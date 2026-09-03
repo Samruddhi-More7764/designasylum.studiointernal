@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens sourced from the Figma exports in /figmaimages.
+ * Values marked "sampled" were pixel-sampled from the 1x PNG exports;
+ * values marked "design.md" come from the Figma inspector data.
+ */
+
+:root {
+  /* Colors — design.md "Global" + section-level colors */
+  --color-page-bg: #444444; /* Global frame background (design.md) */
+  --color-border-subtle: #ffffff1a; /* Global border: 1px solid #FFFFFF1A (design.md) */
+  --color-nav-overlay: #00000033; /* Group 63 (navbar) background (design.md) */
+
+  /* Confirmed: Playfair / section heading accent is #000000 */
+  --color-ink: #000000;
+  /* Footer orange — sampled from Homepage.png bottom band */
+  --color-footer-orange: #fe5a28;
+  --color-muted: #374151; /* FAQ answers / secondary paragraphs */
+  --color-hairline: #e8e8e8; /* Row separators + card borders on white */
+  --color-input-bg: #f2efea; /* Contact form input fill (sampled Homepage.png) */
+  --color-chip-bg: #f2f2f2; /* Pain-point category chip fill (sampled) */
+  --color-chip-text: #31398f; /* Pain-point category chip text (sampled) */
+  --color-arrow-accent: #2819f5; /* Portfolio caption arrow (sampled) */
+  --color-hero-sky: #79cce9; /* Hero photo bottom edge -> white gradient start (sampled) */
+
+  /* Typography — design.md "Texts and their info" */
+  --font-size-display: 60px;
+  --line-height-display: 72px;
+  --letter-spacing-display: -3px;
+
+  --font-size-hero: 44px;
+  --line-height-hero: 100%;
+  --letter-spacing-hero: -2px;
+
+  --font-size-quote: 20px;
+  --line-height-quote: 37.71px;
+  --letter-spacing-quote: -1px;
+
+  --font-size-body: 16px;
+  --letter-spacing-body: 0px;
+}
+
+@theme inline {
+  /* Fonts registered in app/layout.tsx via next/font/google, plus Satoshi
+     loaded via Fontshare (not on Google Fonts — see layout.tsx comment). */
+  --font-figtree: var(--font-figtree);
+  --font-playfair: var(--font-playfair);
+  --font-satoshi: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+
+  /* Colors */
+  --color-page-bg: var(--color-page-bg);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-nav-overlay: var(--color-nav-overlay);
+  --color-ink: var(--color-ink);
+  --color-footer-orange: var(--color-footer-orange);
+  --color-muted: var(--color-muted);
+  --color-hairline: var(--color-hairline);
+  --color-input-bg: var(--color-input-bg);
+  --color-chip-bg: var(--color-chip-bg);
+  --color-chip-text: var(--color-chip-text);
+  --color-arrow-accent: var(--color-arrow-accent);
+  --color-hero-sky: var(--color-hero-sky);
+
+  /* Pill radius (design.md: border-radius: 9999px on every button) */
+  --radius-pill: 9999px;
+
+  /* Font-size scale with matching line-height / letter-spacing pairs. */
+  --text-display: var(--font-size-display);
+  --text-display--line-height: var(--line-height-display);
+  --text-display--letter-spacing: var(--letter-spacing-display);
+
+  --text-hero: var(--font-size-hero);
+  --text-hero--line-height: var(--line-height-hero);
+  --text-hero--letter-spacing: var(--letter-spacing-hero);
+
+  --text-quote: var(--font-size-quote);
+  --text-quote--line-height: var(--line-height-quote);
+  --text-quote--letter-spacing: var(--letter-spacing-quote);
+
+  --text-body: var(--font-size-body);
+  --text-body--letter-spacing: var(--letter-spacing-body);
+}
+
+body {
+  background: var(--color-page-bg);
+  font-family: var(--font-figtree), sans-serif;
+}
+
+/*
+ * Logo marquee (Frame 2095588032): two rows of logo cards, row 1 scrolls
+ * left and row 2 scrolls right (designplan.md default: 30s linear infinite).
+ * The track holds two copies of its content, so translating by -50% loops
+ * seamlessly.
+ */
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee-left {
+  animation: marquee-left 30s linear infinite;
+}
+
+.animate-marquee-right {
+  animation: marquee-right 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-left,
+  .animate-marquee-right {
+    animation: none;
+  }
+}
