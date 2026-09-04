@@ -64,15 +64,17 @@ export function CaseStudies() {
         <Accent>diverse</Accent> set of industries
       </SectionHeading>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,350px)_1fr] lg:gap-16">
-        <div className="relative aspect-[350/560] w-full overflow-hidden lg:sticky lg:top-24 lg:self-start">
-          <Image
-            src="/assets/images/case-study-flower.png"
-            alt="Black-and-white sculptural flower form"
-            fill
-            className="object-cover"
-            sizes="(min-width: 1024px) 350px, 100vw"
-          />
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,350px)_1fr] lg:items-start lg:gap-16">
+        <div className="w-full lg:sticky lg:top-[100px] lg:self-start">
+          <div className="relative aspect-[350/560] w-full overflow-hidden">
+            <Image
+              src="/assets/images/case-study-flower.png"
+              alt="Black-and-white sculptural flower form"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 350px, 100vw"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col">

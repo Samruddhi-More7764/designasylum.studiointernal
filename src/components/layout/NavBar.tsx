@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { LiveClock } from "@/components/ui/LiveClock";
 import { PillButton } from "@/components/ui/PillButton";
@@ -30,16 +31,18 @@ function NavLink({
 }
 
 /**
- * Placeholder for the "d" logomark until the SVG is exported from Figma.
+ * Navbar logomark — Figma Group 61 (24×36 desktop, ~15×21 mobile).
  */
 function LogoMark() {
   return (
-    <span
-      aria-label="Design Asylum"
-      className="font-figtree text-[28px] leading-none font-medium lowercase text-white"
-    >
-      d
-    </span>
+    <Image
+      src="/assets/images/nav-logomark.png"
+      alt="Design Asylum"
+      width={24}
+      height={36}
+      priority
+      className="h-[21.2px] w-[15.06px] shrink-0 object-contain lg:h-9 lg:w-6"
+    />
   );
 }
 

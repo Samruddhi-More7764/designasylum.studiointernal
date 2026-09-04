@@ -42,19 +42,21 @@ function HubHeading({
  * Client hub — section 2: sticky on-page scroller + content blocks.
  * Positions from Figma: scroller x=60, content x=476 (gap ≈120).
  *
- * Desktop (lg+): unchanged. Mobile: gutters, type, Logo/BTS stack.
+ * Desktop (lg+): left rail sticky below the fixed navbar while the 7 Body
+ * sections scroll. Hidden below lg. Partnership and later sections are
+ * outside this sticky containing block (Figma).
  */
 export function ClientHubBody() {
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] items-start gap-10 lg:gap-[120px]">
-        <aside className="sticky top-28 hidden shrink-0 lg:block">
+        <aside className="sticky top-[100px] hidden shrink-0 self-start lg:block">
           <ClientHubScroller />
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col gap-12 sm:gap-14 lg:max-w-[933px] lg:gap-16">
           {/* About Client — 933 × 239, gap 16 */}
-          <div id="about-client" className="flex scroll-mt-32 flex-col gap-4">
+          <div id="about-client" className="flex scroll-mt-[100px] flex-col gap-4">
             <HubHeading
               italic={sevenloopAbout.italic}
               rest={sevenloopAbout.rest}
@@ -86,7 +88,7 @@ export function ClientHubBody() {
           </div>
 
           {/* Logo Design — desktop 3-col; mobile stacked full-width */}
-          <div id="logo-design" className="flex scroll-mt-32 flex-col gap-5 lg:gap-6">
+          <div id="logo-design" className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6">
             <HubHeading
               italic={sevenloopLogoDesign.italic}
               rest={sevenloopLogoDesign.rest}
@@ -112,7 +114,7 @@ export function ClientHubBody() {
           {/* Website Design & Development */}
           <div
             id="website-design"
-            className="flex scroll-mt-32 flex-col gap-5 lg:gap-6"
+            className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6"
           >
             <HubHeading
               italic={sevenloopWebsiteDesign.italic}
@@ -132,7 +134,7 @@ export function ClientHubBody() {
           {/* Project Brochure — keep 2-col on mobile */}
           <div
             id="project-brochure"
-            className="flex scroll-mt-32 flex-col gap-5 lg:gap-6"
+            className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6"
           >
             <HubHeading
               italic={sevenloopProjectBrochure.italic}
@@ -158,7 +160,7 @@ export function ClientHubBody() {
           </div>
 
           {/* Brand Video */}
-          <div id="brand-video" className="flex scroll-mt-32 flex-col gap-5 lg:gap-6">
+          <div id="brand-video" className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6">
             <HubHeading
               italic={sevenloopBrandVideo.italic}
               rest={sevenloopBrandVideo.rest}
@@ -177,7 +179,7 @@ export function ClientHubBody() {
           {/* Behind the Scenes — desktop 3-col; mobile stacked */}
           <div
             id="behind-the-scenes"
-            className="flex scroll-mt-32 flex-col gap-5 lg:gap-6"
+            className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6"
           >
             <HubHeading
               italic={sevenloopBehindTheScenes.italic}
@@ -202,7 +204,7 @@ export function ClientHubBody() {
           </div>
 
           {/* Case Study — heading + subheading + CTA */}
-          <div id="case-study" className="flex scroll-mt-32 flex-col gap-4">
+          <div id="case-study" className="flex scroll-mt-[100px] flex-col gap-4">
             <HubHeading
               italic={sevenloopCaseStudy.italic}
               rest={sevenloopCaseStudy.rest}

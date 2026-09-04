@@ -1,16 +1,26 @@
+import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import {
-  ServiceStackIcon,
-  ServiceBlocksIcon,
-} from "@/components/ui/ServiceIcons";
+import { ServiceStackIcon } from "@/components/ui/ServiceIcons";
 import { services, type Service } from "@/data/services";
 
 function ServiceIcon({ service }: { service: Service }) {
-  // Figma: most services use the 3-stack isometric square (56×57);
-  // Website development uses the composed blocks glyph.
-  const Icon = service.icon === "grid" ? ServiceBlocksIcon : ServiceStackIcon;
+  // Figma: most services use the 3-stack isometric square.
+  // Website development uses the Carbon development mark (57×57 export).
+  if (service.icon === "grid") {
+    return (
+      <Image
+        src="/assets/images/service-development.png"
+        alt=""
+        width={57}
+        height={57}
+        aria-hidden="true"
+        className="h-[57px] w-[56px] shrink-0 object-contain lg:h-[57px] lg:w-[57px]"
+      />
+    );
+  }
+
   return (
-    <Icon className="size-9 shrink-0 text-black sm:size-11 lg:size-[56px]" />
+    <ServiceStackIcon className="size-9 shrink-0 text-black sm:size-11 lg:size-[56px]" />
   );
 }
 
