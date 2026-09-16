@@ -18,6 +18,16 @@ export function resolveMediaUrl(value: unknown): string | null {
   }
 
   if (typeof value === "object") {
+    const sourcePath =
+      "sourcePath" in value
+        ? (value as { sourcePath?: string | null }).sourcePath?.trim()
+        : null;
+    // Seeded files live in `public/` (e.g. /assets/images/logo-b.png). Prefer
+    // that on Vercel — `/api/media/file/...` is local disk and 500s there.
+    if (sourcePath?.startsWith("/")) {
+      return toNextImageSrc(sourcePath);
+    }
+
     const url = "url" in value ? (value as { url?: string | null }).url : null;
     const trimmed = url?.trim();
     if (trimmed) return toNextImageSrc(trimmed);

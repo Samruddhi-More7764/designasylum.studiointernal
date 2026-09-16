@@ -1,10 +1,12 @@
 import { GoogleTagManager as NextGoogleTagManager } from "@next/third-parties/google";
 
-const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+const gtmId =
+  process.env.NEXT_PUBLIC_GTM_ID?.trim() || "GTM-TP3F8PRP";
 
 /**
  * GTM bootstrap (dataLayer + gtm.js). Next.js injects this after hydration.
- * Renders nothing when NEXT_PUBLIC_GTM_ID is unset.
+ * Falls back to Prashant's container so production works even if the env
+ * var was not set at build time.
  */
 export function GoogleTagManager() {
   if (!gtmId) return null;
