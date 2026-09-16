@@ -70,8 +70,9 @@ export default buildConfig({
         media: true,
       },
       token: blobToken,
-      // Bypass Vercel's 4.5MB serverless upload limit.
-      clientUploads: true,
+      // Server-side put() — avoids browser CORS to vercel.com/api/blob.
+      // Vercel limits this path to 4.5MB; typical CMS images are fine.
+      clientUploads: false,
     }),
   ],
 });

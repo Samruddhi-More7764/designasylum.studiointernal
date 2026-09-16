@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   description: "Design Asylum landing page — built from Figma design specs.",
 };
 
+// Always read Payload at request time so CMS media/content edits show
+// without a redeploy. These pages were previously static at build.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
