@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   const validated = validateContactLead(body);
-  if (!validated.ok || !validated.lead) {
+  if (!validated.ok) {
     return NextResponse.json(
       { ok: false, error: validated.error },
       { status: validated.status },

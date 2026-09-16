@@ -21,7 +21,7 @@ export type ContactLead = {
 };
 
 export type ContactLeadResult =
-  | { ok: true }
+  | { ok: true; lead: ContactLead }
   | { ok: false; error: string; status: number };
 
 function loadServiceAccount(): ServiceAccount {
@@ -64,7 +64,7 @@ function sheetsConfig() {
 
 export function validateContactLead(
   input: Partial<ContactLead>,
-): ContactLeadResult & { lead?: ContactLead } {
+): ContactLeadResult {
   const fullName = input.fullName?.trim() ?? "";
   const workEmail = input.workEmail?.trim() ?? "";
   const mobileNumber = input.mobileNumber?.trim() ?? "";
