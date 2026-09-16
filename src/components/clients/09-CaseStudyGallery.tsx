@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { sevenloopCaseStudyGallery } from "@/data/caseStudyPage";
+import { getCaseStudyPage } from "@/cms/content";
 
 /**
  * Case study — full-bleed gallery: 4 stacked images, each 1350×759 with
@@ -9,14 +9,15 @@ import { sevenloopCaseStudyGallery } from "@/data/caseStudyPage";
  * Mobile: same stacked structure — gutters/spacing only.
  * No carousel, scroll, or swipe behavior.
  */
-export function CaseStudyGallery() {
+export async function CaseStudyGallery() {
+  const { gallery } = await getCaseStudyPage();
   return (
     <section className="bg-white">
-      {sevenloopCaseStudyGallery.map((image, i) => (
+      {gallery.map((image, i) => (
         <div
           key={image.src}
           className={`mx-auto w-full max-w-[1470px] px-5 sm:px-8 lg:px-[60px] ${
-            i === sevenloopCaseStudyGallery.length - 1
+            i === gallery.length - 1
               ? "pb-10 sm:pb-12 lg:pb-16"
               : "pb-6 sm:pb-8 lg:pb-10"
           }`}

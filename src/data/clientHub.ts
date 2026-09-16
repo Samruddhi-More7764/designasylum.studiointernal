@@ -68,6 +68,7 @@ export const sevenloopBrandVideo = {
     src: "/assets/images/client-hub/brand-video.jpg",
     alt: "Sevenloop brand video preview",
   },
+  videoSrc: null as string | null,
 };
 
 export const sevenloopBehindTheScenes = {

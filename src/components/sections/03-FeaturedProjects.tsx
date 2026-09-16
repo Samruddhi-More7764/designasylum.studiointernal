@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { PillButton } from "@/components/ui/PillButton";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
-import { featuredProjects, type FeaturedProject } from "@/data/projects";
+import { getFeaturedProjects } from "@/cms/content";
+import type { FeaturedProject } from "@/data/projects";
 
 function ProjectRow({ project }: { project: FeaturedProject }) {
   // Desktop: Frame 2095587764 row — unchanged at lg+.
@@ -31,7 +32,7 @@ function ProjectRow({ project }: { project: FeaturedProject }) {
         <PillButton
           variant="outline"
           size="sm"
-          href="/clients/sevenloop"
+          href={project.href}
           className="w-[154px] !px-4"
         >
           View website
@@ -70,7 +71,9 @@ function ProjectRow({ project }: { project: FeaturedProject }) {
  * Featured Projects — Frame 2095587764 / Homepage.
  * Desktop: unchanged. Mobile: stacked project cards per Homepagemobile.
  */
-export function FeaturedProjects() {
+export async function FeaturedProjects() {
+  const featuredProjects = await getFeaturedProjects();
+
   return (
     <section className="mx-auto flex w-full max-w-[1471px] flex-col gap-px bg-white">
       <SectionHeading className="px-5 text-[32px] font-normal leading-[1.2] tracking-[-1.5px] text-[#05201F] sm:px-6 sm:text-[36px] lg:px-[60px] lg:text-[44px] lg:leading-[62.6px] lg:tracking-[-2.09px]">

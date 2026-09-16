@@ -7,12 +7,15 @@ import { ClientHubProjectTeam } from "@/components/clients/05-ClientHubProjectTe
 import { ClientHubStartProject } from "@/components/clients/06-ClientHubStartProject";
 import { Services } from "@/components/sections/04-Services";
 import { Footer } from "@/components/sections/15-Footer";
+import { getFooter } from "@/cms/content";
 
 /**
  * Client hub — Sevenloop | Design Asylum Client Work.
  * Sections are added one-by-one to match Figma.
  */
-export default function SevenloopClientHubPage() {
+export default async function SevenloopClientHubPage() {
+  const footer = await getFooter();
+
   return (
     <>
       <NavBar />
@@ -25,7 +28,7 @@ export default function SevenloopClientHubPage() {
         <Services variant="plain" />
         <ClientHubStartProject />
       </main>
-      <Footer />
+      <Footer columns={footer.columns} aiLinks={footer.aiLinks} />
     </>
   );
 }

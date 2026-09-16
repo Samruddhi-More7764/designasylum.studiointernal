@@ -1,5 +1,5 @@
 import { PillButton } from "@/components/ui/PillButton";
-import { sevenloopCaseStudyViewAllClients } from "@/data/caseStudyPage";
+import { getCaseStudyPage } from "@/cms/content";
 
 /**
  * Case study — "View All Clients" CTA below the image gallery.
@@ -7,17 +7,18 @@ import { sevenloopCaseStudyViewAllClients } from "@/data/caseStudyPage";
  *
  * Desktop (lg+): unchanged. Mobile: gutters/spacing only.
  */
-export function CaseStudyViewAllClients() {
+export async function CaseStudyViewAllClients() {
+  const { viewAll } = await getCaseStudyPage();
   return (
     <section className="bg-white px-5 pb-14 sm:px-8 sm:pb-16 lg:px-[60px] lg:pb-20">
       <div className="mx-auto flex w-full max-w-[1350px] justify-center">
         <PillButton
           variant="outline"
           size="sm"
-          href={sevenloopCaseStudyViewAllClients.href}
+          href={viewAll.href}
           className="min-w-[185px] border-black"
         >
-          {sevenloopCaseStudyViewAllClients.label}
+          {viewAll.label}
         </PillButton>
       </div>
     </section>

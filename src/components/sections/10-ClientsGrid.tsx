@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
-import { clientsGridRows, type ClientLogo } from "@/data/clients";
+import { getClientLogoLayouts } from "@/cms/content";
+import type { ClientLogo } from "@/data/clients";
 
 function ClientCard({ logo }: { logo: ClientLogo }) {
   // Desktop: h-[374px]. Mobile: shorter card, same logo + "4 & Counting".
@@ -28,7 +29,9 @@ function ClientCard({ logo }: { logo: ClientLogo }) {
  * Clients grid — Group 2: 1418×937.
  * Desktop: 4-col rows. Mobile: 2-col cards with "4 & Counting".
  */
-export function ClientsGrid() {
+export async function ClientsGrid() {
+  const { clientsGridRows } = await getClientLogoLayouts();
+
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-20 lg:px-[26px]">
       <div className="mx-auto flex max-w-[1418px] flex-col gap-10 sm:gap-[60px]">

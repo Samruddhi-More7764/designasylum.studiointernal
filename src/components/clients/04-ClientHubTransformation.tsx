@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { sevenloopTransformation } from "@/data/clientHub";
+import { getClientHub } from "@/cms/content";
 import { ClientHubMobileCompare } from "@/components/clients/ClientHubMobileCompare";
 
 function ComparePill({ label }: { label: string }) {
@@ -18,22 +18,26 @@ function ComparePill({ label }: { label: string }) {
  * Desktop (lg+): existing dual-panel markup — untouched.
  * Mobile (<lg): separate drag-compare UI; desktop markup is hidden.
  */
-export function ClientHubTransformation() {
+export async function ClientHubTransformation() {
+  const { transformation } = await getClientHub();
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] flex-col items-center gap-6 sm:gap-8">
         <div className="flex max-w-[466px] flex-col items-center gap-3 text-center">
           <h2 className="font-figtree text-[28px] leading-[1.2] font-normal tracking-[-1px] text-[#05201F] sm:text-[36px] lg:text-[44px] lg:leading-[62.6px] lg:tracking-[-2.09px]">
-            {sevenloopTransformation.heading}
+            {transformation.heading}
           </h2>
           <p className="font-satoshi text-[15px] leading-snug font-normal tracking-[-0.5px] text-black/78 sm:text-[18px] lg:text-[20px] lg:leading-none">
-            {sevenloopTransformation.subtext}
+            {transformation.subtext}
           </p>
         </div>
 
         {/* Mobile-only compare slider */}
         <div className="w-full lg:hidden">
-          <ClientHubMobileCompare />
+          <ClientHubMobileCompare
+            before={transformation.before}
+            after={transformation.after}
+          />
         </div>
 
         {/* Desktop dual panels — exact prior markup, lg+ only */}
@@ -49,8 +53,8 @@ export function ClientHubTransformation() {
               }}
             >
               <Image
-                src={sevenloopTransformation.before.src}
-                alt={sevenloopTransformation.before.alt}
+                src={transformation.before.src}
+                alt={transformation.before.alt}
                 fill
                 className="object-cover object-top"
                 sizes="(min-width: 640px) 50vw, 100vw"
@@ -72,8 +76,8 @@ export function ClientHubTransformation() {
               }}
             >
               <Image
-                src={sevenloopTransformation.after.src}
-                alt={sevenloopTransformation.after.alt}
+                src={transformation.after.src}
+                alt={transformation.after.alt}
                 fill
                 className="object-cover object-top"
                 sizes="(min-width: 640px) 50vw, 100vw"

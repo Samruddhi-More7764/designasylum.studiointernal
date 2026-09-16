@@ -14,7 +14,13 @@ import { sevenloopTransformation } from "@/data/clientHub";
  * Mobile-only (<lg) before/after drag compare.
  * Uses the same assets as the desktop Transformation panels.
  */
-export function ClientHubMobileCompare() {
+export function ClientHubMobileCompare({
+  before = sevenloopTransformation.before,
+  after = sevenloopTransformation.after,
+}: {
+  before?: { src: string; alt: string };
+  after?: { src: string; alt: string };
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(50);
   const dragging = useRef(false);
@@ -86,8 +92,8 @@ export function ClientHubMobileCompare() {
         {/* After (full base) */}
         <div className="absolute inset-0">
           <Image
-            src={sevenloopTransformation.after.src}
-            alt={sevenloopTransformation.after.alt}
+            src={after.src}
+            alt={after.alt}
             fill
             className="object-cover object-top"
             sizes="100vw"
@@ -101,8 +107,8 @@ export function ClientHubMobileCompare() {
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         >
           <Image
-            src={sevenloopTransformation.before.src}
-            alt={sevenloopTransformation.before.alt}
+            src={before.src}
+            alt={before.alt}
             fill
             className="object-cover object-top"
             sizes="100vw"

@@ -5,6 +5,7 @@ export interface CaseStudy {
   name: string;
   description: string;
   tags: string[];
+  href: string;
 }
 
 const row: CaseStudy = {
@@ -18,6 +19,7 @@ const row: CaseStudy = {
     "Explainer Film",
     "Webflow Build",
   ],
+  href: "/clients/sevenloop/case-study",
 };
 
 export const caseStudies: CaseStudy[] = [row, row, row, row];

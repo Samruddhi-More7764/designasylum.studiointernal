@@ -5,12 +5,15 @@ import { CaseStudyGallery } from "@/components/clients/09-CaseStudyGallery";
 import { CaseStudyViewAllClients } from "@/components/clients/10-CaseStudyViewAllClients";
 import { ClientHubStartProject } from "@/components/clients/06-ClientHubStartProject";
 import { CaseStudyFooter } from "@/components/clients/11-CaseStudyFooter";
+import { getFooter } from "@/cms/content";
 
 /**
  * Case study — Sevenloop | Design Asylum Client Work.
  * Reached from the "View Case Study" CTA on the Sevenloop Client Hub page.
  */
-export default function SevenloopCaseStudyPage() {
+export default async function SevenloopCaseStudyPage() {
+  const footer = await getFooter();
+
   return (
     <>
       <NavBar />
@@ -21,7 +24,7 @@ export default function SevenloopCaseStudyPage() {
         <CaseStudyViewAllClients />
         <ClientHubStartProject align="start" />
       </main>
-      <CaseStudyFooter />
+      <CaseStudyFooter columns={footer.columns} aiLinks={footer.aiLinks} />
     </>
   );
 }

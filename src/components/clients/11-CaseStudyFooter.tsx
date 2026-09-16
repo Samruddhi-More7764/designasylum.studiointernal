@@ -11,11 +11,11 @@ import {
   SocialYouTube,
 } from "@/components/ui/SocialIcons";
 import { FitWordmark } from "@/components/ui/FitWordmark";
-import { FOOTER_COLUMNS, AI_LINKS } from "@/data/footer";
-
-// Case Study footer reuses every homepage/Client-Hub column except "Sales"
-// — that contact info moves into the top phone/email/address block instead.
-const CASE_STUDY_COLUMNS = FOOTER_COLUMNS.filter((col) => col.title !== "Sales");
+import {
+  FOOTER_COLUMNS,
+  AI_LINKS,
+  type FooterColumn,
+} from "@/data/footer";
 
 /**
  * Case study — footer: same gradient background, wordmark and copyright
@@ -32,7 +32,14 @@ const CASE_STUDY_COLUMNS = FOOTER_COLUMNS.filter((col) => col.title !== "Sales")
  * Desktop (lg+): unchanged Case Study-specific structure.
  * Mobile: typography/gutters; keep 2-col links; preserve Case content.
  */
-export function CaseStudyFooter() {
+export function CaseStudyFooter({
+  columns = FOOTER_COLUMNS,
+  aiLinks = AI_LINKS,
+}: {
+  columns?: FooterColumn[];
+  aiLinks?: string[];
+}) {
+  const caseStudyColumns = columns.filter((col) => col.title !== "Sales");
   return (
     <footer className="relative overflow-hidden bg-black">
       <Image
@@ -89,7 +96,7 @@ export function CaseStudyFooter() {
             </p>
 
             <div className="grid w-full max-w-[360px] grid-cols-2 gap-3">
-              {AI_LINKS.map((name) => (
+              {aiLinks.map((name) => (
                 <a
                   key={name}
                   href="#"
@@ -105,7 +112,7 @@ export function CaseStudyFooter() {
 
         {/* 6 link columns (Sales dropped) — Figma: 610×500 grid, gap 60 */}
         <div className="grid w-full max-w-[610px] grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 sm:gap-x-[60px] sm:gap-y-10">
-          {CASE_STUDY_COLUMNS.map((col) => (
+          {caseStudyColumns.map((col) => (
             <div
               key={col.title}
               className="flex w-auto flex-col gap-3 sm:w-[150px]"

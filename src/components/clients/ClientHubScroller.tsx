@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
-import {
-  clientHubNavItems,
-  type ClientHubNavId,
-} from "@/data/clientHub";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { clientHubNavItems } from "@/data/clientHub";
+import type { ClientHubNavItem } from "@/cms/types";
 
 /**
  * Clearance below the fixed navbar (mt-5 + h-16) plus a small gap.
@@ -12,20 +10,29 @@ import {
  */
 export const CLIENT_HUB_STICKY_OFFSET_PX = 100;
 
+const fallbackNavItems: ClientHubNavItem[] = clientHubNavItems.map((item) => ({
+  id: item.id,
+  label: item.label,
+}));
+
 /**
  * Sticky section scroller — left rail on Client Hub (lg+ only).
  * Active: #1F3128 + solid bar. Inactive: #1F312899.
  */
 export function ClientHubScroller({
-  defaultActive = "about-client",
+  items = fallbackNavItems,
+  defaultActive,
 }: {
-  defaultActive?: ClientHubNavId;
+  items?: ClientHubNavItem[];
+  defaultActive?: string;
 }) {
-  const [active, setActive] = useState<ClientHubNavId>(defaultActive);
+  const navItems = items.length ? items : fallbackNavItems;
+  const navKey = navItems.map((item) => item.id).join("|");
+  const [active, setActive] = useState(defaultActive || navItems[0]?.id || "");
+
+  const ids = useMemo(() => navKey.split("|").filter(Boolean), [navKey]);
 
   useEffect(() => {
-    const ids = clientHubNavItems.map((item) => item.id);
-
     function updateActive() {
       const last = ids[ids.length - 1];
       const lastEl = document.getElementById(last);
@@ -39,7 +46,7 @@ export function ClientHubScroller({
         }
       }
 
-      let current: ClientHubNavId = ids[0];
+      let current = ids[0];
       for (const id of ids) {
         const el = document.getElementById(id);
         if (!el) continue;
@@ -55,7 +62,7 @@ export function ClientHubScroller({
 
     updateActive();
 
-    const hashId = window.location.hash.slice(1) as ClientHubNavId;
+    const hashId = window.location.hash.slice(1);
     if (ids.includes(hashId)) {
       setActive(hashId);
     }
@@ -66,17 +73,15 @@ export function ClientHubScroller({
       window.removeEventListener("scroll", updateActive);
       window.removeEventListener("resize", updateActive);
     };
-  }, []);
+  }, [ids]);
 
-  function scrollToSection(
-    event: MouseEvent<HTMLAnchorElement>,
-    id: ClientHubNavId,
-  ) {
+  function scrollToSection(event: MouseEvent<HTMLAnchorElement>, id: string) {
     event.preventDefault();
     const el = document.getElementById(id);
     if (!el) return;
     setActive(id);
-    const top = el.getBoundingClientRect().top + window.scrollY - CLIENT_HUB_STICKY_OFFSET_PX;
+    const top =
+      el.getBoundingClientRect().top + window.scrollY - CLIENT_HUB_STICKY_OFFSET_PX;
     window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     history.replaceState(null, "", `#${id}`);
   }
@@ -93,14 +98,14 @@ export function ClientHubScroller({
         <div
           className="absolute left-0 w-full rounded-[76.56px] bg-[#1F3128] transition-[top,height] duration-300"
           style={{
-            top: `${(clientHubNavItems.findIndex((i) => i.id === active) / clientHubNavItems.length) * 100}%`,
-            height: `${100 / clientHubNavItems.length}%`,
+            top: `${(navItems.findIndex((i) => i.id === active) / navItems.length) * 100}%`,
+            height: `${100 / navItems.length}%`,
           }}
         />
       </div>
 
       <ul className="flex flex-1 flex-col justify-between py-0">
-        {clientHubNavItems.map((item) => {
+        {navItems.map((item) => {
           const isActive = item.id === active;
           return (
             <li key={item.id}>

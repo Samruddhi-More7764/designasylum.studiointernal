@@ -8,7 +8,11 @@ import {
   SocialYouTube,
 } from "@/components/ui/SocialIcons";
 import { FitWordmark } from "@/components/ui/FitWordmark";
-import { FOOTER_COLUMNS, AI_LINKS } from "@/data/footer";
+import {
+  FOOTER_COLUMNS,
+  AI_LINKS,
+  type FooterColumn,
+} from "@/data/footer";
 
 /**
  * Full Homepage footer:
@@ -19,7 +23,13 @@ import { FOOTER_COLUMNS, AI_LINKS } from "@/data/footer";
  * Mobile: stacked contact, AI 2×2, links 2-col.
  * Desktop (lg+): original 2-col contact/AI + 8-col links.
  */
-export function Footer() {
+export function Footer({
+  columns = FOOTER_COLUMNS,
+  aiLinks = AI_LINKS,
+}: {
+  columns?: FooterColumn[];
+  aiLinks?: string[];
+}) {
   return (
     <footer className="relative overflow-hidden bg-black">
       <Image
@@ -53,7 +63,7 @@ export function Footer() {
           </p>
 
           <div className="grid w-full max-w-[360px] grid-cols-2 gap-3 lg:max-w-none">
-            {AI_LINKS.map((name) => (
+            {aiLinks.map((name) => (
               <a
                 key={name}
                 href="#"
@@ -70,7 +80,7 @@ export function Footer() {
       {/* Link columns + wordmark */}
       <div className="relative mx-auto max-w-[1470px] px-5 pt-8 pb-8 sm:px-6 sm:pt-10 lg:px-[60px]">
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-8 lg:gap-8">
-          {FOOTER_COLUMNS.map((col) => (
+          {columns.map((col) => (
             <div key={col.title} className="flex flex-col gap-3">
               <h3 className="font-figtree text-[11px] font-semibold uppercase tracking-[0.12em] text-[#1D1D1D]">
                 {col.title}

@@ -24,6 +24,9 @@
   --color-arrow-accent: #2819f5; /* Portfolio caption arrow (sampled) */
   --color-hero-sky: #79cce9; /* Hero photo bottom edge -> white gradient start (sampled) */
 
+  /* Public pages cap at the Figma artboard. Wider monitors get white sides. */
+  --site-max: 1470px;
+
   /* Typography — design.md "Texts and their info" */
   --font-size-display: 60px;
   --line-height-display: 72px;
@@ -80,10 +83,16 @@
 
   --text-body: var(--font-size-body);
   --text-body--letter-spacing: var(--letter-spacing-body);
+
+  --max-width-site: var(--site-max);
+}
+
+html,
+body {
+  background: #ffffff;
 }
 
 body {
-  background: var(--color-page-bg);
   font-family: var(--font-figtree), sans-serif;
 }
 

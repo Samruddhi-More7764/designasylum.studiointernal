@@ -16,11 +16,14 @@ import { TestimonialVideos } from "@/components/sections/13-TestimonialVideos";
 import { FAQ } from "@/components/sections/14-FAQ";
 import { TalkAboutBrand } from "@/components/sections/16-TalkAboutBrand";
 import { Footer } from "@/components/sections/15-Footer";
+import { getFaqItems, getFooter } from "@/cms/content";
 
 /**
  * Homepage composition only (ignore Updated Homepage UI frames).
  */
-export default function Home() {
+export default async function Home() {
+  const [faqItems, footer] = await Promise.all([getFaqItems(), getFooter()]);
+
   return (
     <>
       <NavBar />
@@ -39,10 +42,10 @@ export default function Home() {
         <CaseStudies />
         <BookStrategyCta />
         <TestimonialVideos />
-        <FAQ />
+        <FAQ items={faqItems} />
         <TalkAboutBrand />
       </main>
-      <Footer />
+      <Footer columns={footer.columns} aiLinks={footer.aiLinks} />
     </>
   );
 }

@@ -1,6 +1,7 @@
-import Image from "next/image";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
-import { testimonials, type Testimonial } from "@/data/testimonials";
+import { CmsMediaFill } from "@/components/ui/CmsMediaFill";
+import { getTestimonials } from "@/cms/content";
+import type { Testimonial } from "@/data/testimonials";
 
 function TestimonialCard({
   item,
@@ -9,23 +10,17 @@ function TestimonialCard({
   item: Testimonial;
   featured?: boolean;
 }) {
-  // Frame 2095588036.png: play/pause + name/role are baked into the cropped
-  // thumbnails. Center card is taller on desktop; mobile uses uniform cards
-  // with bordered quote boxes beneath.
+  const frameClass = featured
+    ? "aspect-[290/320] lg:aspect-[290/360]"
+    : "aspect-[290/320] lg:aspect-[290/240]";
+
   return (
     <div className="flex flex-col gap-4">
-      <div
-        className={`relative w-full overflow-hidden rounded-2xl ${
-          featured
-            ? "aspect-[290/320] lg:aspect-[290/360]"
-            : "aspect-[290/320] lg:aspect-[290/240]"
-        }`}
-      >
-        <Image
-          src={item.image}
+      <div className={`relative w-full overflow-hidden rounded-2xl ${frameClass}`}>
+        <CmsMediaFill
+          image={item.image}
+          video={item.video}
           alt={item.alt}
-          fill
-          className="object-cover"
           sizes="(min-width: 1024px) 290px, 100vw"
         />
       </div>
@@ -40,10 +35,13 @@ function TestimonialCard({
 
 /**
  * Video testimonials — Frame 2095588036: 992 × 536px, gap 60px, centered.
- * Three cards; center card is the active/taller one with no quote beneath.
- * Mobile: single column. Desktop (lg+): 3-col.
+ * Cards come from CMS (add/remove). The second card is the taller featured one
+ * when at least two exist.
  */
-export function TestimonialVideos() {
+export async function TestimonialVideos() {
+  const testimonials = await getTestimonials();
+  const featuredIndex = testimonials.length >= 2 ? 1 : -1;
+
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-20">
       <div className="mx-auto flex max-w-[992px] flex-col gap-10 sm:gap-[60px]">
@@ -52,9 +50,13 @@ export function TestimonialVideos() {
         </SectionHeading>
 
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-3 lg:gap-[60px]">
-          <TestimonialCard item={testimonials[0]} />
-          <TestimonialCard item={testimonials[1]} featured />
-          <TestimonialCard item={testimonials[2]} />
+          {testimonials.map((item, i) => (
+            <TestimonialCard
+              key={`${item.alt}-${i}`}
+              item={item}
+              featured={i === featuredIndex}
+            />
+          ))}
         </div>
       </div>
     </section>

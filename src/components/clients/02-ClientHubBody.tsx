@@ -1,16 +1,9 @@
 import Image from "next/image";
 import { Accent } from "@/components/ui/SectionHeading";
 import { PillButton } from "@/components/ui/PillButton";
+import { CmsMediaFill } from "@/components/ui/CmsMediaFill";
 import { ClientHubScroller } from "@/components/clients/ClientHubScroller";
-import {
-  sevenloopAbout,
-  sevenloopLogoDesign,
-  sevenloopWebsiteDesign,
-  sevenloopProjectBrochure,
-  sevenloopBrandVideo,
-  sevenloopBehindTheScenes,
-  sevenloopCaseStudy,
-} from "@/data/clientHub";
+import { getClientHub } from "@/cms/content";
 
 function HubHeading({
   italic,
@@ -46,29 +39,39 @@ function HubHeading({
  * sections scroll. Hidden below lg. Partnership and later sections are
  * outside this sticky containing block (Figma).
  */
-export function ClientHubBody() {
+export async function ClientHubBody() {
+  const {
+    navItems,
+    about,
+    logoDesign,
+    websiteDesign,
+    projectBrochure,
+    brandVideo,
+    behindTheScenes,
+    caseStudy,
+  } = await getClientHub();
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] items-start gap-10 lg:gap-[120px]">
         <aside className="sticky top-[100px] hidden shrink-0 self-start lg:block">
-          <ClientHubScroller />
+          <ClientHubScroller items={navItems} />
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col gap-12 sm:gap-14 lg:max-w-[933px] lg:gap-16">
           {/* About Client — 933 × 239, gap 16 */}
           <div id="about-client" className="flex scroll-mt-[100px] flex-col gap-4">
             <HubHeading
-              italic={sevenloopAbout.italic}
-              rest={sevenloopAbout.rest}
+              italic={about.italic}
+              rest={about.rest}
             />
             <p className="max-w-[929px] font-satoshi text-[15px] font-normal leading-[1.45] tracking-[-0.5px] text-black sm:text-[18px] sm:leading-[25.9px] lg:text-[20px]">
-              {sevenloopAbout.body}
+              {about.body}
             </p>
             <div className="flex flex-wrap gap-3 pt-2 sm:gap-4">
               <PillButton
                 variant="dark"
                 size="sm"
-                href={sevenloopAbout.websiteHref}
+                href={about.websiteHref}
                 className="min-w-[154px] border-black"
               >
                 Visit Website
@@ -78,7 +81,7 @@ export function ClientHubBody() {
                   key={i}
                   variant="outline"
                   size="sm"
-                  href={sevenloopAbout.websiteHref}
+                  href={about.websiteHref}
                   className="min-w-[154px] border-black"
                 >
                   Visit Website
@@ -90,11 +93,11 @@ export function ClientHubBody() {
           {/* Logo Design — desktop 3-col; mobile stacked full-width */}
           <div id="logo-design" className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6">
             <HubHeading
-              italic={sevenloopLogoDesign.italic}
-              rest={sevenloopLogoDesign.rest}
+              italic={logoDesign.italic}
+              rest={logoDesign.rest}
             />
             <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3 lg:gap-6">
-              {sevenloopLogoDesign.images.map((image) => (
+              {logoDesign.images.map((image) => (
                 <div
                   key={image.src}
                   className="relative aspect-[300/195] w-full overflow-hidden rounded-xl"
@@ -117,13 +120,13 @@ export function ClientHubBody() {
             className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6"
           >
             <HubHeading
-              italic={sevenloopWebsiteDesign.italic}
-              rest={sevenloopWebsiteDesign.rest}
+              italic={websiteDesign.italic}
+              rest={websiteDesign.rest}
             />
             <div className="relative aspect-[932/515] w-full overflow-hidden rounded-xl">
               <Image
-                src={sevenloopWebsiteDesign.image.src}
-                alt={sevenloopWebsiteDesign.image.alt}
+                src={websiteDesign.image.src}
+                alt={websiteDesign.image.alt}
                 fill
                 className="object-cover"
                 sizes="(min-width: 1024px) 932px, 100vw"
@@ -137,12 +140,12 @@ export function ClientHubBody() {
             className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6"
           >
             <HubHeading
-              italic={sevenloopProjectBrochure.italic}
-              rest={sevenloopProjectBrochure.rest}
+              italic={projectBrochure.italic}
+              rest={projectBrochure.rest}
               italicPosition="last"
             />
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-              {sevenloopProjectBrochure.images.map((image) => (
+              {projectBrochure.images.map((image) => (
                 <div
                   key={image.src}
                   className="relative aspect-[458/515] w-full overflow-hidden rounded-xl"
@@ -162,15 +165,14 @@ export function ClientHubBody() {
           {/* Brand Video */}
           <div id="brand-video" className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6">
             <HubHeading
-              italic={sevenloopBrandVideo.italic}
-              rest={sevenloopBrandVideo.rest}
+              italic={brandVideo.italic}
+              rest={brandVideo.rest}
             />
             <div className="relative aspect-[932/515] w-full overflow-hidden rounded-xl">
-              <Image
-                src={sevenloopBrandVideo.image.src}
-                alt={sevenloopBrandVideo.image.alt}
-                fill
-                className="object-cover"
+              <CmsMediaFill
+                image={brandVideo.image.src}
+                video={brandVideo.videoSrc}
+                alt={brandVideo.image.alt}
                 sizes="(min-width: 1024px) 932px, 100vw"
               />
             </div>
@@ -182,11 +184,11 @@ export function ClientHubBody() {
             className="flex scroll-mt-[100px] flex-col gap-5 lg:gap-6"
           >
             <HubHeading
-              italic={sevenloopBehindTheScenes.italic}
-              rest={sevenloopBehindTheScenes.rest}
+              italic={behindTheScenes.italic}
+              rest={behindTheScenes.rest}
             />
             <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3 lg:gap-6">
-              {sevenloopBehindTheScenes.images.map((image, i) => (
+              {behindTheScenes.images.map((image, i) => (
                 <div
                   key={`${image.src}-${i}`}
                   className="relative aspect-[299/358] w-full overflow-hidden rounded-xl"
@@ -206,18 +208,18 @@ export function ClientHubBody() {
           {/* Case Study — heading + subheading + CTA */}
           <div id="case-study" className="flex scroll-mt-[100px] flex-col gap-4">
             <HubHeading
-              italic={sevenloopCaseStudy.italic}
-              rest={sevenloopCaseStudy.rest}
+              italic={caseStudy.italic}
+              rest={caseStudy.rest}
               italicPosition="last"
             />
             <p className="max-w-[610px] font-satoshi text-[15px] font-normal leading-[1.45] tracking-[-0.5px] text-black sm:text-[18px] sm:leading-[25.9px] lg:text-[20px]">
-              {sevenloopCaseStudy.subheading}
+              {caseStudy.subheading}
             </p>
             <div className="pt-2">
               <PillButton
                 variant="dark"
                 size="sm"
-                href={sevenloopCaseStudy.href}
+                href={caseStudy.href}
                 className="min-w-[177px] border-black"
               >
                 View Case Study

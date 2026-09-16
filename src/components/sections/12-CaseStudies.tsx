@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { PillButton } from "@/components/ui/PillButton";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
-import { caseStudies, type CaseStudy } from "@/data/caseStudies";
+import { getHomepageCaseStudies } from "@/cms/content";
+import type { CaseStudy } from "@/data/caseStudies";
 
 function CaseStudyRow({ study }: { study: CaseStudy }) {
   // Desktop: number + name + VIEW WEBSITE on one row, then description + tags.
@@ -17,7 +18,7 @@ function CaseStudyRow({ study }: { study: CaseStudy }) {
           variant="outline"
           size="sm"
           className="hidden w-fit lg:ml-auto lg:inline-flex"
-          href="/clients/sevenloop"
+          href={study.href}
         >
           View website
         </PillButton>
@@ -31,7 +32,7 @@ function CaseStudyRow({ study }: { study: CaseStudy }) {
         variant="outline"
         size="sm"
         className="w-fit lg:hidden"
-        href="/clients/sevenloop"
+        href={study.href}
       >
         View website
       </PillButton>
@@ -56,7 +57,9 @@ function CaseStudyRow({ study }: { study: CaseStudy }) {
  * Mobile: image first, then stacked project rows.
  * BookStrategyCta (next section) provides the session CTA.
  */
-export function CaseStudies() {
+export async function CaseStudies() {
+  const caseStudies = await getHomepageCaseStudies();
+
   return (
     <section className="bg-white px-5 py-16 sm:px-6 sm:py-20 lg:px-[60px]">
       <SectionHeading className="mb-10 max-w-[720px] text-[28px] font-medium leading-[1.2] tracking-[-0.8px] text-ink sm:mb-12 sm:text-[36px] lg:mb-16 lg:text-[40px] lg:leading-[1.15] lg:tracking-[-1px]">

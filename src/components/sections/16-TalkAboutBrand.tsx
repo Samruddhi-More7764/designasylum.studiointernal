@@ -1,6 +1,10 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { PillButton } from "@/components/ui/PillButton";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
+import { submitContactLead } from "@/lib/submitContactLead";
 
 interface FieldProps {
   label: string;
@@ -24,12 +28,50 @@ const inputClasses =
 
 /**
  * "Let's talk about your brand" — Homepage bottom contact form
- * (left heading + right stacked fields). Presentational only.
+ * (left heading + right stacked fields). Posts to the same Google Sheet
+ * as the first homepage form.
  *
  * Mobile: stacked heading + full-width single-column form.
  * Desktop (lg+): 2-col layout unchanged.
  */
 export function TalkAboutBrand() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">(
+    "idle",
+  );
+  const [message, setMessage] = useState("");
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+
+    setStatus("submitting");
+    setMessage("");
+
+    try {
+      const result = await submitContactLead({
+        fullName: data.get("fullName"),
+        workEmail: data.get("workEmail"),
+        mobileNumber: data.get("mobileNumber"),
+        companyType: data.get("companyType"),
+        message: data.get("message"),
+      });
+
+      if (!result.ok) {
+        setStatus("error");
+        setMessage(result.error || "Could not save your details. Please try again.");
+        return;
+      }
+
+      form.reset();
+      setStatus("success");
+      setMessage("Thanks — we will be in touch.");
+    } catch {
+      setStatus("error");
+      setMessage("Could not save your details. Please try again.");
+    }
+  }
+
   return (
     <section className="bg-white px-5 py-16 sm:px-6 sm:py-24 lg:px-[60px]">
       <div className="mx-auto grid max-w-[1332px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-20">
@@ -43,12 +85,14 @@ export function TalkAboutBrand() {
           </p>
         </div>
 
-        <form className="flex flex-col gap-5" action="#">
+        <form className="flex flex-col gap-5" onSubmit={onSubmit}>
           <Field label="Full Name*" htmlFor="talk-name">
             <input
               id="talk-name"
               name="fullName"
               type="text"
+              required
+              autoComplete="name"
               placeholder="Your Full Name"
               className={inputClasses}
             />
@@ -59,6 +103,8 @@ export function TalkAboutBrand() {
               id="talk-email"
               name="workEmail"
               type="email"
+              required
+              autoComplete="email"
               placeholder="JonDoe@gmail.com"
               className={inputClasses}
             />
@@ -74,6 +120,9 @@ export function TalkAboutBrand() {
                 id="talk-phone"
                 name="mobileNumber"
                 type="tel"
+                required
+                inputMode="numeric"
+                autoComplete="tel-national"
                 placeholder="1234567890"
                 className={inputClasses}
               />
@@ -86,6 +135,7 @@ export function TalkAboutBrand() {
                 id="talk-company"
                 name="companyType"
                 defaultValue=""
+                required
                 className={`${inputClasses} appearance-none pr-10`}
               >
                 <option value="" disabled>
@@ -103,26 +153,32 @@ export function TalkAboutBrand() {
           </Field>
 
           <Field
-            label="Tell us about your brand or project"
+            label="Tell us about your brand or project*"
             htmlFor="talk-message"
           >
             <textarea
               id="talk-message"
               name="message"
               rows={5}
+              required
               placeholder="Your message"
               className="w-full resize-none rounded-lg bg-input-bg px-4 py-3 font-satoshi text-sm text-black placeholder:text-black/40 outline-none"
             />
           </Field>
 
+          <p className="min-h-5 font-satoshi text-sm text-muted" aria-live="polite">
+            {message}
+          </p>
+
           <div className="pt-2">
             <PillButton
               variant="dark"
               size="lg"
-              type="button"
-              className="h-[56px] w-full max-w-[290px] justify-between !border-black !px-[19.84px] font-satoshi text-[14px] font-medium leading-4 tracking-normal"
+              type="submit"
+              disabled={status === "submitting"}
+              className="h-[56px] w-full max-w-[290px] justify-between !border-black !px-[19.84px] font-satoshi text-[14px] font-medium leading-4 tracking-normal disabled:opacity-50"
             >
-              Submit
+              {status === "submitting" ? "Sending" : "Submit"}
             </PillButton>
           </div>
         </form>

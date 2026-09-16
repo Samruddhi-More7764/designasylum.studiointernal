@@ -1,6 +1,7 @@
 import { PillButton } from "@/components/ui/PillButton";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
-import { painPoints, type PainPoint } from "@/data/painPoints";
+import { getPainPoints } from "@/cms/content";
+import type { PainPoint } from "@/data/painPoints";
 
 function PainPointCard({ point }: { point: PainPoint }) {
   // Container (Nivaro).png card anatomy: rounded bordered card; large
@@ -43,7 +44,9 @@ function PainPointCard({ point }: { point: PainPoint }) {
  *
  * Mobile: single-column stack. Desktop (lg+): 3-col.
  */
-export function PainPoints() {
+export async function PainPoints() {
+  const painPoints = await getPainPoints();
+
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-[60px] lg:px-[60px]">
       <SectionHeading className="mb-10 text-center text-[28px] font-medium tracking-[-0.8px] text-ink sm:mb-16 sm:text-[36px] lg:text-[40px] lg:tracking-[-1px]">

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { marqueeRow1, marqueeRow2, type ClientLogo } from "@/data/clients";
+import { getClientLogoLayouts } from "@/cms/content";
+import type { ClientLogo } from "@/data/clients";
 
 // The raw dimensions in data/clients.ts (192×49 / 191×51 / 193×82 / 176×101)
 // are each logo's Figma *node* bounding box, not its intended on-screen size
@@ -65,7 +66,8 @@ function LogoRow({ logos }: { logos: ClientLogo[] }) {
  * Desktop (lg+): 1130×304, gap 24, two static rows (4 + 5).
  * Mobile (<lg): 2-column grid matching Homepagemobile reference.
  */
-export function LogoMarquee() {
+export async function LogoMarquee() {
+  const { marqueeRow1, marqueeRow2 } = await getClientLogoLayouts();
   const mobileLogos = [...marqueeRow1, ...marqueeRow2];
 
   return (

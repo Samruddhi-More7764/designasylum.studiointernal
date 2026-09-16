@@ -9,11 +9,13 @@ export interface FeaturedProject {
   metricLabel: string;
   image: string;
   alt: string;
+  href: string;
 }
 
 const description =
   "A heritage law firm, repositioned with teeth. New name, new voice, a brand that argues its own case.";
 const metricLabel = "Rise in inbound briefs in the year after relaunch";
+const href = "/clients/sevenloop";
 
 export const featuredProjects: FeaturedProject[] = [
   {
@@ -23,6 +25,7 @@ export const featuredProjects: FeaturedProject[] = [
     metricLabel,
     image: "/assets/images/project-plant-glass.png",
     alt: "Dark leaves and roots suspended in a glass vessel",
+    href,
   },
   {
     name: "Northwind",
@@ -31,6 +34,7 @@ export const featuredProjects: FeaturedProject[] = [
     metricLabel,
     image: "/assets/images/project-bubbles-bottle.png",
     alt: "Glass bottle surrounded by floating iridescent bubbles",
+    href,
   },
   {
     name: "Northwind",
@@ -39,6 +43,7 @@ export const featuredProjects: FeaturedProject[] = [
     metricLabel,
     image: "/assets/images/project-foam-circle.png",
     alt: "Circular dish filled with white foam bubbles",
+    href,
   },
   {
     name: "Northwind",
@@ -47,5 +52,6 @@ export const featuredProjects: FeaturedProject[] = [
     metricLabel,
     image: "/assets/images/project-pink-fluid.png",
     alt: "Abstract pink fluid with red organic shapes",
+    href,
   },
 ];

@@ -6,6 +6,9 @@ export interface Testimonial {
   image: string;
   alt: string;
   quote?: string;
+  video?: string;
+  width: number;
+  height: number;
 }
 
 export const testimonials: Testimonial[] = [
@@ -14,15 +17,21 @@ export const testimonials: Testimonial[] = [
     alt: "Dr. Mallesh B., Co-founder, i3systems — video testimonial",
     quote:
       "\u201cIt was a genuinely successful branding project, and, more to the point, fun to work with the team.\u201d",
+    width: 290,
+    height: 320,
   },
   {
     image: "/assets/images/testimonial-2.png",
     alt: "Dr. Mallesh B., Co-founder, i3systems — video testimonial",
+    width: 290,
+    height: 320,
   },
   {
     image: "/assets/images/testimonial-3.png",
     alt: "Dr. Mallesh B., Co-founder, i3systems — video testimonial",
     quote:
       "\u201cIt was a genuinely successful branding project, and, more to the point, fun to work with the team.\u201d",
+    width: 290,
+    height: 320,
   },
 ];

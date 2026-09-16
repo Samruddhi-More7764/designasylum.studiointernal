@@ -3,7 +3,8 @@ import Link from "next/link";
 import { MoveRight } from "lucide-react";
 import { PillButton } from "@/components/ui/PillButton";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
-import { portfolioItems, type PortfolioItem } from "@/data/portfolio";
+import { getPortfolioItems } from "@/cms/content";
+import type { PortfolioItem } from "@/data/portfolio";
 
 const CLIENT_HUB_HREF = "/clients/sevenloop";
 
@@ -18,7 +19,7 @@ function PortfolioCard({
   // Mobile: image → title+arrow → category.
   return (
     <Link
-      href={CLIENT_HUB_HREF}
+      href={item.href || CLIENT_HUB_HREF}
       className={`flex w-full max-w-[663px] flex-col gap-[10px] transition-opacity hover:opacity-90 lg:h-[416px] ${className}`}
     >
       <div className="relative aspect-[663/373] w-full overflow-hidden lg:aspect-auto lg:min-h-0 lg:flex-1">
@@ -68,7 +69,9 @@ function PortfolioCard({
  * Portfolio grid — Frame 8.
  * Desktop: 2×3 cards. Mobile: single-column stack.
  */
-export function PortfolioGrid() {
+export async function PortfolioGrid() {
+  const portfolioItems = await getPortfolioItems();
+
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-20 lg:px-[60px]">
       <div className="mx-auto flex h-auto w-full max-w-[1350px] flex-col gap-10 sm:gap-16 lg:min-h-[1613px]">

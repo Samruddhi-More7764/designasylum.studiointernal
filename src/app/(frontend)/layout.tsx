@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Figtree, Playfair_Display } from "next/font/google";
+import {
+  GoogleTagManager,
+  GoogleTagManagerNoscript,
+} from "@/components/analytics/GoogleTagManager";
 import "./globals.css";
 
 // Confirmed via design.md: font-family Figtree, weight 400, style Regular.
@@ -34,6 +38,7 @@ export default function RootLayout({
       lang="en"
       className={`${figtree.variable} ${playfairDisplay.variable} h-full scroll-smooth antialiased`}
     >
+      <GoogleTagManager />
       <head>
         {/*
           Satoshi (design.md: font-family Satoshi, weight 400, style Regular)
@@ -48,7 +53,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-white">
+        <GoogleTagManagerNoscript />
+        <div className="mx-auto flex min-h-full w-full max-w-[1470px] flex-1 flex-col bg-white">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
