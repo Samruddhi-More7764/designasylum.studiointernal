@@ -26,7 +26,7 @@ function PainPointCard({ point }: { point: PainPoint }) {
         {point.quote}
       </p>
 
-      <PillButton variant="outline" size="sm">
+      <PillButton variant="outline" size="sm" href={point.href}>
         See outcome
       </PillButton>
 

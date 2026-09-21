@@ -1,11 +1,13 @@
 import type { CollectionConfig } from "payload";
-
-const HUB_HREF = "/clients/sevenloop";
+import { homepageClientLink } from "../fields/homepageClientLink";
 
 export const PortfolioItems: CollectionConfig = {
   slug: "portfolio-items",
   defaultSort: "order",
-  admin: { useAsTitle: "name", defaultColumns: ["name", "category", "href", "order"] },
+  admin: {
+    useAsTitle: "name",
+    defaultColumns: ["name", "category", "client", "order"],
+  },
   access: { read: () => true },
   fields: [
     { name: "name", type: "text", required: true },
@@ -18,16 +20,7 @@ export const PortfolioItems: CollectionConfig = {
       filterOptions: { mimeType: { contains: "image" } },
     },
     { name: "alt", type: "text", required: true },
-    {
-      name: "href",
-      type: "text",
-      required: true,
-      defaultValue: HUB_HREF,
-      admin: {
-        description:
-          "Where this card links. Does not create a new page — edit Client Hub under Globals. Example: /clients/sevenloop",
-      },
-    },
+    homepageClientLink,
     { name: "order", type: "number", required: true, defaultValue: 0 },
   ],
 };

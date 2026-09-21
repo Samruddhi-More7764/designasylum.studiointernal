@@ -1,3 +1,4 @@
+import { notFound, redirect } from "next/navigation";
 import { NavBar } from "@/components/layout/NavBar";
 import { ClientHubHero } from "@/components/clients/01-ClientHubHero";
 import { ClientHubBody } from "@/components/clients/02-ClientHubBody";
@@ -7,24 +8,34 @@ import { ClientHubProjectTeam } from "@/components/clients/05-ClientHubProjectTe
 import { ClientHubStartProject } from "@/components/clients/06-ClientHubStartProject";
 import { Services } from "@/components/sections/04-Services";
 import { Footer } from "@/components/sections/15-Footer";
-import { getFooter } from "@/cms/content";
+import { getClientBySlug, getFooter } from "@/cms/content";
+import { caseStudyPath } from "@/cms/urls";
 
-/**
- * Client hub — Sevenloop | Design Asylum Client Work.
- * Sections are added one-by-one to match Figma.
- */
-export default async function SevenloopClientHubPage() {
+export const dynamic = "force-dynamic";
+
+type Props = { params: Promise<{ slug: string }> };
+
+export default async function ClientPage({ params }: Props) {
+  const { slug } = await params;
+  const client = await getClientBySlug(slug);
+  if (!client) notFound();
+
+  if (client.projectType === "direct") {
+    if (!client.featuredStudySlug) notFound();
+    redirect(caseStudyPath(slug, client.featuredStudySlug));
+  }
+
   const footer = await getFooter();
 
   return (
     <>
       <NavBar />
       <main className="bg-white pt-28">
-        <ClientHubHero />
-        <ClientHubBody />
-        <ClientHubPartnership />
-        <ClientHubTransformation />
-        <ClientHubProjectTeam />
+        <ClientHubHero name={client.name} slug={client.slug} />
+        <ClientHubBody clientSlug={slug} />
+        <ClientHubPartnership clientSlug={slug} />
+        <ClientHubTransformation clientSlug={slug} />
+        <ClientHubProjectTeam clientSlug={slug} />
         <Services variant="plain" />
         <ClientHubStartProject />
       </main>

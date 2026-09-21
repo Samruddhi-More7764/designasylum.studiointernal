@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Accent } from "@/components/ui/SectionHeading";
 import { PillButton } from "@/components/ui/PillButton";
 import { CmsMediaFill } from "@/components/ui/CmsMediaFill";
@@ -32,6 +33,36 @@ function HubHeading({
 }
 
 /**
+ * Media tile for a hub section. When the section has a case study picked in
+ * the CMS the tile becomes a link; otherwise it stays a plain visual.
+ */
+function StudyTile({
+  href,
+  label,
+  className,
+  children,
+}: {
+  href: string | null;
+  label: string;
+  className: string;
+  children: React.ReactNode;
+}) {
+  if (!href) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <Link
+      href={href}
+      aria-label={`View case study: ${label}`}
+      className={`${className} group cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#05201F]`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/**
  * Client hub — section 2: sticky on-page scroller + content blocks.
  * Positions from Figma: scroller x=60, content x=476 (gap ≈120).
  *
@@ -39,7 +70,7 @@ function HubHeading({
  * sections scroll. Hidden below lg. Partnership and later sections are
  * outside this sticky containing block (Figma).
  */
-export async function ClientHubBody() {
+export async function ClientHubBody({ clientSlug = "sevenloop" }: { clientSlug?: string }) {
   const {
     navItems,
     about,
@@ -49,7 +80,7 @@ export async function ClientHubBody() {
     brandVideo,
     behindTheScenes,
     caseStudy,
-  } = await getClientHub();
+  } = await getClientHub(clientSlug);
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] items-start gap-10 lg:gap-[120px]">
@@ -98,8 +129,10 @@ export async function ClientHubBody() {
             />
             <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-3 lg:gap-6">
               {logoDesign.images.map((image) => (
-                <div
+                <StudyTile
                   key={image.src}
+                  href={logoDesign.href}
+                  label={`${logoDesign.italic} ${logoDesign.rest}`}
                   className="relative aspect-[300/195] w-full overflow-hidden rounded-xl"
                 >
                   <Image
@@ -109,7 +142,7 @@ export async function ClientHubBody() {
                     className="object-cover"
                     sizes="(min-width: 1024px) 300px, 100vw"
                   />
-                </div>
+                </StudyTile>
               ))}
             </div>
           </div>
@@ -123,7 +156,11 @@ export async function ClientHubBody() {
               italic={websiteDesign.italic}
               rest={websiteDesign.rest}
             />
-            <div className="relative aspect-[932/515] w-full overflow-hidden rounded-xl">
+            <StudyTile
+              href={websiteDesign.href}
+              label={`${websiteDesign.italic} ${websiteDesign.rest}`}
+              className="relative aspect-[932/515] w-full overflow-hidden rounded-xl"
+            >
               <Image
                 src={websiteDesign.image.src}
                 alt={websiteDesign.image.alt}
@@ -131,7 +168,7 @@ export async function ClientHubBody() {
                 className="object-cover"
                 sizes="(min-width: 1024px) 932px, 100vw"
               />
-            </div>
+            </StudyTile>
           </div>
 
           {/* Project Brochure — keep 2-col on mobile */}
@@ -146,8 +183,10 @@ export async function ClientHubBody() {
             />
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
               {projectBrochure.images.map((image) => (
-                <div
+                <StudyTile
                   key={image.src}
+                  href={projectBrochure.href}
+                  label={`${projectBrochure.rest} ${projectBrochure.italic}`}
                   className="relative aspect-[458/515] w-full overflow-hidden rounded-xl"
                 >
                   <Image
@@ -157,7 +196,7 @@ export async function ClientHubBody() {
                     className="object-cover"
                     sizes="(min-width: 1024px) 458px, 50vw"
                   />
-                </div>
+                </StudyTile>
               ))}
             </div>
           </div>
@@ -168,14 +207,18 @@ export async function ClientHubBody() {
               italic={brandVideo.italic}
               rest={brandVideo.rest}
             />
-            <div className="relative aspect-[932/515] w-full overflow-hidden rounded-xl">
+            <StudyTile
+              href={brandVideo.href}
+              label={`${brandVideo.italic} ${brandVideo.rest}`}
+              className="relative aspect-[932/515] w-full overflow-hidden rounded-xl"
+            >
               <CmsMediaFill
                 image={brandVideo.image.src}
                 video={brandVideo.videoSrc}
                 alt={brandVideo.image.alt}
                 sizes="(min-width: 1024px) 932px, 100vw"
               />
-            </div>
+            </StudyTile>
           </div>
 
           {/* Behind the Scenes — desktop 3-col; mobile stacked */}

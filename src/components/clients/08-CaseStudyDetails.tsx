@@ -8,8 +8,16 @@ import { CaseStudyQuoteIcon } from "@/components/ui/CaseStudyQuoteIcon";
  *
  * Desktop (lg+): side-by-side. Mobile: quote → icon → details stack.
  */
-export async function CaseStudyDetails() {
-  const { details } = await getCaseStudyPage();
+export async function CaseStudyDetails({
+  clientSlug = "sevenloop",
+  studySlug = "case-study",
+}: {
+  clientSlug?: string;
+  studySlug?: string;
+}) {
+  const page = await getCaseStudyPage(clientSlug, studySlug);
+  if (!page) return null;
+  const { details } = page;
   return (
     <section className="bg-white px-5 py-10 sm:px-8 sm:py-12 lg:px-[60px] lg:py-16">
       <div className="mx-auto flex w-full max-w-[1350px] flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-12">

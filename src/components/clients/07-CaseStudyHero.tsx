@@ -10,8 +10,16 @@ import { getCaseStudyPage } from "@/cms/content";
  *
  * Desktop (lg+): unchanged. Mobile: type scale, gutters, wrapping.
  */
-export async function CaseStudyHero() {
-  const { hero } = await getCaseStudyPage();
+export async function CaseStudyHero({
+  clientSlug = "sevenloop",
+  studySlug = "case-study",
+}: {
+  clientSlug?: string;
+  studySlug?: string;
+}) {
+  const page = await getCaseStudyPage(clientSlug, studySlug);
+  if (!page) return null;
+  const { hero } = page;
   return (
     <section className="bg-white">
       <div className="mx-auto flex w-full max-w-[1438px] flex-col items-center gap-4 px-5 pb-6 pt-6 sm:gap-6 sm:px-8 sm:pb-8 sm:pt-10">

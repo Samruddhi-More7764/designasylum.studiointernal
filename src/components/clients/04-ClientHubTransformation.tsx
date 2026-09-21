@@ -18,8 +18,12 @@ function ComparePill({ label }: { label: string }) {
  * Desktop (lg+): existing dual-panel markup — untouched.
  * Mobile (<lg): separate drag-compare UI; desktop markup is hidden.
  */
-export async function ClientHubTransformation() {
-  const { transformation } = await getClientHub();
+export async function ClientHubTransformation({
+  clientSlug = "sevenloop",
+}: {
+  clientSlug?: string;
+}) {
+  const { transformation } = await getClientHub(clientSlug);
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] flex-col items-center gap-6 sm:gap-8">

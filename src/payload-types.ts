@@ -77,6 +77,8 @@ export interface Config {
     'homepage-case-studies': HomepageCaseStudy;
     testimonials: Testimonial;
     'faq-items': FaqItem;
+    clients: Client;
+    'case-studies': CaseStudy;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +96,8 @@ export interface Config {
     'homepage-case-studies': HomepageCaseStudiesSelect<false> | HomepageCaseStudiesSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'faq-items': FaqItemsSelect<false> | FaqItemsSelect<true>;
+    clients: ClientsSelect<false> | ClientsSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -105,13 +109,9 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-footer': SiteFooter;
-    'client-hub': ClientHub;
-    'case-study-page': CaseStudyPage;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
-    'client-hub': ClientHubSelect<false> | ClientHubSelect<true>;
-    'case-study-page': CaseStudyPageSelect<false> | CaseStudyPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -219,10 +219,241 @@ export interface FeaturedProject {
   image: number | Media;
   alt: string;
   /**
-   * Where this card links. Does not create a new page — Client Hub and Case Study live under Globals. Example: /clients/sevenloop
+   * Card opens this Client: Hub → /clients/{slug}; Direct → that client’s featured case study.
    */
-  href: string;
+  client: number | Client;
   order: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One record per brand. Hub = 2+ projects (library). Direct = one project, skip hub.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: number;
+  name: string;
+  /**
+   * URL: /clients/{slug}. Example: sevenloop, puma.
+   */
+  slug: string;
+  /**
+   * Homepage cards follow this. Hub = library. Direct = one study. If creating from a Case study, save the Client first — Featured study fills in after the study is saved.
+   */
+  projectType: 'hub' | 'direct';
+  /**
+   * Homepage opens this study when Project type is Direct. Create the Case study first (or save this Client, then the study) — do not create a study from this field.
+   */
+  featuredStudy?: (number | null) | CaseStudy;
+  navItems?:
+    | {
+        navId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  about?: {
+    italic: string;
+    rest: string;
+    body: string;
+    websiteHref: string;
+  };
+  logoDesign?: {
+    italic: string;
+    rest: string;
+    images?:
+      | {
+          image: number | Media;
+          alt: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional — open this case study from Logo Design.
+     */
+    caseStudy?: (number | null) | CaseStudy;
+  };
+  websiteDesign?: {
+    italic: string;
+    rest: string;
+    image: {
+      image: number | Media;
+      alt: string;
+      id?: string | null;
+    };
+    /**
+     * Optional — open this case study from Website Design.
+     */
+    caseStudy?: (number | null) | CaseStudy;
+  };
+  projectBrochure?: {
+    italic: string;
+    rest: string;
+    images?:
+      | {
+          image: number | Media;
+          alt: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional — open this case study from Project Brochure.
+     */
+    caseStudy?: (number | null) | CaseStudy;
+  };
+  brandVideo?: {
+    italic: string;
+    rest: string;
+    /**
+     * Still poster only (JPG/PNG). Upload the MP4 in Video.
+     */
+    image: {
+      image: number | Media;
+      alt: string;
+      id?: string | null;
+    };
+    /**
+     * MP4 or WebM for playback. Put a still JPG/PNG in Image — not the video file.
+     */
+    video?: (number | null) | Media;
+    /**
+     * Optional — open this case study from Brand Video.
+     */
+    caseStudy?: (number | null) | CaseStudy;
+  };
+  behindTheScenes?: {
+    italic: string;
+    rest: string;
+    images?:
+      | {
+          image: number | Media;
+          alt: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  caseStudy?: {
+    italic: string;
+    rest: string;
+    subheading: string;
+    /**
+     * Primary Case Study CTA on the hub.
+     */
+    caseStudy?: (number | null) | CaseStudy;
+  };
+  partnership?: {
+    label: string;
+    heading: string;
+    headingAccent: string;
+    paragraphs?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  transformation?: {
+    heading: string;
+    subtext: string;
+    before: {
+      image: number | Media;
+      alt: string;
+      id?: string | null;
+    };
+    after: {
+      image: number | Media;
+      alt: string;
+      id?: string | null;
+    };
+  };
+  projectTeam?: {
+    heading: string;
+    subheading: string;
+    members?:
+      | {
+          name: string;
+          role: string;
+          photo: {
+            image: number | Media;
+            alt: string;
+            id?: string | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Belongs to a Client. Hub clients can have many; a Direct client usually has one.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: number;
+  title: string;
+  /**
+   * URL: /clients/{client}/{slug}. Example: case-study, website, branding.
+   */
+  slug: string;
+  /**
+   * The brand this study belongs to. If the Client does not exist yet, create and save it first — leave Featured study empty. After you save this Case study, Direct clients pick it up automatically.
+   */
+  client: number | Client;
+  hero: {
+    heading: string;
+    /**
+     * Last breadcrumb crumb. Defaults to the study title.
+     */
+    breadcrumbCurrent?: string | null;
+    /**
+     * Optional. Leave empty to auto-build Home / clients / {client}.
+     */
+    breadcrumb?:
+      | {
+          label: string;
+          href: string;
+          id?: string | null;
+        }[]
+      | null;
+    image: {
+      image: number | Media;
+      alt: string;
+      id?: string | null;
+    };
+  };
+  details: {
+    quote: string;
+    /**
+     * Heading shown above the table — e.g. "Details". This is a caption on its own, not a row, so it has no value beside it. Add label/value pairs under Rows below.
+     */
+    tableHeading: string;
+    /**
+     * Each row is a label/value pair (e.g. Client → Sevenloop). If you leave this empty the page falls back to placeholder rows.
+     */
+    rows?:
+      | {
+          label: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  gallery?:
+    | {
+        image: number | Media;
+        alt: string;
+        id?: string | null;
+      }[]
+    | null;
+  viewAll: {
+    label: string;
+    href: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -237,9 +468,9 @@ export interface PortfolioItem {
   image: number | Media;
   alt: string;
   /**
-   * Where this card links. Does not create a new page — edit Client Hub under Globals. Example: /clients/sevenloop
+   * Card opens this Client: Hub → /clients/{slug}; Direct → that client’s featured case study.
    */
-  href: string;
+  client: number | Client;
   order: number;
   updatedAt: string;
   createdAt: string;
@@ -253,6 +484,10 @@ export interface PainPoint {
   tag: string;
   quote: string;
   resolution: string;
+  /**
+   * Card opens this Client: Hub → /clients/{slug}; Direct → that client’s featured case study.
+   */
+  client: number | Client;
   order: number;
   updatedAt: string;
   createdAt: string;
@@ -285,9 +520,9 @@ export interface HomepageCaseStudy {
     id?: string | null;
   }[];
   /**
-   * Where View website goes. Cloudphys should use /clients/sevenloop/case-study. Does not create a new case-study page — edit that under Globals.
+   * Row opens this case study — /clients/{client}/{study}. Pick the project itself, not the brand.
    */
-  href: string;
+  caseStudy: number | CaseStudy;
   order: number;
   updatedAt: string;
   createdAt: string;
@@ -395,6 +630,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'faq-items';
         value: number | FaqItem;
+      } | null)
+    | ({
+        relationTo: 'clients';
+        value: number | Client;
+      } | null)
+    | ({
+        relationTo: 'case-studies';
+        value: number | CaseStudy;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -508,7 +751,7 @@ export interface FeaturedProjectsSelect<T extends boolean = true> {
   metricLabel?: T;
   image?: T;
   alt?: T;
-  href?: T;
+  client?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -522,7 +765,7 @@ export interface PortfolioItemsSelect<T extends boolean = true> {
   category?: T;
   image?: T;
   alt?: T;
-  href?: T;
+  client?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -535,6 +778,7 @@ export interface PainPointsSelect<T extends boolean = true> {
   tag?: T;
   quote?: T;
   resolution?: T;
+  client?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -566,7 +810,7 @@ export interface HomepageCaseStudiesSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
-  href?: T;
+  caseStudy?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -594,6 +838,221 @@ export interface FaqItemsSelect<T extends boolean = true> {
   question?: T;
   answer?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients_select".
+ */
+export interface ClientsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  projectType?: T;
+  featuredStudy?: T;
+  navItems?:
+    | T
+    | {
+        navId?: T;
+        label?: T;
+        id?: T;
+      };
+  about?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        body?: T;
+        websiteHref?: T;
+      };
+  logoDesign?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+        caseStudy?: T;
+      };
+  websiteDesign?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        image?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+        caseStudy?: T;
+      };
+  projectBrochure?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+        caseStudy?: T;
+      };
+  brandVideo?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        image?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+        video?: T;
+        caseStudy?: T;
+      };
+  behindTheScenes?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+      };
+  caseStudy?:
+    | T
+    | {
+        italic?: T;
+        rest?: T;
+        subheading?: T;
+        caseStudy?: T;
+      };
+  partnership?:
+    | T
+    | {
+        label?: T;
+        heading?: T;
+        headingAccent?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  transformation?:
+    | T
+    | {
+        heading?: T;
+        subtext?: T;
+        before?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+        after?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+      };
+  projectTeam?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        members?:
+          | T
+          | {
+              name?: T;
+              role?: T;
+              photo?:
+                | T
+                | {
+                    image?: T;
+                    alt?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  client?: T;
+  hero?:
+    | T
+    | {
+        heading?: T;
+        breadcrumbCurrent?: T;
+        breadcrumb?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        image?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
+      };
+  details?:
+    | T
+    | {
+        quote?: T;
+        tableHeading?: T;
+        rows?:
+          | T
+          | {
+              label?: T;
+              value?: T;
+              id?: T;
+            };
+      };
+  gallery?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
+  viewAll?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -666,180 +1125,6 @@ export interface SiteFooter {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "client-hub".
- */
-export interface ClientHub {
-  id: number;
-  navItems?:
-    | {
-        navId: string;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  about: {
-    italic: string;
-    rest: string;
-    body: string;
-    websiteHref: string;
-  };
-  logoDesign: {
-    italic: string;
-    rest: string;
-    images?:
-      | {
-          image: number | Media;
-          alt: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  websiteDesign: {
-    italic: string;
-    rest: string;
-    image: {
-      image: number | Media;
-      alt: string;
-      id?: string | null;
-    };
-  };
-  projectBrochure: {
-    italic: string;
-    rest: string;
-    images?:
-      | {
-          image: number | Media;
-          alt: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  brandVideo: {
-    italic: string;
-    rest: string;
-    /**
-     * Still poster only (JPG/PNG). Upload the MP4 in Video.
-     */
-    image: {
-      image: number | Media;
-      alt: string;
-      id?: string | null;
-    };
-    /**
-     * MP4 or WebM for playback. Put a still JPG/PNG in Image — not the video file.
-     */
-    video?: (number | null) | Media;
-  };
-  behindTheScenes: {
-    italic: string;
-    rest: string;
-    images?:
-      | {
-          image: number | Media;
-          alt: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  caseStudy: {
-    italic: string;
-    rest: string;
-    subheading: string;
-    href: string;
-  };
-  partnership: {
-    label: string;
-    heading: string;
-    headingAccent: string;
-    paragraphs?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  transformation: {
-    heading: string;
-    subtext: string;
-    before: {
-      image: number | Media;
-      alt: string;
-      id?: string | null;
-    };
-    after: {
-      image: number | Media;
-      alt: string;
-      id?: string | null;
-    };
-  };
-  projectTeam: {
-    heading: string;
-    subheading: string;
-    members?:
-      | {
-          name: string;
-          role: string;
-          photo: {
-            image: number | Media;
-            alt: string;
-            id?: string | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-  };
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "case-study-page".
- */
-export interface CaseStudyPage {
-  id: number;
-  hero: {
-    heading: string;
-    breadcrumbCurrent: string;
-    breadcrumb?:
-      | {
-          label: string;
-          href: string;
-          id?: string | null;
-        }[]
-      | null;
-    image: {
-      image: number | Media;
-      alt: string;
-      id?: string | null;
-    };
-  };
-  details: {
-    quote: string;
-    tableHeading: string;
-    rows?:
-      | {
-          label: string;
-          value: string;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  gallery?:
-    | {
-        image: number | Media;
-        alt: string;
-        id?: string | null;
-      }[]
-    | null;
-  viewAll: {
-    label: string;
-    href: string;
-  };
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-footer_select".
  */
 export interface SiteFooterSelect<T extends boolean = true> {
@@ -860,212 +1145,6 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | {
         label?: T;
         id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "client-hub_select".
- */
-export interface ClientHubSelect<T extends boolean = true> {
-  navItems?:
-    | T
-    | {
-        navId?: T;
-        label?: T;
-        id?: T;
-      };
-  about?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        body?: T;
-        websiteHref?: T;
-      };
-  logoDesign?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        images?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  websiteDesign?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        image?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  projectBrochure?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        images?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  brandVideo?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        image?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-        video?: T;
-      };
-  behindTheScenes?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        images?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  caseStudy?:
-    | T
-    | {
-        italic?: T;
-        rest?: T;
-        subheading?: T;
-        href?: T;
-      };
-  partnership?:
-    | T
-    | {
-        label?: T;
-        heading?: T;
-        headingAccent?: T;
-        paragraphs?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-      };
-  transformation?:
-    | T
-    | {
-        heading?: T;
-        subtext?: T;
-        before?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-        after?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  projectTeam?:
-    | T
-    | {
-        heading?: T;
-        subheading?: T;
-        members?:
-          | T
-          | {
-              name?: T;
-              role?: T;
-              photo?:
-                | T
-                | {
-                    image?: T;
-                    alt?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "case-study-page_select".
- */
-export interface CaseStudyPageSelect<T extends boolean = true> {
-  hero?:
-    | T
-    | {
-        heading?: T;
-        breadcrumbCurrent?: T;
-        breadcrumb?:
-          | T
-          | {
-              label?: T;
-              href?: T;
-              id?: T;
-            };
-        image?:
-          | T
-          | {
-              image?: T;
-              alt?: T;
-              id?: T;
-            };
-      };
-  details?:
-    | T
-    | {
-        quote?: T;
-        tableHeading?: T;
-        rows?:
-          | T
-          | {
-              label?: T;
-              value?: T;
-              id?: T;
-            };
-      };
-  gallery?:
-    | T
-    | {
-        image?: T;
-        alt?: T;
-        id?: T;
-      };
-  viewAll?:
-    | T
-    | {
-        label?: T;
-        href?: T;
       };
   updatedAt?: T;
   createdAt?: T;

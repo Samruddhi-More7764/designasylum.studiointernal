@@ -7,8 +7,16 @@ import { getCaseStudyPage } from "@/cms/content";
  *
  * Desktop (lg+): unchanged. Mobile: gutters/spacing only.
  */
-export async function CaseStudyViewAllClients() {
-  const { viewAll } = await getCaseStudyPage();
+export async function CaseStudyViewAllClients({
+  clientSlug = "sevenloop",
+  studySlug = "case-study",
+}: {
+  clientSlug?: string;
+  studySlug?: string;
+}) {
+  const page = await getCaseStudyPage(clientSlug, studySlug);
+  if (!page) return null;
+  const { viewAll } = page;
   return (
     <section className="bg-white px-5 pb-14 sm:px-8 sm:pb-16 lg:px-[60px] lg:pb-20">
       <div className="mx-auto flex w-full max-w-[1350px] justify-center">

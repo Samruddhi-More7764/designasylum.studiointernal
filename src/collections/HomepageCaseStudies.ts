@@ -1,11 +1,13 @@
 import type { CollectionConfig } from "payload";
-
-const CASE_STUDY_HREF = "/clients/sevenloop/case-study";
+import { homepageStudyLink } from "../fields/homepageStudyLink";
 
 export const HomepageCaseStudies: CollectionConfig = {
   slug: "homepage-case-studies",
   defaultSort: "order",
-  admin: { useAsTitle: "name", defaultColumns: ["number", "name", "href", "order"] },
+  admin: {
+    useAsTitle: "name",
+    defaultColumns: ["number", "name", "caseStudy", "order"],
+  },
   access: { read: () => true },
   fields: [
     { name: "number", type: "text", required: true },
@@ -17,16 +19,7 @@ export const HomepageCaseStudies: CollectionConfig = {
       required: true,
       fields: [{ name: "label", type: "text", required: true }],
     },
-    {
-      name: "href",
-      type: "text",
-      required: true,
-      defaultValue: CASE_STUDY_HREF,
-      admin: {
-        description:
-          "Where View website goes. Cloudphys should use /clients/sevenloop/case-study. Does not create a new case-study page — edit that under Globals.",
-      },
-    },
+    homepageStudyLink,
     { name: "order", type: "number", required: true, defaultValue: 0 },
   ],
 };

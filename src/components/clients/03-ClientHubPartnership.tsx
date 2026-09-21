@@ -10,8 +10,12 @@ import { getClientHub } from "@/cms/content";
  *
  * Desktop (lg+): side-by-side. Mobile: stacked card then paragraphs.
  */
-export async function ClientHubPartnership() {
-  const { partnership } = await getClientHub();
+export async function ClientHubPartnership({
+  clientSlug = "sevenloop",
+}: {
+  clientSlug?: string;
+}) {
+  const { partnership } = await getClientHub(clientSlug);
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] flex-col items-start gap-10 sm:gap-12 lg:flex-row lg:gap-16">

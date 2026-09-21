@@ -4,6 +4,7 @@ export interface PainPoint {
   tag: string;
   quote: string;
   resolution: string;
+  href: string;
 }
 
 const card: PainPoint = {
@@ -12,6 +13,7 @@ const card: PainPoint = {
     "We can\u2019t convey what the brand stands for, and it\u2019s costing us the talent we want.",
   resolution:
     "Design Asylum worked with Fortuna to drag the brand up to the pace of the industry while keeping the depth that attracts better people.",
+  href: "/clients/sevenloop",
 };
 
 export const painPoints: PainPoint[] = [card, card, card];

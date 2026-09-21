@@ -133,6 +133,163 @@ async function seed() {
 
   const payload = await getPayload({ config });
 
+  // --- Sevenloop Client (hub) + Case study ---
+  const existingClients = await payload.find({
+    collection: "clients",
+    where: { slug: { equals: "sevenloop" } },
+    limit: 1,
+    depth: 0,
+  });
+
+  const sevenloopHubData = {
+    name: "Sevenloop",
+    slug: "sevenloop",
+    projectType: "hub" as const,
+    navItems: clientHubNavItems.map((item) => ({
+      navId: item.id,
+      label: item.label,
+    })),
+    about: sevenloopAbout,
+    logoDesign: {
+      italic: sevenloopLogoDesign.italic,
+      rest: sevenloopLogoDesign.rest,
+      images: await Promise.all(
+        sevenloopLogoDesign.images.map((img) => cmsImage(payload, img.src, img.alt)),
+      ),
+    },
+    websiteDesign: {
+      italic: sevenloopWebsiteDesign.italic,
+      rest: sevenloopWebsiteDesign.rest,
+      image: await cmsImage(
+        payload,
+        sevenloopWebsiteDesign.image.src,
+        sevenloopWebsiteDesign.image.alt,
+      ),
+    },
+    projectBrochure: {
+      italic: sevenloopProjectBrochure.italic,
+      rest: sevenloopProjectBrochure.rest,
+      images: await Promise.all(
+        sevenloopProjectBrochure.images.map((img) =>
+          cmsImage(payload, img.src, img.alt),
+        ),
+      ),
+    },
+    brandVideo: {
+      italic: sevenloopBrandVideo.italic,
+      rest: sevenloopBrandVideo.rest,
+      image: await cmsImage(
+        payload,
+        sevenloopBrandVideo.image.src,
+        sevenloopBrandVideo.image.alt,
+      ),
+    },
+    behindTheScenes: {
+      italic: sevenloopBehindTheScenes.italic,
+      rest: sevenloopBehindTheScenes.rest,
+      images: await Promise.all(
+        sevenloopBehindTheScenes.images.map((img) =>
+          cmsImage(payload, img.src, img.alt),
+        ),
+      ),
+    },
+    caseStudy: {
+      italic: sevenloopCaseStudy.italic,
+      rest: sevenloopCaseStudy.rest,
+      subheading: sevenloopCaseStudy.subheading,
+    },
+    partnership: {
+      label: sevenloopPartnership.label,
+      heading: sevenloopPartnership.heading,
+      headingAccent: sevenloopPartnership.headingAccent,
+      paragraphs: sevenloopPartnership.paragraphs.map((text) => ({ text })),
+    },
+    transformation: {
+      heading: sevenloopTransformation.heading,
+      subtext: sevenloopTransformation.subtext,
+      before: await cmsImage(
+        payload,
+        sevenloopTransformation.before.src,
+        sevenloopTransformation.before.alt,
+      ),
+      after: await cmsImage(
+        payload,
+        sevenloopTransformation.after.src,
+        sevenloopTransformation.after.alt,
+      ),
+    },
+    projectTeam: {
+      heading: sevenloopProjectTeam.heading,
+      subheading: sevenloopProjectTeam.subheading,
+      members: await Promise.all(
+        sevenloopProjectTeam.members.map(async (member) => ({
+          name: member.name,
+          role: member.role,
+          photo: await cmsImage(payload, member.photo.src, member.photo.alt),
+        })),
+      ),
+    },
+  };
+
+  const sevenloopClient =
+    existingClients.docs[0] != null
+      ? await payload.update({
+          collection: "clients",
+          id: existingClients.docs[0].id,
+          data: sevenloopHubData,
+        })
+      : await payload.create({
+          collection: "clients",
+          data: sevenloopHubData,
+        });
+  const sevenloopClientId = sevenloopClient.id;
+
+  const existingStudies = await payload.find({
+    collection: "case-studies",
+    where: {
+      and: [
+        { slug: { equals: "case-study" } },
+        { client: { equals: sevenloopClientId } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+  });
+
+  const studyData = {
+    title: sevenloopCaseStudyHero.heading,
+    slug: "case-study",
+    client: sevenloopClientId,
+    hero: {
+      heading: sevenloopCaseStudyHero.heading,
+      breadcrumbCurrent: sevenloopCaseStudyHero.breadcrumbCurrent,
+      breadcrumb: sevenloopCaseStudyHero.breadcrumb,
+      image: await cmsImage(
+        payload,
+        sevenloopCaseStudyHero.image.src,
+        sevenloopCaseStudyHero.image.alt,
+      ),
+    },
+    details: sevenloopCaseStudyDetails,
+    gallery: await Promise.all(
+      sevenloopCaseStudyGallery.map((img) => cmsImage(payload, img.src, img.alt)),
+    ),
+    viewAll: sevenloopCaseStudyViewAllClients,
+  };
+
+  const sevenloopStudy =
+    existingStudies.docs[0] != null
+      ? await payload.update({
+          collection: "case-studies",
+          id: existingStudies.docs[0].id,
+          data: studyData,
+        })
+      : await payload.create({
+          collection: "case-studies",
+          data: studyData,
+        });
+  const sevenloopStudyId = sevenloopStudy.id;
+
   await upsertByOrder(
     payload,
     "featured-projects",
@@ -144,7 +301,7 @@ async function seed() {
         metricLabel: item.metricLabel,
         image: await upsertMedia(payload, item.image, item.alt),
         alt: item.alt,
-        href: item.href,
+        client: sevenloopClientId,
       })),
     ),
   );
@@ -158,7 +315,7 @@ async function seed() {
         category: item.category,
         image: await upsertMedia(payload, item.image, item.alt),
         alt: item.alt,
-        href: item.href,
+        client: sevenloopClientId,
       })),
     ),
   );
@@ -166,7 +323,12 @@ async function seed() {
   await upsertByOrder(
     payload,
     "pain-points",
-    painPoints.map((item) => ({ ...item })),
+    painPoints.map((item) => ({
+      tag: item.tag,
+      quote: item.quote,
+      resolution: item.resolution,
+      client: sevenloopClientId,
+    })),
   );
 
   await upsertByOrder(
@@ -190,7 +352,7 @@ async function seed() {
       name: item.name,
       description: item.description,
       tags: item.tags.map((label) => ({ label })),
-      href: item.href,
+      caseStudy: sevenloopStudyId,
     })),
   );
 
@@ -228,114 +390,27 @@ async function seed() {
     },
   });
 
-  await payload.updateGlobal({
-    slug: "client-hub",
+  // Wire hub section CTAs to the primary case study
+  await payload.update({
+    collection: "clients",
+    id: sevenloopClientId,
     data: {
-      navItems: clientHubNavItems.map((item) => ({
-        navId: item.id,
-        label: item.label,
-      })),
-      about: sevenloopAbout,
-      logoDesign: {
-        italic: sevenloopLogoDesign.italic,
-        rest: sevenloopLogoDesign.rest,
-        images: await Promise.all(
-          sevenloopLogoDesign.images.map((img) => cmsImage(payload, img.src, img.alt)),
-        ),
-      },
-      websiteDesign: {
-        italic: sevenloopWebsiteDesign.italic,
-        rest: sevenloopWebsiteDesign.rest,
-        image: await cmsImage(
-          payload,
-          sevenloopWebsiteDesign.image.src,
-          sevenloopWebsiteDesign.image.alt,
-        ),
-      },
-      projectBrochure: {
-        italic: sevenloopProjectBrochure.italic,
-        rest: sevenloopProjectBrochure.rest,
-        images: await Promise.all(
-          sevenloopProjectBrochure.images.map((img) =>
-            cmsImage(payload, img.src, img.alt),
-          ),
-        ),
-      },
-      brandVideo: {
-        italic: sevenloopBrandVideo.italic,
-        rest: sevenloopBrandVideo.rest,
-        image: await cmsImage(
-          payload,
-          sevenloopBrandVideo.image.src,
-          sevenloopBrandVideo.image.alt,
-        ),
-      },
-      behindTheScenes: {
-        italic: sevenloopBehindTheScenes.italic,
-        rest: sevenloopBehindTheScenes.rest,
-        images: await Promise.all(
-          sevenloopBehindTheScenes.images.map((img) =>
-            cmsImage(payload, img.src, img.alt),
-          ),
-        ),
-      },
-      caseStudy: sevenloopCaseStudy,
-      partnership: {
-        label: sevenloopPartnership.label,
-        heading: sevenloopPartnership.heading,
-        headingAccent: sevenloopPartnership.headingAccent,
-        paragraphs: sevenloopPartnership.paragraphs.map((text) => ({ text })),
-      },
-      transformation: {
-        heading: sevenloopTransformation.heading,
-        subtext: sevenloopTransformation.subtext,
-        before: await cmsImage(
-          payload,
-          sevenloopTransformation.before.src,
-          sevenloopTransformation.before.alt,
-        ),
-        after: await cmsImage(
-          payload,
-          sevenloopTransformation.after.src,
-          sevenloopTransformation.after.alt,
-        ),
-      },
-      projectTeam: {
-        heading: sevenloopProjectTeam.heading,
-        subheading: sevenloopProjectTeam.subheading,
-        members: await Promise.all(
-          sevenloopProjectTeam.members.map(async (member) => ({
-            name: member.name,
-            role: member.role,
-            photo: await cmsImage(payload, member.photo.src, member.photo.alt),
-          })),
-        ),
+      logoDesign: { caseStudy: sevenloopStudyId },
+      websiteDesign: { caseStudy: sevenloopStudyId },
+      projectBrochure: { caseStudy: sevenloopStudyId },
+      brandVideo: { caseStudy: sevenloopStudyId },
+      caseStudy: {
+        italic: sevenloopCaseStudy.italic,
+        rest: sevenloopCaseStudy.rest,
+        subheading: sevenloopCaseStudy.subheading,
+        caseStudy: sevenloopStudyId,
       },
     },
   });
 
-  await payload.updateGlobal({
-    slug: "case-study-page",
-    data: {
-      hero: {
-        heading: sevenloopCaseStudyHero.heading,
-        breadcrumbCurrent: sevenloopCaseStudyHero.breadcrumbCurrent,
-        breadcrumb: sevenloopCaseStudyHero.breadcrumb,
-        image: await cmsImage(
-          payload,
-          sevenloopCaseStudyHero.image.src,
-          sevenloopCaseStudyHero.image.alt,
-        ),
-      },
-      details: sevenloopCaseStudyDetails,
-      gallery: await Promise.all(
-        sevenloopCaseStudyGallery.map((img) => cmsImage(payload, img.src, img.alt)),
-      ),
-      viewAll: sevenloopCaseStudyViewAllClients,
-    },
-  });
-
-  payload.logger.info("Seed complete. Create the first admin user at /admin.");
+  payload.logger.info(
+    "Seed complete. Sevenloop client (hub) + case-study ready. Create the first admin user at /admin if needed.",
+  );
   process.exit(0);
 }
 

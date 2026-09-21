@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { clientHubPath } from "@/cms/urls";
 
 /**
- * Client hub — first section (Sevenloop | Design Asylum Client Work).
- * Breadcrumb + title + category line + media placeholder.
- *
- * Desktop (lg+): unchanged. Mobile: type scale, gutters, fluid media.
+ * Client hub — first section: breadcrumb + title + category line + media placeholder.
  */
-export function ClientHubHero() {
+export function ClientHubHero({
+  name,
+  slug,
+}: {
+  name: string;
+  slug: string;
+}) {
+  const hubHref = clientHubPath(slug);
   return (
     <section className="bg-white">
       <div className="mx-auto flex w-full max-w-[1438px] flex-col items-center gap-3 px-5 pb-6 sm:gap-4 sm:px-8 sm:pb-8">
@@ -27,7 +32,7 @@ export function ClientHubHero() {
             aria-hidden="true"
           />
           <Link
-            href="/clients/sevenloop"
+            href={hubHref}
             className="text-center font-normal text-black transition-opacity hover:opacity-70"
           >
             clients
@@ -37,11 +42,11 @@ export function ClientHubHero() {
             strokeWidth={1.5}
             aria-hidden="true"
           />
-          <span className="text-center font-medium text-black">sevenloop</span>
+          <span className="text-center font-medium text-black">{slug}</span>
         </nav>
 
         <h1 className="font-figtree text-[40px] font-normal leading-[1.15] tracking-[-0.5px] text-black uppercase sm:text-[48px] lg:text-[56px] lg:leading-[79.2px]">
-          Sevenloop
+          {name}
         </h1>
 
         <p className="max-w-[842px] px-1 text-center font-satoshi text-[11px] font-normal leading-[140%] tracking-[-0.5px] text-black uppercase sm:text-[13px] sm:leading-[120%] lg:text-[14px]">
@@ -58,7 +63,7 @@ export function ClientHubHero() {
       <div className="mx-auto flex w-full max-w-[1438px] items-center justify-center px-5 sm:px-8 lg:h-[573px]">
         <div
           className="aspect-[1150.4/532] w-full max-w-[1150.4px] rounded-xl bg-black"
-          aria-label="Sevenloop media placeholder"
+          aria-label={`${name} media placeholder`}
           role="img"
         />
       </div>

@@ -9,8 +9,12 @@ import { getClientHub } from "@/cms/content";
  *
  * Preserves existing 1 → sm:2 → lg:3 grid. Mobile: gutters + type scale.
  */
-export async function ClientHubProjectTeam() {
-  const { projectTeam } = await getClientHub();
+export async function ClientHubProjectTeam({
+  clientSlug = "sevenloop",
+}: {
+  clientSlug?: string;
+}) {
+  const { projectTeam } = await getClientHub(clientSlug);
   return (
     <section className="bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1438px] flex-col items-center gap-6 sm:gap-8">

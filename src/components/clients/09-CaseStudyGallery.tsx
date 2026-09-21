@@ -9,8 +9,16 @@ import { getCaseStudyPage } from "@/cms/content";
  * Mobile: same stacked structure — gutters/spacing only.
  * No carousel, scroll, or swipe behavior.
  */
-export async function CaseStudyGallery() {
-  const { gallery } = await getCaseStudyPage();
+export async function CaseStudyGallery({
+  clientSlug = "sevenloop",
+  studySlug = "case-study",
+}: {
+  clientSlug?: string;
+  studySlug?: string;
+}) {
+  const page = await getCaseStudyPage(clientSlug, studySlug);
+  if (!page) return null;
+  const { gallery } = page;
   return (
     <section className="bg-white">
       {gallery.map((image, i) => (

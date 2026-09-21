@@ -17,9 +17,9 @@ import { ClientLogos } from "./collections/ClientLogos";
 import { HomepageCaseStudies } from "./collections/HomepageCaseStudies";
 import { Testimonials } from "./collections/Testimonials";
 import { FaqItems } from "./collections/FaqItems";
+import { Clients } from "./collections/Clients";
+import { CaseStudies } from "./collections/CaseStudies";
 import { SiteFooter } from "./globals/SiteFooter";
-import { ClientHub } from "./globals/ClientHub";
-import { CaseStudyPage } from "./globals/CaseStudyPage";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -47,8 +47,10 @@ export default buildConfig({
     HomepageCaseStudies,
     Testimonials,
     FaqItems,
+    Clients,
+    CaseStudies,
   ],
-  globals: [SiteFooter, ClientHub, CaseStudyPage],
+  globals: [SiteFooter],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",
   typescript: {
