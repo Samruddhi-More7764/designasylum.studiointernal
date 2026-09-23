@@ -2,9 +2,15 @@
  * Turn a Payload upload, a leftover `/assets/...` path, or a populated Media
  * doc into a URL the frontend can pass to next/image or <video>.
  *
- * Priority: the uploaded file (`url`) first, then the seed-only `sourcePath`
- * fallback. Checking `sourcePath` first would silently ignore any file an
- * editor uploads over a seeded record.
+ * Priority is deliberately conditional, not a fixed order:
+ *   1. Seeded record whose file was never replaced -> its `public/` asset.
+ *   2. Anything else -> the upload `url`.
+ *
+ * Reason: `/api/media/file/...` only serves bytes when object storage is
+ * configured (BLOB_READ_WRITE_TOKEN). Without it, Vercel's serverless disk is
+ * empty on every cold start and that route 404s, so seeded records must keep
+ * using their bundled asset. Preferring `url` unconditionally 404s the whole
+ * site; preferring `sourcePath` unconditionally ignores editor uploads.
  *
  * Same-origin Payload URLs (http://localhost:3000/api/media/file/...) are
  * rewritten to a path so next/image treats them as local.
@@ -22,24 +28,62 @@ export function resolveMediaUrl(value: unknown): string | null {
   }
 
   if (typeof value === "object") {
-    // An actual uploaded file always wins. Editors replacing a file in the
-    // admin must see their upload, so this is checked before `sourcePath`.
-    const url = "url" in value ? (value as { url?: string | null }).url : null;
-    const trimmed = url?.trim();
-    if (trimmed) return toNextImageSrc(trimmed);
-
-    // Fallback for seeded records that never got a real upload: the original
-    // file still lives in `public/` (e.g. /assets/images/logo-b.png).
     const sourcePath =
       "sourcePath" in value
         ? (value as { sourcePath?: string | null }).sourcePath?.trim()
         : null;
+    const filename =
+      "filename" in value
+        ? (value as { filename?: string | null }).filename?.trim()
+        : null;
+
+    // A seeded record still pointing at its original public/ file: serve that.
+    // Without object storage configured, `/api/media/file/...` has no bytes to
+    // return on Vercel (serverless disk is empty on every cold start), so the
+    // bundled asset is the only thing that actually resolves.
+    //
+    // Once an editor replaces the file, `filename` no longer matches the seeded
+    // path's basename — that means a real upload exists and should win.
     if (sourcePath?.startsWith("/")) {
-      return toNextImageSrc(sourcePath);
+      const seededName = sourcePath.split("/").pop();
+      if (!seededName || !filename || !isReplacedUpload(filename, seededName)) {
+        return toNextImageSrc(sourcePath);
+      }
     }
+
+    const url = "url" in value ? (value as { url?: string | null }).url : null;
+    const trimmed = url?.trim();
+    if (trimmed) return toNextImageSrc(trimmed);
+
+    // Replaced file but the upload URL is unavailable — fall back rather than
+    // render nothing.
+    if (sourcePath?.startsWith("/")) return toNextImageSrc(sourcePath);
   }
 
   return null;
+}
+
+/**
+ * True when `filename` looks like a genuinely different file from the seeded
+ * one, rather than Payload's own de-duplication suffix.
+ *
+ * The seed reuses one source file for several records (e.g. team-member.jpg for
+ * three team slots), and Payload stores the extras as `team-member-1.jpg`.
+ * Those are still the seeded image, so they must keep using `sourcePath`.
+ */
+function isReplacedUpload(filename: string, seededName: string): boolean {
+  if (filename === seededName) return false;
+
+  const strip = (name: string) => {
+    const dot = name.lastIndexOf(".");
+    const stem = dot > 0 ? name.slice(0, dot) : name;
+    const ext = dot > 0 ? name.slice(dot) : "";
+    return { stem: stem.replace(/-\d+$/, ""), ext };
+  };
+
+  const a = strip(filename);
+  const b = strip(seededName);
+  return a.stem !== b.stem || a.ext !== b.ext;
 }
 
 function toNextImageSrc(url: string): string {
