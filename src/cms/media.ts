@@ -2,6 +2,10 @@
  * Turn a Payload upload, a leftover `/assets/...` path, or a populated Media
  * doc into a URL the frontend can pass to next/image or <video>.
  *
+ * Priority: the uploaded file (`url`) first, then the seed-only `sourcePath`
+ * fallback. Checking `sourcePath` first would silently ignore any file an
+ * editor uploads over a seeded record.
+ *
  * Same-origin Payload URLs (http://localhost:3000/api/media/file/...) are
  * rewritten to a path so next/image treats them as local.
  */
@@ -18,19 +22,21 @@ export function resolveMediaUrl(value: unknown): string | null {
   }
 
   if (typeof value === "object") {
+    // An actual uploaded file always wins. Editors replacing a file in the
+    // admin must see their upload, so this is checked before `sourcePath`.
+    const url = "url" in value ? (value as { url?: string | null }).url : null;
+    const trimmed = url?.trim();
+    if (trimmed) return toNextImageSrc(trimmed);
+
+    // Fallback for seeded records that never got a real upload: the original
+    // file still lives in `public/` (e.g. /assets/images/logo-b.png).
     const sourcePath =
       "sourcePath" in value
         ? (value as { sourcePath?: string | null }).sourcePath?.trim()
         : null;
-    // Seeded files live in `public/` (e.g. /assets/images/logo-b.png). Prefer
-    // that on Vercel — `/api/media/file/...` is local disk and 500s there.
     if (sourcePath?.startsWith("/")) {
       return toNextImageSrc(sourcePath);
     }
-
-    const url = "url" in value ? (value as { url?: string | null }).url : null;
-    const trimmed = url?.trim();
-    if (trimmed) return toNextImageSrc(trimmed);
   }
 
   return null;
