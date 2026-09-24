@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { CaseStudyMedia } from "@/components/clients/CaseStudyMedia";
 import { ChevronRight } from "lucide-react";
 import { getCaseStudyPage } from "@/cms/content";
 
@@ -54,13 +54,10 @@ export async function CaseStudyHero({
 
       <div className="mx-auto w-full max-w-[1470px] px-5 pb-10 sm:px-8 sm:pb-12 lg:px-[60px] lg:pb-16">
         <div className="relative aspect-[1350/759] w-full overflow-hidden rounded-[13.98px]">
-          <Image
+          <CaseStudyMedia
             src={hero.image.src}
             alt={hero.image.alt}
-            fill
             priority
-            className="object-cover"
-            sizes="(min-width: 1024px) 1350px, 100vw"
           />
         </div>
       </div>

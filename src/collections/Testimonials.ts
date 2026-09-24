@@ -19,7 +19,15 @@ export const Testimonials: CollectionConfig = {
       },
     },
     cmsVideoUpload("video"),
-    { name: "alt", type: "text", required: true },
+    {
+      name: "alt",
+      type: "text",
+      required: true,
+      admin: {
+        description:
+          "Shown on the photo or video as the person's name. Add the role after a comma — e.g. \"Dr. Mallesh B., Co-founder, i3systems\".",
+      },
+    },
     { name: "quote", type: "textarea" },
     {
       name: "width",

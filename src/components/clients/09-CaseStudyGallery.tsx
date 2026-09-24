@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CaseStudyMedia } from "@/components/clients/CaseStudyMedia";
 import { getCaseStudyPage } from "@/cms/content";
 
 /**
@@ -31,13 +31,7 @@ export async function CaseStudyGallery({
           }`}
         >
           <div className="relative aspect-[1350/759] w-full overflow-hidden rounded-[13.98px]">
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 1350px, 100vw"
-            />
+            <CaseStudyMedia src={image.src} alt={image.alt} />
           </div>
         </div>
       ))}

@@ -3,6 +3,16 @@ import { CmsMediaFill } from "@/components/ui/CmsMediaFill";
 import { getTestimonials } from "@/cms/content";
 import type { Testimonial } from "@/data/testimonials";
 
+function captionFromAlt(alt: string): { name: string; role?: string } {
+  const cleaned = alt.replace(/\s*[—–-]\s*video testimonial\s*$/i, "").trim();
+  const splitAt = cleaned.indexOf(",");
+  if (splitAt === -1) return { name: cleaned };
+  const name = cleaned.slice(0, splitAt).trim();
+  const role = cleaned.slice(splitAt + 1).trim();
+  if (!name) return { name: cleaned };
+  return { name, role: role || undefined };
+}
+
 function TestimonialCard({
   item,
   featured = false,
@@ -13,6 +23,7 @@ function TestimonialCard({
   const frameClass = featured
     ? "aspect-[290/320] lg:aspect-[290/360]"
     : "aspect-[290/320] lg:aspect-[290/240]";
+  const caption = captionFromAlt(item.alt);
 
   return (
     <div className="flex flex-col gap-4">
@@ -23,6 +34,18 @@ function TestimonialCard({
           alt={item.alt}
           sizes="(min-width: 1024px) 290px, 100vw"
         />
+        {caption.name ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-4 pb-3.5 pt-12">
+            <p className="font-satoshi text-[13px] font-medium leading-tight text-white">
+              {caption.name}
+            </p>
+            {caption.role ? (
+              <p className="mt-0.5 font-satoshi text-[11px] leading-tight text-white/90">
+                {caption.role}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {item.quote ? (
         <p className="rounded-2xl border border-hairline bg-white px-5 py-4 text-center font-satoshi text-sm leading-relaxed text-muted lg:rounded-none lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:text-left">

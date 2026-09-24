@@ -211,8 +211,9 @@ The numbered "Worked with companies…" list.
 
 | Field | Notes |
 |---|---|
-| Image | Photo or video thumbnail from Media |
-| Alt | Description |
+| Image | Still photo from Media. This is the poster if you also add a video. |
+| Video | Optional MP4, WebM, or MOV. Plays in the card. |
+| Alt | The person's name, drawn on the photo or video. Put the role after a comma: `Dr. Mallesh B., Co-founder, i3systems` |
 | Quote | The testimonial text |
 | Width / Height | Display size |
 | Order | Position |
@@ -298,7 +299,7 @@ Each hub section can open a different case study. If you leave a section's picke
 |---|---|
 | Heading | Main title |
 | Breadcrumb current | Last item in the trail — defaults to the title |
-| Image | Hero image from Media |
+| Image | Hero photo or video from Media. Either is allowed. |
 
 **Details**
 | Field | Notes |
@@ -311,7 +312,7 @@ Each hub section can open a different case study. If you leave a section's picke
 
 **Gallery**
 
-Click **Add Item** for each image and pick it from Media. Images stack full-width down the page.
+Click **Add Item** for each frame and pick a photo or a video from Media. Frames stack full-width down the page. A video plays in place; a photo stays a still.
 
 **View All**
 | Field | Notes |

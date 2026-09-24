@@ -1,5 +1,5 @@
 import type { Field } from "payload";
-import { cmsImageFields } from "./cmsImage";
+import { cmsEitherMediaFields } from "./cmsImage";
 
 export const caseStudyFields: Field[] = [
   {
@@ -27,7 +27,7 @@ export const caseStudyFields: Field[] = [
           { name: "href", type: "text", required: true },
         ],
       },
-      { name: "image", type: "group", fields: cmsImageFields },
+      { name: "image", type: "group", fields: cmsEitherMediaFields },
     ],
   },
   {
@@ -63,7 +63,7 @@ export const caseStudyFields: Field[] = [
   {
     name: "gallery",
     type: "array",
-    fields: cmsImageFields,
+    fields: cmsEitherMediaFields,
   },
   {
     name: "viewAll",

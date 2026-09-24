@@ -7,13 +7,20 @@ type CmsMediaFillProps = {
   video?: string | null;
   alt: string;
   sizes: string;
+  priority?: boolean;
 };
 
 /**
  * Renders a video with a still poster, or a still image. Never passes an
  * MP4 into next/image (that 400s with "isn't a valid image").
  */
-export function CmsMediaFill({ image, video, alt, sizes }: CmsMediaFillProps) {
+export function CmsMediaFill({
+  image,
+  video,
+  alt,
+  sizes,
+  priority = false,
+}: CmsMediaFillProps) {
   const videoSrc =
     (video && isVideoSrc(video) ? video : null) ||
     (image && isVideoSrc(image) ? image : null);
@@ -33,6 +40,13 @@ export function CmsMediaFill({ image, video, alt, sizes }: CmsMediaFillProps) {
   if (!poster) return null;
 
   return (
-    <Image src={poster} alt={alt} fill className="object-cover" sizes={sizes} />
+    <Image
+      src={poster}
+      alt={alt}
+      fill
+      priority={priority}
+      className="object-cover"
+      sizes={sizes}
+    />
   );
 }

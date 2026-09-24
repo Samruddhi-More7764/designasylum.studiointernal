@@ -421,6 +421,9 @@ export interface CaseStudy {
         }[]
       | null;
     image: {
+      /**
+       * Photo (JPG, PNG, WebP) or video (MP4, WebM, MOV) from Media.
+       */
       image: number | Media;
       alt: string;
       id?: string | null;
@@ -445,6 +448,9 @@ export interface CaseStudy {
   };
   gallery?:
     | {
+        /**
+         * Photo (JPG, PNG, WebP) or video (MP4, WebM, MOV) from Media.
+         */
         image: number | Media;
         alt: string;
         id?: string | null;
@@ -541,6 +547,9 @@ export interface Testimonial {
    * MP4 or WebM for playback. Put a still JPG/PNG in Image — not the video file.
    */
   video?: (number | null) | Media;
+  /**
+   * Shown on the photo or video as the person's name. Add the role after a comma — e.g. "Dr. Mallesh B., Co-founder, i3systems".
+   */
   alt: string;
   quote?: string | null;
   /**

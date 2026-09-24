@@ -8,7 +8,7 @@ const videoFilter: UploadField["filterOptions"] = {
   mimeType: { contains: "video/" },
 };
 
-/** Upload + alt pair used by Client Hub and Case Study image groups/arrays. */
+/** Upload + alt pair used by Client Hub image groups/arrays. */
 export const cmsImageFields: Field[] = [
   {
     name: "image",
@@ -16,6 +16,27 @@ export const cmsImageFields: Field[] = [
     relationTo: "media",
     required: true,
     filterOptions: imageFilter,
+  },
+  {
+    name: "alt",
+    type: "text",
+    required: true,
+  },
+];
+
+/**
+ * Same shape as cmsImageFields, but the upload may be a photo or a video.
+ * Field name stays `image` so existing case-study rows keep their files.
+ */
+export const cmsEitherMediaFields: Field[] = [
+  {
+    name: "image",
+    type: "upload",
+    relationTo: "media",
+    required: true,
+    admin: {
+      description: "Photo (JPG, PNG, WebP) or video (MP4, WebM, MOV) from Media.",
+    },
   },
   {
     name: "alt",
