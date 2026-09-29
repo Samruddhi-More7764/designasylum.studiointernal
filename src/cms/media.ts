@@ -4,13 +4,13 @@
  *
  * Priority is deliberately conditional, not a fixed order:
  *   1. Seeded record whose file was never replaced -> its `public/` asset.
- *   2. Anything else -> the upload `url`.
+ *   2. A real CMS upload, when Blob is configured -> the public Blob URL.
+ *   3. Anything else -> the stored upload `url`.
  *
- * Reason: `/api/media/file/...` only serves bytes when object storage is
- * configured (BLOB_READ_WRITE_TOKEN). Without it, Vercel's serverless disk is
- * empty on every cold start and that route 404s, so seeded records must keep
- * using their bundled asset. Preferring `url` unconditionally 404s the whole
- * site; preferring `sourcePath` unconditionally ignores editor uploads.
+ * Reason: Payload stores `/api/media/file/...` even after the bytes are in
+ * Vercel Blob. That route has no file on Vercel's disk, so next/image 500s.
+ * Seeded records must keep their bundled asset. Editor uploads must use the
+ * Blob object, which is named with the media `filename`.
  *
  * Same-origin Payload URLs (http://localhost:3000/api/media/file/...) are
  * rewritten to a path so next/image treats them as local.
@@ -53,7 +53,14 @@ export function resolveMediaUrl(value: unknown): string | null {
 
     const url = "url" in value ? (value as { url?: string | null }).url : null;
     const trimmed = url?.trim();
-    if (trimmed) return toNextImageSrc(trimmed);
+    if (trimmed) {
+      const uploadedName = filename || payloadMediaFilename(trimmed);
+      if (uploadedName && payloadMediaFilename(trimmed)) {
+        const blobUrl = publicBlobUrl(uploadedName);
+        if (blobUrl) return blobUrl;
+      }
+      return toNextImageSrc(trimmed);
+    }
 
     // Replaced file but the upload URL is unavailable — fall back rather than
     // render nothing.
@@ -84,6 +91,40 @@ function isReplacedUpload(filename: string, seededName: string): boolean {
   const a = strip(filename);
   const b = strip(seededName);
   return a.stem !== b.stem || a.ext !== b.ext;
+}
+
+/** Filename stored on a Payload `/api/media/file/<name>` URL, or null. */
+function payloadMediaFilename(url: string): string | null {
+  try {
+    const parsed = url.startsWith("/")
+      ? new URL(url, "http://local.invalid")
+      : new URL(url);
+    const marker = "/api/media/file/";
+    const index = parsed.pathname.indexOf(marker);
+    if (index === -1) return null;
+    const name = decodeURIComponent(parsed.pathname.slice(index + marker.length));
+    return name || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Public URL for a Blob object uploaded under `filename`.
+ * Matches `@payloadcms/storage-vercel-blob` (store id parsed from the token,
+ * filename passed through encodeURIComponent).
+ */
+function publicBlobUrl(filename: string): string | null {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return null;
+  const storeId = token
+    .match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]
+    ?.toLowerCase();
+  if (!storeId && !process.env.STORAGE_VERCEL_BLOB_BASE_URL) return null;
+  const base =
+    process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
+    `https://${storeId}.public.blob.vercel-storage.com`;
+  return `${base.replace(/\/$/, "")}/${encodeURIComponent(filename)}`;
 }
 
 function toNextImageSrc(url: string): string {

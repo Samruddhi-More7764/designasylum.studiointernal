@@ -20,35 +20,33 @@ function captionFromAlt(alt: string): { name: string; role?: string } {
  * those corners, then draw the name as HTML. A real play control is added
  * only when the card has a video, and it starts on click.
  */
-export function TestimonialCard({
-  item,
-  featured = false,
-}: {
-  item: Testimonial;
-  featured?: boolean;
-}) {
+export function TestimonialCard({ item }: { item: Testimonial }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [expanded, setExpanded] = useState(false);
   const [playing, setPlaying] = useState(false);
   const caption = captionFromAlt(item.alt);
   const hasVideo = Boolean(item.video);
-  const expanded = hasVideo && playing;
 
-  function togglePlayback() {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      void video.play();
-      return;
+  function onOpen() {
+    const next = !expanded;
+    setExpanded(next);
+    if (!hasVideo) return;
+    if (next) {
+      void videoRef.current?.play();
+    } else {
+      videoRef.current?.pause();
     }
-    video.pause();
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[320px] flex-col gap-2">
-      <div
+    <div className="flex w-full flex-col gap-2">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-pressed={expanded}
         className={[
-          "relative w-full overflow-hidden rounded-2xl",
-          expanded || featured ? "h-[388px]" : "h-[384px]",
+          "relative w-full overflow-hidden rounded-2xl text-left",
+          expanded ? "h-[360px]" : "h-[240px]",
         ].join(" ")}
       >
         {hasVideo ? (
@@ -69,28 +67,22 @@ export function TestimonialCard({
             src={item.image}
             alt=""
             fill
-            className="scale-[1.22] object-cover"
-            sizes="320px"
+            className="origin-top scale-[1.28] object-cover object-top"
+            sizes="(min-width: 1024px) 291px, 100vw"
           />
         ) : null}
 
         {hasVideo ? (
-          <button
-            type="button"
-            onClick={togglePlayback}
-            aria-label={playing ? "Pause testimonial" : "Play testimonial"}
+          <span
+            aria-hidden="true"
             className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/55 text-white"
           >
-            {playing ? (
-              <Pause className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Play className="h-4 w-4" aria-hidden="true" />
-            )}
-          </button>
+            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </span>
         ) : null}
 
-        {!expanded && caption.name ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black via-black/85 to-transparent px-4 pt-16 pb-3.5">
+        {caption.name ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black from-35% via-black/95 to-transparent px-4 pt-16 pb-4">
             <p className="font-satoshi text-[13px] font-medium leading-tight text-white">
               {caption.name}
             </p>
@@ -101,9 +93,9 @@ export function TestimonialCard({
             ) : null}
           </div>
         ) : null}
-      </div>
+      </button>
 
-      {item.quote ? (
+      {item.quote && !expanded ? (
         <p className="rounded-2xl border border-hairline bg-white px-5 py-4 text-center font-satoshi text-sm leading-relaxed text-muted lg:rounded-none lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:text-left">
           {item.quote}
         </p>

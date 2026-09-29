@@ -87,3 +87,15 @@ const AI_HOMEPAGES: Record<string, string> = {
 export function aiHomepage(name: string): string | null {
   return AI_HOMEPAGES[name.trim().toLowerCase()] ?? null;
 }
+
+/** Compact pill widths from the footer design (height is 48px for all). */
+const AI_BUTTON_WIDTH: Record<string, string> = {
+  chatgpt: "w-[125px]",
+  gemini: "w-[121px]",
+  perplexity: "w-[144px]",
+  claude: "w-[144px]",
+};
+
+export function aiButtonWidth(name: string): string {
+  return AI_BUTTON_WIDTH[name.trim().toLowerCase()] ?? "w-auto";
+}

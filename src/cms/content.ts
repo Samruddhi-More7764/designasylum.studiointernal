@@ -79,9 +79,10 @@ function texts(
 const mediaDir = path.join(process.cwd(), "media");
 
 /**
- * Payload returns `/api/media/file/...` even when the upload was never saved
- * to disk. next/image then 500s ("isn't a valid image"). Use the file only
- * when it exists; otherwise keep the seeded public asset.
+ * `resolveMediaUrl` returns a public Blob URL for editor uploads when Blob is
+ * configured. If it is still `/api/media/file/...`, the bytes are only usable
+ * when they exist on disk. Otherwise keep the seeded public asset so
+ * next/image does not 500 on an empty serverless disk.
  */
 function safeMediaUrl(value: unknown): string | null {
   const src = resolveMediaUrl(value);

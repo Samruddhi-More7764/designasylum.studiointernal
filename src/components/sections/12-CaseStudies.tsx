@@ -5,47 +5,41 @@ import { getHomepageCaseStudies } from "@/cms/content";
 import type { CaseStudy } from "@/data/caseStudies";
 
 function CaseStudyRow({ study }: { study: CaseStudy }) {
-  // Desktop: number + name + VIEW WEBSITE on one row, then description + tags.
-  // Mobile: index → title → description → View Website → wrapped tags.
+  // Header (281×45) with View website under it. Description (326×73) on the
+  // right, and the tag pills directly beneath that description.
   return (
-    <div className="flex flex-col gap-4 border-b border-hairline py-8 first:pt-0 last:border-b-0 lg:gap-6 lg:py-10">
-      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:gap-4">
-        <span className="font-satoshi text-sm text-muted">{study.number}</span>
-        <h3 className="font-figtree text-[28px] font-medium tracking-[-0.5px] text-black sm:text-[36px] lg:text-[44px] lg:tracking-[-1px]">
-          {study.name}
-        </h3>
+    <div className="flex flex-col gap-4 border-b border-hairline py-8 first:pt-0 last:border-b-0 lg:flex-row lg:items-start lg:justify-between lg:gap-8 lg:py-10">
+      <div className="relative min-h-[142px] w-full lg:w-[281px] lg:shrink-0">
+        <div className="flex h-[45px] items-center gap-3 lg:-mt-[2.38px]">
+          <span className="font-satoshi text-sm text-muted">{study.number}</span>
+          <h3 className="font-figtree text-[28px] font-medium tracking-[-0.5px] text-black sm:text-[36px] lg:text-[44px] lg:leading-[45px] lg:tracking-[-1px]">
+            {study.name}
+          </h3>
+        </div>
         <PillButton
           variant="outline"
           size="sm"
-          className="hidden w-fit lg:ml-auto lg:inline-flex"
+          className="mt-6 h-[50px] w-[154px] !px-4 lg:absolute lg:top-[91.28px] lg:left-0 lg:mt-0"
           href={study.href}
         >
           View website
         </PillButton>
       </div>
 
-      <p className="max-w-[520px] font-satoshi text-sm leading-relaxed text-black">
-        {study.description}
-      </p>
-
-      <PillButton
-        variant="outline"
-        size="sm"
-        className="w-fit lg:hidden"
-        href={study.href}
-      >
-        View website
-      </PillButton>
-
-      <div className="flex flex-wrap gap-2">
-        {study.tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-pill border border-black/10 bg-[#F2F2F2] px-3 py-1.5 font-satoshi text-[10px] uppercase tracking-wide text-black lg:bg-white"
-          >
-            {tag}
-          </span>
-        ))}
+      <div className="w-full max-w-[326px] lg:w-[326px] lg:shrink-0">
+        <p className="font-satoshi text-sm leading-relaxed text-black lg:h-[73px]">
+          {study.description}
+        </p>
+        <div className="flex flex-wrap content-start gap-2 pt-3.5 lg:h-[98px] lg:pt-[14px]">
+          {study.tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex h-[38px] shrink-0 items-center justify-center whitespace-nowrap rounded-[64px] border-[1.5px] border-[#E3E3E3] bg-[#EDECEC] px-[14px] font-figtree text-[12px] font-medium leading-[10px] tracking-[0.8px] text-[#4B4B4B] uppercase"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -67,15 +61,15 @@ export async function CaseStudies() {
         <Accent>diverse</Accent> set of industries
       </SectionHeading>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,350px)_1fr] lg:items-start lg:gap-16">
-        <div className="w-full lg:sticky lg:top-[100px] lg:self-start">
-          <div className="relative aspect-[350/560] w-full overflow-hidden">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[485px_minmax(0,1fr)] lg:items-start lg:gap-16">
+        <div className="w-full lg:sticky lg:top-[100px] lg:mt-[23.93px] lg:self-start">
+          <div className="relative aspect-[485/539] w-full overflow-hidden lg:-ml-[0.1px] lg:h-[539px] lg:w-[485px]">
             <Image
               src="/assets/images/case-study-flower.png"
               alt="Black-and-white sculptural flower form"
               fill
               className="object-cover"
-              sizes="(min-width: 1024px) 350px, 100vw"
+              sizes="(min-width: 1024px) 485px, 100vw"
             />
           </div>
         </div>

@@ -15,6 +15,7 @@ import {
   FOOTER_COLUMNS,
   AI_LINKS,
   aiHomepage,
+  aiButtonWidth,
   type FooterColumn,
 } from "@/data/footer";
 
@@ -96,14 +97,14 @@ export function CaseStudyFooter({
               Ask AI for a summary of Design Asylum
             </p>
 
-            <div className="grid w-full max-w-[360px] grid-cols-2 gap-3">
+            <div className="flex max-w-[360px] flex-wrap gap-3">
               {aiLinks.map((name) => (
                 <a
                   key={name}
                   href={aiHomepage(name) ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-pill border border-[#1D1D1D]/30 bg-transparent px-3 font-figtree text-[11px] font-medium uppercase tracking-[0.06em] text-[#1D1D1D] sm:px-5 sm:text-[12px]"
+                  className={`inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-pill border border-[#1D1D1D]/30 bg-transparent px-4 font-figtree text-[11px] font-medium uppercase tracking-[0.04em] text-[#1D1D1D] ${aiButtonWidth(name)}`}
                 >
                   {name}
                   <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
