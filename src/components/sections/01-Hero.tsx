@@ -72,7 +72,7 @@ export function Hero() {
           ready to invest.
         </p>
 
-        <PillButton variant="light" size="sm">
+        <PillButton variant="light" size="sm" href="/#talk">
           Get started
         </PillButton>
       </div>

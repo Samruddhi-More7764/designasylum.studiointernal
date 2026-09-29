@@ -12,8 +12,9 @@ import { DesignAsylumWordmark } from "@/components/ui/DesignAsylumWordmark";
  */
 export function FitWordmark(_props: { text?: string }) {
   return (
-    <div className="mt-20 w-full overflow-hidden">
-      <DesignAsylumWordmark className="block h-auto w-full text-white" />
+    <div className="mt-20 flex w-full justify-center lg:block">
+      {/* Mobile artboard: 351.8 × 43.91. Desktop fills the 1402px frame. */}
+      <DesignAsylumWordmark className="block h-[43.906px] w-[351.799px] max-w-full text-white lg:h-auto lg:w-full" />
     </div>
   );
 }

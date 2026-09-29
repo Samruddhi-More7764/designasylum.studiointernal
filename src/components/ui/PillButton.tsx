@@ -1,4 +1,6 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+"use client";
+
+import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -36,6 +38,22 @@ const sizeClasses: Record<PillButtonSize, string> = {
   lg: "h-[56px] px-6 text-[14px] font-medium",
 };
 
+function scrollToPageHash(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  const hashIndex = href.indexOf("#");
+  if (hashIndex === -1) return;
+  const id = href.slice(hashIndex + 1);
+  if (!id || typeof window === "undefined") return;
+
+  const path = hashIndex > 0 ? href.slice(0, hashIndex) : window.location.pathname;
+  const onThisPage = path === window.location.pathname;
+  const target = document.getElementById(id);
+  if (!onThisPage || !target) return;
+
+  event.preventDefault();
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  history.pushState(null, "", `#${id}`);
+}
+
 export function PillButton({
   variant = "dark",
   size = "sm",
@@ -63,6 +81,19 @@ export function PillButton({
   );
 
   if (href) {
+    if (href.includes("#")) {
+      return (
+        <a
+          href={href}
+          className={classes}
+          style={rest.style}
+          onClick={(event) => scrollToPageHash(event, href)}
+        >
+          {content}
+        </a>
+      );
+    }
+
     return (
       <Link href={href} className={classes} style={rest.style}>
         {content}

@@ -76,3 +76,14 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 ];
 
 export const AI_LINKS = ["ChatGPT", "Gemini", "Perplexity", "Claude"];
+
+const AI_HOMEPAGES: Record<string, string> = {
+  chatgpt: "https://chatgpt.com/",
+  gemini: "https://gemini.google.com/",
+  perplexity: "https://www.perplexity.ai/",
+  claude: "https://claude.ai/",
+};
+
+export function aiHomepage(name: string): string | null {
+  return AI_HOMEPAGES[name.trim().toLowerCase()] ?? null;
+}

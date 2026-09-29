@@ -11,6 +11,7 @@ import { FitWordmark } from "@/components/ui/FitWordmark";
 import {
   FOOTER_COLUMNS,
   AI_LINKS,
+  aiHomepage,
   type FooterColumn,
 } from "@/data/footer";
 
@@ -66,7 +67,9 @@ export function Footer({
             {aiLinks.map((name) => (
               <a
                 key={name}
-                href="#"
+                href={aiHomepage(name) ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-pill border border-[#1D1D1D]/30 bg-transparent px-3 font-figtree text-[11px] font-medium uppercase tracking-[0.06em] text-[#1D1D1D] sm:px-5 sm:text-[12px]"
               >
                 {name}
@@ -77,8 +80,8 @@ export function Footer({
         </div>
       </div>
 
-      {/* Link columns + wordmark */}
-      <div className="relative mx-auto max-w-[1470px] px-5 pt-8 pb-8 sm:px-6 sm:pt-10 lg:px-[60px]">
+      {/* Link columns */}
+      <div className="relative mx-auto max-w-[1470px] px-5 pt-8 sm:px-6 sm:pt-10 lg:px-[60px]">
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-8 lg:gap-8">
           {columns.map((col) => (
             <div key={col.title} className="flex flex-col gap-3">
@@ -117,12 +120,21 @@ export function Footer({
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Desktop wordmark: 1470 frame, left 33.4px. Mobile logo is 351.8×43.9, centered. */}
+      <div className="relative mx-auto w-full max-w-[1470px] px-[19.1px] lg:px-[33.4px]">
         <FitWordmark text="Design_ Asylum" />
+      </div>
 
-        <div className="mt-8 flex flex-col gap-2 pt-4 font-figtree text-[10px] uppercase tracking-wider text-white sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-6">
-          <span>&copy; Design Asylum 2026</span>
-          <span className="sm:order-last">Last updated 10 June 2026</span>
+      <div className="relative mx-auto max-w-[1470px] px-5 pb-8 sm:px-6 lg:px-[60px]">
+        <div className="mt-8 flex flex-col gap-2 pt-4 font-figtree text-[10px] uppercase tracking-wider text-white lg:mt-10 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:pt-6">
+          <span className="inline-flex items-center gap-4 lg:contents">
+            <span>&copy; Design Asylum 2026</span>
+            <span className="whitespace-nowrap lg:order-last">
+              Last updated 10 June 2026
+            </span>
+          </span>
           <span>Built in-house by Asylum Build</span>
         </div>
       </div>

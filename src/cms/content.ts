@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { cache } from "react";
 import { getPayloadClient } from "@/cms/getPayload";
 import { isVideoMedia, isVideoSrc, resolveMediaAlt, resolveMediaUrl } from "@/cms/media";
@@ -74,6 +76,29 @@ function texts(
     .filter(Boolean);
 }
 
+const mediaDir = path.join(process.cwd(), "media");
+
+/**
+ * Payload returns `/api/media/file/...` even when the upload was never saved
+ * to disk. next/image then 500s ("isn't a valid image"). Use the file only
+ * when it exists; otherwise keep the seeded public asset.
+ */
+function safeMediaUrl(value: unknown): string | null {
+  const src = resolveMediaUrl(value);
+  if (!src?.startsWith("/api/media/file/")) return src;
+
+  const filename = decodeURIComponent(src.slice("/api/media/file/".length).split("?")[0]);
+  const onDisk = path.basename(filename);
+  if (onDisk && existsSync(path.join(mediaDir, onDisk))) return src;
+
+  if (value && typeof value === "object" && "sourcePath" in value) {
+    const sourcePath = (value as { sourcePath?: string | null }).sourcePath?.trim();
+    if (sourcePath?.startsWith("/")) return sourcePath;
+  }
+
+  return null;
+}
+
 type CmsImageRow = {
   image?: unknown;
   src?: string | null;
@@ -81,7 +106,7 @@ type CmsImageRow = {
 } | null | undefined;
 
 function image(value: CmsImageRow, fallback: { src: string; alt: string }) {
-  const src = resolveMediaUrl(value?.image) || value?.src?.trim() || null;
+  const src = safeMediaUrl(value?.image) || value?.src?.trim() || null;
   if (!src) return fallback;
   return {
     src,
@@ -95,7 +120,7 @@ function images(
 ) {
   const mapped = (rows || [])
     .map((row, i) => {
-      const resolved = resolveMediaUrl(row?.image) || row?.src?.trim();
+      const resolved = safeMediaUrl(row?.image) || row?.src?.trim();
       if (!resolved) return null;
       return image(row, fallback[i] || { src: resolved, alt: "" });
     })
@@ -289,7 +314,7 @@ export const getFeaturedProjects = cache(async (): Promise<FeaturedProject[]> =>
     const mapped = (
       await Promise.all(
         result.docs.map(async (doc) => {
-          const src = resolveMediaUrl(doc.image);
+          const src = safeMediaUrl(doc.image);
           if (!src) return null;
           return {
             name: String(doc.name),
@@ -329,7 +354,7 @@ export const getPortfolioItems = cache(async (): Promise<PortfolioItem[]> => {
     const mapped = (
       await Promise.all(
         result.docs.map(async (doc) => {
-          const src = resolveMediaUrl(doc.image);
+          const src = safeMediaUrl(doc.image);
           if (!src) return null;
           return {
             name: String(doc.name),
@@ -410,7 +435,7 @@ export const getClientLogoLayouts = cache(async () => {
     }
     const logos = result.docs
       .map((doc) => {
-        const src = resolveMediaUrl(doc.image);
+        const src = safeMediaUrl(doc.image);
         if (!src) return null;
         return {
           name: String(doc.name),
@@ -485,8 +510,8 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
     if (!result.docs.length) return fallbackTestimonials;
     const mapped: Testimonial[] = [];
     for (const doc of result.docs) {
-      const imageUrl = resolveMediaUrl(doc.image);
-      const videoUrl = resolveMediaUrl(doc.video);
+      const imageUrl = safeMediaUrl(doc.image);
+      const videoUrl = safeMediaUrl(doc.video);
       const imageIsVideo = isVideoMedia(doc.image) || isVideoSrc(imageUrl);
       const video = videoUrl || (imageIsVideo ? imageUrl : null);
       const poster = imageIsVideo ? null : imageUrl;
@@ -720,7 +745,7 @@ export const getClientHub = cache(
             g.brandVideo?.image,
             fallbackClientHub.brandVideo.image,
           );
-          const uploadedVideo = resolveMediaUrl(g.brandVideo?.video);
+          const uploadedVideo = safeMediaUrl(g.brandVideo?.video);
           const imageIsVideo =
             isVideoMedia(
               g.brandVideo?.image &&

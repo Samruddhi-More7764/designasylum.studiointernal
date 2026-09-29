@@ -17,16 +17,21 @@ export function FAQ({ items = fallbackFaqItems }: { items?: FaqItem[] }) {
 
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-20 lg:px-[60px]">
-      <div className="mx-auto grid max-w-[1332px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,380px)_1fr] lg:gap-20">
-        <div className="flex flex-col items-start gap-6 sm:gap-8">
-          <SectionHeading className="text-[32px] font-medium tracking-[-0.8px] text-ink sm:text-[40px] lg:text-[48px] lg:tracking-[-1px]">
+      <div className="mx-auto grid max-w-[1332px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,655px)_1fr] lg:gap-16">
+        <div className="flex flex-col items-start gap-4 lg:gap-6">
+          <SectionHeading className="max-w-[720px] text-[32px] font-medium leading-[1.15] tracking-[-0.8px] text-ink sm:text-[36px] lg:h-[44px] lg:w-[655px] lg:text-[40px] lg:leading-[44px] lg:whitespace-nowrap">
             Common <Accent>questions</Accent>
           </SectionHeading>
-          <p className="max-w-[280px] font-satoshi text-[15px] leading-relaxed text-muted sm:text-base">
+          <p className="max-w-[420px] font-satoshi text-[15px] leading-[26px] text-muted lg:h-[52px] lg:w-[420px]">
             This is different we get that, you may have questions, here are
             some answers.
           </p>
-          <PillButton variant="dark" size="lg" className="w-full max-w-[318px]">
+          <PillButton
+            variant="dark"
+            size="sm"
+            href="/#talk"
+            className="h-[44px] w-full max-w-[327px] !px-[19.84px]"
+          >
             Book a brand strategy session
           </PillButton>
         </div>

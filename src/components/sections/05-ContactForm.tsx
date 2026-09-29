@@ -10,7 +10,10 @@ import { ContactLeadForm } from "@/components/sections/ContactLeadForm";
  */
 export function ContactForm() {
   return (
-    <section className="relative z-0 w-full overflow-hidden bg-white max-lg:-mt-24 max-lg:bg-transparent max-lg:pt-24">
+    <section
+      id="contact"
+      className="relative z-0 w-full scroll-mt-[100px] overflow-hidden bg-white max-lg:-mt-24 max-lg:bg-transparent max-lg:pt-24"
+    >
       {/*
         Mobile-only continuous background (no aspect trap).
         TOP image: kept pulled up so blue sits behind the heading.

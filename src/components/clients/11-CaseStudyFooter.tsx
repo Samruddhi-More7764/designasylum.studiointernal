@@ -14,6 +14,7 @@ import { FitWordmark } from "@/components/ui/FitWordmark";
 import {
   FOOTER_COLUMNS,
   AI_LINKS,
+  aiHomepage,
   type FooterColumn,
 } from "@/data/footer";
 
@@ -99,7 +100,9 @@ export function CaseStudyFooter({
               {aiLinks.map((name) => (
                 <a
                   key={name}
-                  href="#"
+                  href={aiHomepage(name) ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-pill border border-[#1D1D1D]/30 bg-transparent px-3 font-figtree text-[11px] font-medium uppercase tracking-[0.06em] text-[#1D1D1D] sm:px-5 sm:text-[12px]"
                 >
                   {name}

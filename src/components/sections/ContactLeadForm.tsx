@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ChevronDown } from "lucide-react";
+import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
 import { PillButton } from "@/components/ui/PillButton";
 import { Accent } from "@/components/ui/SectionHeading";
 import { submitContactLead } from "@/lib/submitContactLead";
@@ -50,6 +51,7 @@ export function ContactLeadForm() {
       const result = await submitContactLead({
         fullName: data.get("fullName"),
         workEmail: data.get("workEmail"),
+        countryCode: data.get("countryCode"),
         mobileNumber: data.get("mobileNumber"),
         companyType: data.get("companyType"),
         message: data.get("message"),
@@ -112,11 +114,10 @@ export function ContactLeadForm() {
           </Field>
 
           <Field label="Mobile Number*" htmlFor="contact-phone">
-            <div className="flex w-full gap-[8.83px]">
-              <span className="flex h-12 w-[68px] shrink-0 items-center justify-center gap-0.5 rounded-lg bg-[#F2EFEA] px-2 font-satoshi text-base text-black">
-                +91
-                <ChevronDown className="h-4 w-4" aria-hidden="true" />
-              </span>
+            <CountryCodeSelect
+              rowClassName="gap-[8.83px]"
+              triggerClassName="flex h-12 w-[84px] shrink-0 items-center justify-center gap-0.5 rounded-lg bg-[#F2EFEA] px-2 font-satoshi text-base text-black"
+            >
               <input
                 id="contact-phone"
                 name="mobileNumber"
@@ -127,7 +128,7 @@ export function ContactLeadForm() {
                 placeholder="1234567890"
                 className={`${inputClasses} min-w-0 flex-1`}
               />
-            </div>
+            </CountryCodeSelect>
           </Field>
 
           <Field label="Company Type*" htmlFor="contact-company">

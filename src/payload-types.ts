@@ -247,22 +247,49 @@ export interface Client {
    * Homepage opens this study when Project type is Direct. Create the Case study first (or save this Client, then the study) — do not create a study from this field.
    */
   featuredStudy?: (number | null) | CaseStudy;
+  /**
+   * Sidebar labels. Defaults match the static page: About Client, Logo Design, Website Design & Development, Project Brochure, Brand Video, Behind the Scenes, Case Study. Not required to stay worded that way.
+   */
   navItems?:
     | {
+        /**
+         * Keep the existing id (logo-design, website-design, brand-video, …) so the sidebar still jumps to that block.
+         */
         navId: string;
+        /**
+         * Shown in the sidebar. Editable per client.
+         */
         label: string;
         id?: string | null;
       }[]
     | null;
+  /**
+   * Heading default: About Client.
+   */
   about?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “About”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Client”.
+     */
+    rest?: string | null;
     body: string;
     websiteHref: string;
   };
+  /**
+   * Heading default: Logo Design.
+   */
   logoDesign?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Logo”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Design”.
+     */
+    rest?: string | null;
     images?:
       | {
           image: number | Media;
@@ -275,9 +302,18 @@ export interface Client {
      */
     caseStudy?: (number | null) | CaseStudy;
   };
+  /**
+   * Heading default: Website Design & Development.
+   */
   websiteDesign?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Website”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Design & Development”.
+     */
+    rest?: string | null;
     image: {
       image: number | Media;
       alt: string;
@@ -288,9 +324,18 @@ export interface Client {
      */
     caseStudy?: (number | null) | CaseStudy;
   };
+  /**
+   * Heading default: Project Brochure. “Brochure” is the italic word.
+   */
   projectBrochure?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Brochure”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Project”.
+     */
+    rest?: string | null;
     images?:
       | {
           image: number | Media;
@@ -303,9 +348,18 @@ export interface Client {
      */
     caseStudy?: (number | null) | CaseStudy;
   };
+  /**
+   * Heading default: Brand Video.
+   */
   brandVideo?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Brand”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Video”.
+     */
+    rest?: string | null;
     /**
      * Still poster only (JPG/PNG). Upload the MP4 in Video.
      */
@@ -323,9 +377,18 @@ export interface Client {
      */
     caseStudy?: (number | null) | CaseStudy;
   };
+  /**
+   * Heading default: Behind The Scenes.
+   */
   behindTheScenes?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Behind”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “The Scenes”.
+     */
+    rest?: string | null;
     images?:
       | {
           image: number | Media;
@@ -334,9 +397,18 @@ export interface Client {
         }[]
       | null;
   };
+  /**
+   * Heading default: Case Study.
+   */
   caseStudy?: {
-    italic: string;
-    rest: string;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Study”.
+     */
+    italic?: string | null;
+    /**
+     * Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default. Default: “Case”.
+     */
+    rest?: string | null;
     subheading: string;
     /**
      * Primary Case Study CTA on the hub.

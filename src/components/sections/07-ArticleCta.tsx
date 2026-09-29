@@ -16,6 +16,7 @@ export function ArticleCta() {
         </p>
         <PillButton
           variant="dark"
+          href="/#talk"
           className="h-[50px] w-full max-w-[318.19px] !px-4"
         >
           Book a brand strategy session

@@ -1,6 +1,7 @@
 export type ContactLeadPayload = {
   fullName: FormDataEntryValue | null;
   workEmail: FormDataEntryValue | null;
+  countryCode: FormDataEntryValue | null;
   mobileNumber: FormDataEntryValue | null;
   companyType: FormDataEntryValue | null;
   message: FormDataEntryValue | null;

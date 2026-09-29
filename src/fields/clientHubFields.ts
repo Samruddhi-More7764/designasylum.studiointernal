@@ -5,24 +5,76 @@ import { caseStudyRelation } from "./caseStudyRelation";
 const hubOnly = (_data: unknown, siblingData: { projectType?: string }) =>
   siblingData?.projectType === "hub";
 
+const headingNote =
+  "Editable per client, and not required. Design Asylum often does this same work, but the wording can change. Leave blank to keep the static-page default.";
+
+/** Italic word + the rest of a hub section heading. Defaults match the static page. */
+function sectionHeadingFields(italic: string, rest: string): Field[] {
+  return [
+    {
+      name: "italic",
+      type: "text",
+      label: "Heading — italic word",
+      defaultValue: italic,
+      admin: {
+        description: `${headingNote} Default: “${italic}”.`,
+      },
+    },
+    {
+      name: "rest",
+      type: "text",
+      label: "Heading — remaining words",
+      defaultValue: rest,
+      admin: {
+        description: `${headingNote} Default: “${rest}”.`,
+      },
+    },
+  ];
+}
+
 /** Hub page sections — shown only when projectType is hub. */
 export const clientHubFields: Field[] = [
   {
     name: "navItems",
     type: "array",
-    admin: { condition: hubOnly },
+    labels: { singular: "Sidebar heading", plural: "Sidebar headings" },
+    admin: {
+      condition: hubOnly,
+      description:
+        "Sidebar labels. Defaults match the static page: About Client, Logo Design, Website Design & Development, Project Brochure, Brand Video, Behind the Scenes, Case Study. Not required to stay worded that way.",
+    },
     fields: [
-      { name: "navId", type: "text", required: true },
-      { name: "label", type: "text", required: true },
+      {
+        name: "navId",
+        type: "text",
+        required: true,
+        label: "Section id",
+        admin: {
+          description:
+            "Keep the existing id (logo-design, website-design, brand-video, …) so the sidebar still jumps to that block.",
+        },
+      },
+      {
+        name: "label",
+        type: "text",
+        required: true,
+        label: "Heading",
+        admin: {
+          description: "Shown in the sidebar. Editable per client.",
+        },
+      },
     ],
   },
   {
     name: "about",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "About Client",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: About Client.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("About", "Client"),
       { name: "body", type: "textarea", required: true },
       { name: "websiteHref", type: "text", required: true },
     ],
@@ -30,10 +82,13 @@ export const clientHubFields: Field[] = [
   {
     name: "logoDesign",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "Logo Design",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: Logo Design.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("Logo", "Design"),
       { name: "images", type: "array", fields: cmsImageFields },
       caseStudyRelation("Optional — open this case study from Logo Design."),
     ],
@@ -41,10 +96,13 @@ export const clientHubFields: Field[] = [
   {
     name: "websiteDesign",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "Website",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: Website Design & Development.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("Website", "Design & Development"),
       { name: "image", type: "group", fields: cmsImageFields },
       caseStudyRelation("Optional — open this case study from Website Design."),
     ],
@@ -52,10 +110,13 @@ export const clientHubFields: Field[] = [
   {
     name: "projectBrochure",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "Project Brochure",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: Project Brochure. “Brochure” is the italic word.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("Brochure", "Project"),
       { name: "images", type: "array", fields: cmsImageFields },
       caseStudyRelation("Optional — open this case study from Project Brochure."),
     ],
@@ -63,10 +124,13 @@ export const clientHubFields: Field[] = [
   {
     name: "brandVideo",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "Brand Video",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: Brand Video.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("Brand", "Video"),
       {
         name: "image",
         type: "group",
@@ -82,20 +146,26 @@ export const clientHubFields: Field[] = [
   {
     name: "behindTheScenes",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "Behind the Scenes",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: Behind The Scenes.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("Behind", "The Scenes"),
       { name: "images", type: "array", fields: cmsImageFields },
     ],
   },
   {
     name: "caseStudy",
     type: "group",
-    admin: { condition: hubOnly },
+    label: "Case Study",
+    admin: {
+      condition: hubOnly,
+      description: "Heading default: Case Study.",
+    },
     fields: [
-      { name: "italic", type: "text", required: true },
-      { name: "rest", type: "text", required: true },
+      ...sectionHeadingFields("Study", "Case"),
       { name: "subheading", type: "textarea", required: true },
       caseStudyRelation("Primary Case Study CTA on the hub."),
     ],

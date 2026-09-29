@@ -5,7 +5,7 @@ import { CaseStudyDetails } from "@/components/clients/08-CaseStudyDetails";
 import { CaseStudyGallery } from "@/components/clients/09-CaseStudyGallery";
 import { CaseStudyViewAllClients } from "@/components/clients/10-CaseStudyViewAllClients";
 import { ClientHubStartProject } from "@/components/clients/06-ClientHubStartProject";
-import { CaseStudyFooter } from "@/components/clients/11-CaseStudyFooter";
+import { Footer } from "@/components/sections/15-Footer";
 import { getCaseStudyPage, getFooter } from "@/cms/content";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ export default async function CaseStudyRoutePage({ params }: Props) {
         <CaseStudyViewAllClients clientSlug={slug} studySlug={study} />
         <ClientHubStartProject align="start" />
       </main>
-      <CaseStudyFooter columns={footer.columns} aiLinks={footer.aiLinks} />
+      <Footer columns={footer.columns} aiLinks={footer.aiLinks} />
     </>
   );
 }

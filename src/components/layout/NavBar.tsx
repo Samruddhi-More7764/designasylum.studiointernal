@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import Image from "next/image";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { LiveClock } from "@/components/ui/LiveClock";
 import { PillButton } from "@/components/ui/PillButton";
@@ -31,27 +31,33 @@ function NavLink({
 }
 
 /**
- * Navbar logomark — Figma Group 61 (24×36 desktop, ~15×21 mobile).
+ * Navbar logomark. Same box as the previous mark:
+ * 24×36 art, 15.06×21.2 on mobile, 24×36 (w-6 / h-9) on desktop.
  */
 function LogoMark() {
   return (
-    <Image
-      src="/assets/images/nav-logomark.png"
-      alt="Design Asylum"
-      width={24}
-      height={36}
-      priority
-      className="h-[21.2px] w-[15.06px] shrink-0 object-contain lg:h-9 lg:w-6"
-    />
+    <svg
+      width="24"
+      height="36"
+      viewBox="0 0 24 36"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className="h-[21.2px] w-[15.06px] shrink-0 lg:h-9 lg:w-6"
+    >
+      <path
+        d="M9.22376 1.80078V6.02147H18.9625V13.5506C16.9357 11.9255 14.4932 11.066 11.8984 11.066C5.66906 11.066 0.601562 16.1203 0.601562 22.3334C0.601562 28.5465 5.66906 33.6008 11.8984 33.6008C14.4932 33.6008 16.9357 32.7414 18.9625 31.1162V33.6008H23.1942V1.80078H9.22376ZM18.9625 22.3345C18.9625 26.2202 15.7933 29.3812 11.8984 29.3812C8.00359 29.3812 4.83331 26.2202 4.83331 22.3345C4.83331 18.4487 8.00251 15.2889 11.8984 15.2889C15.7943 15.2889 18.9625 18.4498 18.9625 22.3345Z"
+        fill="white"
+      />
+    </svg>
   );
 }
 
 /**
- * Navbar — Group 63 / Homepage: 1270 × 64px, top ~19px,
- * background #00000033, ~10px radius.
+ * Navbar — solid black on every section (homepage, client hub, case study).
  *
  * Mobile (<lg): hamburger + mark left, Book a Call right.
- * Desktop (lg+): unchanged full link + clock layout.
+ * Desktop (lg+): full link + clock layout.
  */
 export function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -84,7 +90,7 @@ export function NavBar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 mt-5 w-full px-4">
-      <div className="mx-auto flex h-16 max-w-[1270px] items-center justify-between gap-4 rounded-[10px] border border-border-subtle bg-nav-overlay px-4 backdrop-blur-sm sm:px-6 lg:gap-6">
+      <div className="mx-auto flex h-16 max-w-[1270px] items-center justify-between gap-4 rounded-[10px] border border-white/10 bg-black px-4 sm:px-6 lg:gap-6">
         <div className="flex items-center gap-3 lg:gap-10">
           <button
             type="button"
@@ -100,7 +106,9 @@ export function NavBar() {
             )}
           </button>
 
-          <LogoMark />
+          <Link href="/" aria-label="Design Asylum home" className="shrink-0">
+            <LogoMark />
+          </Link>
 
           <nav className="hidden items-center gap-8 lg:flex">
             {LEFT_NAV_LINKS.map((link) => (
@@ -121,7 +129,7 @@ export function NavBar() {
             ))}
           </nav>
 
-          <PillButton variant="invert" size="xs" className="shrink-0">
+          <PillButton variant="invert" size="xs" href="/#talk" className="shrink-0">
             Book a call
           </PillButton>
         </div>
@@ -134,7 +142,7 @@ export function NavBar() {
           aria-modal="true"
           aria-label="Navigation menu"
         >
-          <nav className="mx-4 flex flex-col gap-6 rounded-[10px] border border-border-subtle bg-nav-overlay px-6 py-8 backdrop-blur-md">
+          <nav className="mx-4 flex flex-col gap-6 rounded-[10px] border border-white/10 bg-black px-6 py-8">
             {ALL_NAV_LINKS.map((link) => (
               <NavLink key={link} onClick={() => setMenuOpen(false)}>
                 {link}

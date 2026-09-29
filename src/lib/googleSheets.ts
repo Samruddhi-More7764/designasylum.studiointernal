@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { JWT } from "google-auth-library";
+import { isCountryDialCode } from "@/data/countryDialCodes";
 
 type ServiceAccount = {
   client_email: string;
@@ -15,6 +16,7 @@ const COMPANY_LABELS: Record<string, string> = {
 export type ContactLead = {
   fullName: string;
   workEmail: string;
+  countryCode: string;
   mobileNumber: string;
   companyType: string;
   message: string;
@@ -67,6 +69,7 @@ export function validateContactLead(
 ): ContactLeadResult {
   const fullName = input.fullName?.trim() ?? "";
   const workEmail = input.workEmail?.trim() ?? "";
+  const countryCode = input.countryCode?.trim() ?? "";
   const mobileNumber = input.mobileNumber?.trim() ?? "";
   const companyType = input.companyType?.trim() ?? "";
   const message = input.message?.trim() ?? "";
@@ -83,8 +86,12 @@ export function validateContactLead(
     return { ok: false, error: "Enter a valid work email.", status: 400 };
   }
 
+  if (!isCountryDialCode(countryCode)) {
+    return { ok: false, error: "Select a country code.", status: 400 };
+  }
+
   const digits = mobileNumber.replace(/\D/g, "");
-  if (digits.length < 8 || digits.length > 15) {
+  if (digits.length < 4 || digits.length > 15) {
     return { ok: false, error: "Enter a valid mobile number.", status: 400 };
   }
 
@@ -97,6 +104,7 @@ export function validateContactLead(
     lead: {
       fullName,
       workEmail,
+      countryCode,
       mobileNumber: digits,
       companyType,
       message,
@@ -137,7 +145,7 @@ export async function appendContactLead(lead: ContactLead): Promise<void> {
         [
           lead.fullName,
           lead.workEmail,
-          `+91 ${lead.mobileNumber}`,
+          `${lead.countryCode} ${lead.mobileNumber}`,
           COMPANY_LABELS[lead.companyType],
           lead.message,
         ],
