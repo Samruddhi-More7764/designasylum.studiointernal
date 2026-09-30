@@ -6,6 +6,9 @@ import {
   type CollectionConfig,
 } from "payload";
 import { caseStudyFields } from "../fields/caseStudyFields";
+import type { CaseStudy } from "../payload-types";
+
+type GalleryRow = NonNullable<CaseStudy["gallery"]>[number];
 
 const slugify = (value: string) =>
   value
@@ -78,12 +81,13 @@ const preserveHiddenMedia: CollectionBeforeChangeHook = ({ data, originalDoc }) 
   }
 
   if (Array.isArray(data.gallery) && Array.isArray(originalDoc?.gallery)) {
+    const savedGallery = originalDoc.gallery as GalleryRow[];
     const previous = new Map(
-      originalDoc.gallery
-        .filter((row) => row?.id)
+      savedGallery
+        .filter((row): row is GalleryRow & { id: string } => Boolean(row?.id))
         .map((row) => [String(row.id), row]),
     );
-    data.gallery = data.gallery.map((row) => {
+    data.gallery = (data.gallery as GalleryRow[]).map((row) => {
       if (!row?.id) return row;
       const old = previous.get(String(row.id));
       if (!old) return row;

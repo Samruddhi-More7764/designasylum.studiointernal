@@ -271,11 +271,17 @@ async function seed() {
         sevenloopCaseStudyHero.media.image.alt,
       ),
     },
-    details: sevenloopCaseStudyDetails,
+    details: {
+      quote: sevenloopCaseStudyDetails.quote,
+      tableHeading: sevenloopCaseStudyDetails.tableHeading,
+      rows: sevenloopCaseStudyDetails.rows,
+      logo: null,
+    },
     gallery: await Promise.all(
-      sevenloopCaseStudyGallery.map((frame) =>
-        cmsImage(payload, frame.image.src, frame.image.alt),
-      ),
+      sevenloopCaseStudyGallery.map(async (frame) => ({
+        layout: "full" as const,
+        ...(await cmsImage(payload, frame.image.src, frame.image.alt)),
+      })),
     ),
     viewAll: sevenloopCaseStudyViewAllClients,
   };

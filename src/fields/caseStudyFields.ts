@@ -1,4 +1,4 @@
-import type { Field } from "payload";
+import type { Field, TextField, UploadField } from "payload";
 
 type MediaLayout = "full" | "split";
 
@@ -21,24 +21,32 @@ function slotLayout(
 
 const mediaDescription = "Photo, GIF, or video (MP4, WebM, MOV).";
 
-function mediaUpload(when: MediaLayout): Field {
+type LayoutData = Parameters<typeof slotLayout>[0];
+
+function mediaUpload(when: MediaLayout): UploadField {
   return {
     name: "image",
     type: "upload",
     relationTo: "media",
     admin: { description: mediaDescription },
-    validate: (value, { data, path }) => {
+    validate: (
+      value: unknown,
+      { data, path }: { data?: LayoutData; path: (number | string)[] },
+    ) => {
       if (slotLayout(data, path) !== when) return true;
       return value ? true : "Upload a photo, GIF, or video.";
     },
   };
 }
 
-function mediaAlt(when: MediaLayout): Field {
+function mediaAlt(when: MediaLayout): TextField {
   return {
     name: "alt",
     type: "text",
-    validate: (value, { data, path }) => {
+    validate: (
+      value: unknown,
+      { data, path }: { data?: LayoutData; path: (number | string)[] },
+    ) => {
       if (slotLayout(data, path) !== when) return true;
       return typeof value === "string" && value.trim()
         ? true
