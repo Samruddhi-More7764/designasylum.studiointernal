@@ -25,7 +25,16 @@ export const Testimonials: CollectionConfig = {
       required: true,
       admin: {
         description:
-          "Shown on the photo or video as the person's name. Add the role after a comma — e.g. \"Dr. Mallesh B., Co-founder, i3systems\".",
+          "Person's name, shown on the photo or video. Example: Dr. Mallesh B.",
+      },
+    },
+    {
+      name: "designation",
+      type: "text",
+      required: false,
+      admin: {
+        description:
+          "Optional. Shown under the name. Example: Co-founder, i3systems.",
       },
     },
     { name: "quote", type: "textarea" },

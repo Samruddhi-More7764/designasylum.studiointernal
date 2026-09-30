@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { InViewVideo } from "@/components/ui/InViewVideo";
-import { isVideoSrc } from "@/cms/media";
+import { isGifSrc, isVideoSrc } from "@/cms/media";
 
 type CmsMediaFillProps = {
   image?: string | null;
@@ -38,6 +38,18 @@ export function CmsMediaFill({
   }
 
   if (!poster) return null;
+
+  if (isGifSrc(poster)) {
+    return (
+      // next/image freezes an animated GIF on the first frame.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={poster}
+        alt={alt}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+    );
+  }
 
   return (
     <Image

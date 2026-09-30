@@ -264,15 +264,18 @@ async function seed() {
       heading: sevenloopCaseStudyHero.heading,
       breadcrumbCurrent: sevenloopCaseStudyHero.breadcrumbCurrent,
       breadcrumb: sevenloopCaseStudyHero.breadcrumb,
+      layout: "full" as const,
       image: await cmsImage(
         payload,
-        sevenloopCaseStudyHero.image.src,
-        sevenloopCaseStudyHero.image.alt,
+        sevenloopCaseStudyHero.media.image.src,
+        sevenloopCaseStudyHero.media.image.alt,
       ),
     },
     details: sevenloopCaseStudyDetails,
     gallery: await Promise.all(
-      sevenloopCaseStudyGallery.map((img) => cmsImage(payload, img.src, img.alt)),
+      sevenloopCaseStudyGallery.map((frame) =>
+        cmsImage(payload, frame.image.src, frame.image.alt),
+      ),
     ),
     viewAll: sevenloopCaseStudyViewAllClients,
   };
@@ -363,6 +366,7 @@ async function seed() {
       testimonials.map(async (item) => ({
         image: await upsertMedia(payload, item.image, item.alt),
         alt: item.alt,
+        designation: item.designation || null,
         quote: item.quote || null,
         width: item.width,
         height: item.height,

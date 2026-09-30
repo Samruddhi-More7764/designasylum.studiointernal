@@ -49,6 +49,7 @@ import {
   sevenloopCaseStudyDetails,
   sevenloopCaseStudyGallery,
   sevenloopCaseStudyViewAllClients,
+  type CaseStudyMediaFrame,
 } from "@/data/caseStudyPage";
 import {
   caseStudyPath,
@@ -113,6 +114,60 @@ function image(value: CmsImageRow, fallback: { src: string; alt: string }) {
     src,
     alt: value?.alt?.trim() || resolveMediaAlt(value?.image) || fallback.alt,
   };
+}
+
+type CmsSide = {
+  image?: unknown;
+  alt?: string | null;
+} | null | undefined;
+
+function still(
+  value: CmsSide,
+  fallback: { src: string; alt: string } | null,
+): { src: string; alt: string } | null {
+  const src = safeMediaUrl(value?.image) || null;
+  if (!src) return fallback;
+  return {
+    src,
+    alt: value?.alt?.trim() || resolveMediaAlt(value?.image) || fallback?.alt || "",
+  };
+}
+
+function mapGallery(
+  rows:
+    | {
+        layout?: "full" | "split" | null;
+        image?: unknown;
+        alt?: string | null;
+        left?: CmsSide;
+        right?: CmsSide;
+      }[]
+    | null
+    | undefined,
+  fallback: CaseStudyMediaFrame[],
+): CaseStudyMediaFrame[] {
+  if (!rows?.length) return fallback;
+  const mapped = rows.flatMap((row, i) => {
+    const layout = row.layout === "split" ? "split" : "full";
+    const fallbackStill = fallback[i]?.image || { src: "", alt: "" };
+    const image = still(
+      { image: row.image, alt: row.alt },
+      layout === "full" ? fallbackStill : null,
+    );
+    const left = still(row.left, null);
+    const right = still(row.right, null);
+    if (layout === "split" && !left && !right) return [];
+    if (layout === "full" && !image) return [];
+    return [
+      {
+        layout,
+        image: image || { src: "", alt: "" },
+        left,
+        right,
+      } satisfies CaseStudyMediaFrame,
+    ];
+  });
+  return mapped.length ? mapped : fallback;
 }
 
 function images(
@@ -517,12 +572,14 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
       const video = videoUrl || (imageIsVideo ? imageUrl : null);
       const poster = imageIsVideo ? null : imageUrl;
       if (!video && !poster) continue;
+      const designation = doc.designation?.trim();
       mapped.push({
         image: poster || "",
         alt: String(doc.alt || resolveMediaAlt(doc.image) || ""),
+        ...(designation ? { designation } : {}),
         ...(doc.quote ? { quote: String(doc.quote) } : {}),
         ...(video ? { video } : {}),
-        width: Number(doc.width) || 290,
+        width: Number(doc.width) || 320,
         height: Number(doc.height) || 320,
       });
     }
@@ -927,10 +984,18 @@ export const getCaseStudyPage = cache(
                 href: item.href || "#",
               }))
             : autoBreadcrumb,
-          image: image(g.hero?.image, fallbackCaseStudyPage.hero.image),
+          media: {
+            layout: g.hero?.layout === "split" ? "split" : "full",
+            image:
+              still(g.hero?.image, fallbackCaseStudyPage.hero.media.image) ||
+              fallbackCaseStudyPage.hero.media.image,
+            left: still(g.hero?.left, null),
+            right: still(g.hero?.right, null),
+          },
         },
         details: {
           quote: g.details?.quote || fallbackCaseStudyPage.details.quote,
+          logo: still({ image: g.details?.logo, alt: null }, null),
           tableHeading:
             g.details?.tableHeading || fallbackCaseStudyPage.details.tableHeading,
           rows: (g.details?.rows || []).length
@@ -940,7 +1005,7 @@ export const getCaseStudyPage = cache(
               }))
             : fallbackCaseStudyPage.details.rows,
         },
-        gallery: images(g.gallery, fallbackCaseStudyPage.gallery),
+        gallery: mapGallery(g.gallery, fallbackCaseStudyPage.gallery),
         viewAll: {
           label: g.viewAll?.label || fallbackCaseStudyPage.viewAll.label,
           href: g.viewAll?.href || fallbackCaseStudyPage.viewAll.href,

@@ -5,6 +5,8 @@
 export interface Testimonial {
   image: string;
   alt: string;
+  /** Optional role under the name, e.g. "Co-founder, i3systems". */
+  designation?: string;
   quote?: string;
   video?: string;
   width: number;
@@ -14,24 +16,27 @@ export interface Testimonial {
 export const testimonials: Testimonial[] = [
   {
     image: "/assets/images/testimonial-1.png",
-    alt: "Dr. Mallesh B., Co-founder, i3systems — video testimonial",
+    alt: "Dr. Mallesh B.",
+    designation: "Co-founder, i3systems",
     quote:
       "\u201cIt was a genuinely successful branding project, and, more to the point, fun to work with the team.\u201d",
-    width: 290,
+    width: 320,
     height: 320,
   },
   {
     image: "/assets/images/testimonial-2.png",
-    alt: "Dr. Mallesh B., Co-founder, i3systems — video testimonial",
-    width: 290,
+    alt: "Dr. Mallesh B.",
+    designation: "Co-founder, i3systems",
+    width: 320,
     height: 320,
   },
   {
     image: "/assets/images/testimonial-3.png",
-    alt: "Dr. Mallesh B., Co-founder, i3systems — video testimonial",
+    alt: "Dr. Mallesh B.",
+    designation: "Co-founder, i3systems",
     quote:
       "\u201cIt was a genuinely successful branding project, and, more to the point, fun to work with the team.\u201d",
-    width: 290,
+    width: 320,
     height: 320,
   },
 ];

@@ -93,7 +93,7 @@ const AI_BUTTON_WIDTH: Record<string, string> = {
   chatgpt: "w-[125px]",
   gemini: "w-[121px]",
   perplexity: "w-[144px]",
-  claude: "w-[144px]",
+  claude: "w-[125px]",
 };
 
 export function aiButtonWidth(name: string): string {

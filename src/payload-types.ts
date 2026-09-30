@@ -492,17 +492,38 @@ export interface CaseStudy {
           id?: string | null;
         }[]
       | null;
-    image: {
+    /**
+     * Complete is one media filling the frame. Two columns is a photo, GIF, or video on each side — any mix.
+     */
+    layout: 'full' | 'split';
+    image?: {
       /**
-       * Photo (JPG, PNG, WebP) or video (MP4, WebM, MOV) from Media.
+       * Photo, GIF, or video (MP4, WebM, MOV).
        */
-      image: number | Media;
-      alt: string;
-      id?: string | null;
+      image?: (number | null) | Media;
+      alt?: string | null;
+    };
+    left?: {
+      /**
+       * Photo, GIF, or video (MP4, WebM, MOV).
+       */
+      image?: (number | null) | Media;
+      alt?: string | null;
+    };
+    right?: {
+      /**
+       * Photo, GIF, or video (MP4, WebM, MOV).
+       */
+      image?: (number | null) | Media;
+      alt?: string | null;
     };
   };
   details: {
     quote: string;
+    /**
+     * Shown in the 54×54 circle under the quote. Choosing a file updates the live case study — refresh that page to see it. Clear the file to bring the orange mark back.
+     */
+    logo?: (number | null) | Media;
     /**
      * Heading shown above the table — e.g. "Details". This is a caption on its own, not a row, so it has no value beside it. Add label/value pairs under Rows below.
      */
@@ -521,10 +542,28 @@ export interface CaseStudy {
   gallery?:
     | {
         /**
-         * Photo (JPG, PNG, WebP) or video (MP4, WebM, MOV) from Media.
+         * Complete is one media filling the frame. Two columns is a photo, GIF, or video on each side — any mix.
          */
-        image: number | Media;
-        alt: string;
+        layout: 'full' | 'split';
+        /**
+         * Photo, GIF, or video (MP4, WebM, MOV).
+         */
+        image?: (number | null) | Media;
+        alt?: string | null;
+        left?: {
+          /**
+           * Photo, GIF, or video (MP4, WebM, MOV).
+           */
+          image?: (number | null) | Media;
+          alt?: string | null;
+        };
+        right?: {
+          /**
+           * Photo, GIF, or video (MP4, WebM, MOV).
+           */
+          image?: (number | null) | Media;
+          alt?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -620,9 +659,13 @@ export interface Testimonial {
    */
   video?: (number | null) | Media;
   /**
-   * Shown on the photo or video as the person's name. Add the role after a comma — e.g. "Dr. Mallesh B., Co-founder, i3systems".
+   * Person's name, shown on the photo or video. Example: Dr. Mallesh B.
    */
   alt: string;
+  /**
+   * Optional. Shown under the name. Example: Co-founder, i3systems.
+   */
+  designation?: string | null;
   quote?: string | null;
   /**
    * On-screen card width. Prefills to the homepage size (290).
@@ -904,6 +947,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
   image?: T;
   video?: T;
   alt?: T;
+  designation?: T;
   quote?: T;
   width?: T;
   height?: T;
@@ -1100,18 +1144,31 @@ export interface CaseStudiesSelect<T extends boolean = true> {
               href?: T;
               id?: T;
             };
+        layout?: T;
         image?:
           | T
           | {
               image?: T;
               alt?: T;
-              id?: T;
+            };
+        left?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+            };
+        right?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
             };
       };
   details?:
     | T
     | {
         quote?: T;
+        logo?: T;
         tableHeading?: T;
         rows?:
           | T
@@ -1124,8 +1181,21 @@ export interface CaseStudiesSelect<T extends boolean = true> {
   gallery?:
     | T
     | {
+        layout?: T;
         image?: T;
         alt?: T;
+        left?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+            };
+        right?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+            };
         id?: T;
       };
   viewAll?:

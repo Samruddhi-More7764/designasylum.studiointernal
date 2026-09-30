@@ -146,6 +146,7 @@ function toNextImageSrc(url: string): string {
 }
 
 const VIDEO_EXT = /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i;
+const GIF_EXT = /\.gif(\?|$)/i;
 
 export function isVideoSrc(url: string | null | undefined): boolean {
   if (!url) return false;
@@ -153,6 +154,15 @@ export function isVideoSrc(url: string | null | undefined): boolean {
     return VIDEO_EXT.test(new URL(url, "http://local.invalid").pathname);
   } catch {
     return VIDEO_EXT.test(url);
+  }
+}
+
+export function isGifSrc(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    return GIF_EXT.test(new URL(url, "http://local.invalid").pathname);
+  } catch {
+    return GIF_EXT.test(url);
   }
 }
 

@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { CaseStudyMedia } from "@/components/clients/CaseStudyMedia";
+import { CaseStudyMediaFrame } from "@/components/clients/CaseStudyMedia";
 import { ChevronRight } from "lucide-react";
 import { getCaseStudyPage } from "@/cms/content";
 
 /**
- * Case study — first section: breadcrumb + heading + hero image.
- * Figma: heading 1066×159, breadcrumb container 308×20 (gap 4), image
- * 1350×759 at top 406/left 60, 13.98px radius.
+ * Case study — first section: breadcrumb + heading + hero media.
+ * The media frame is 1316×740. Complete fills it; two columns are 648×702.
  *
  * Desktop (lg+): unchanged. Mobile: type scale, gutters, wrapping.
  */
@@ -53,13 +52,7 @@ export async function CaseStudyHero({
       </div>
 
       <div className="mx-auto w-full max-w-[1470px] px-5 pb-10 sm:px-8 sm:pb-12 lg:px-[60px] lg:pb-16">
-        <div className="relative aspect-[1350/759] w-full overflow-hidden rounded-[13.98px]">
-          <CaseStudyMedia
-            src={hero.image.src}
-            alt={hero.image.alt}
-            priority
-          />
-        </div>
+        <CaseStudyMediaFrame frame={hero.media} priority />
       </div>
     </section>
   );

@@ -5,14 +5,13 @@ import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 import type { Testimonial } from "@/data/testimonials";
 
-function captionFromAlt(alt: string): { name: string; role?: string } {
-  const cleaned = alt.replace(/\s*[—–-]\s*video testimonial\s*$/i, "").trim();
-  const splitAt = cleaned.indexOf(",");
-  if (splitAt === -1) return { name: cleaned };
-  const name = cleaned.slice(0, splitAt).trim();
-  const role = cleaned.slice(splitAt + 1).trim();
-  if (!name) return { name: cleaned };
-  return { name, role: role || undefined };
+function overlayText(item: Testimonial): { name: string; designation?: string } {
+  const cleaned = item.alt.replace(/\s*[—–-]\s*video testimonial\s*$/i, "").trim();
+  const comma = cleaned.indexOf(",");
+  const name = comma === -1 ? cleaned : cleaned.slice(0, comma).trim() || cleaned;
+  const fromAlt = comma === -1 ? undefined : cleaned.slice(comma + 1).trim() || undefined;
+  const designation = item.designation?.trim() || fromAlt;
+  return { name, designation };
 }
 
 /**
@@ -24,7 +23,7 @@ export function TestimonialCard({ item }: { item: Testimonial }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const caption = captionFromAlt(item.alt);
+  const caption = overlayText(item);
   const hasVideo = Boolean(item.video);
 
   function onOpen() {
@@ -39,7 +38,7 @@ export function TestimonialCard({ item }: { item: Testimonial }) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="mx-auto flex w-full max-w-[320px] flex-col gap-[10px]">
       <button
         type="button"
         onClick={onOpen}
@@ -83,12 +82,12 @@ export function TestimonialCard({ item }: { item: Testimonial }) {
 
         {caption.name ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black from-35% via-black/95 to-transparent px-4 pt-16 pb-4">
-            <p className="font-satoshi text-[13px] font-medium leading-tight text-white">
+            <p className="font-satoshi text-[16px] font-medium leading-[19px] whitespace-nowrap text-white">
               {caption.name}
             </p>
-            {caption.role ? (
-              <p className="mt-0.5 font-satoshi text-[11px] leading-tight text-white/90">
-                {caption.role}
+            {caption.designation ? (
+              <p className="font-satoshi text-[12px] font-medium leading-[14px] whitespace-nowrap text-white">
+                {caption.designation}
               </p>
             ) : null}
           </div>
@@ -96,9 +95,9 @@ export function TestimonialCard({ item }: { item: Testimonial }) {
       </button>
 
       {item.quote && !expanded ? (
-        <p className="rounded-2xl border border-hairline bg-white px-5 py-4 text-center font-satoshi text-sm leading-relaxed text-muted lg:rounded-none lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:text-left">
-          {item.quote}
-        </p>
+        <div className="flex h-[96px] w-full flex-col gap-[10px] overflow-hidden rounded-[12px] border border-[#0000004D] p-[10px]">
+          <p className="font-satoshi text-sm leading-relaxed text-black">{item.quote}</p>
+        </div>
       ) : null}
     </div>
   );

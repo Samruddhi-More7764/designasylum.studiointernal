@@ -1,3 +1,16 @@
+export type CaseStudyStill = { src: string; alt: string };
+
+export type CaseStudyMediaFrame = {
+  layout: "full" | "split";
+  image: CaseStudyStill;
+  left: CaseStudyStill | null;
+  right: CaseStudyStill | null;
+};
+
+function fullFrame(image: CaseStudyStill): CaseStudyMediaFrame {
+  return { layout: "full", image, left: null, right: null };
+}
+
 // Sevenloop case study — Figma: heading + breadcrumb + hero image.
 export const sevenloopCaseStudyHero = {
   heading: "Sevenloop — Branding and project brochure design",
@@ -7,10 +20,10 @@ export const sevenloopCaseStudyHero = {
     { label: "sevenloop", href: "/clients/sevenloop" },
   ],
   breadcrumbCurrent: "Branding",
-  image: {
+  media: fullFrame({
     src: "/assets/images/client-hub/case-study-hero.jpg",
     alt: "Sevenloop branding and project brochure design preview",
-  },
+  }),
 };
 
 // Sevenloop case study — pull-quote + "Details" fact table.
@@ -19,6 +32,7 @@ export const sevenloopCaseStudyHero = {
 export const sevenloopCaseStudyDetails = {
   quote:
     "We wrote four thousand words on how that film actually got made. The brief, the dead ends, the bit we’d never do again. Worth a read.",
+  logo: null as { src: string; alt: string } | null,
   tableHeading: "Details",
   rows: [
     { label: "Client", value: "Sevenloop" },
@@ -32,23 +46,23 @@ export const sevenloopCaseStudyDetails = {
 
 // Sevenloop case study — 4 full-bleed gallery images, each 1350×759 with
 // 13.98px radius, stacked one per section.
-export const sevenloopCaseStudyGallery = [
-  {
+export const sevenloopCaseStudyGallery: CaseStudyMediaFrame[] = [
+  fullFrame({
     src: "/assets/images/client-hub/case-study-gallery-1.jpg",
     alt: "Sevenloop case study gallery image 1",
-  },
-  {
+  }),
+  fullFrame({
     src: "/assets/images/client-hub/case-study-gallery-2.jpg",
     alt: "Sevenloop case study gallery image 2",
-  },
-  {
+  }),
+  fullFrame({
     src: "/assets/images/client-hub/case-study-gallery-3.jpg",
     alt: "Sevenloop case study gallery image 3",
-  },
-  {
+  }),
+  fullFrame({
     src: "/assets/images/client-hub/case-study-gallery-4.jpg",
     alt: "Sevenloop case study gallery image 4",
-  },
+  }),
 ];
 
 // Sevenloop case study — "View all clients" CTA below the gallery.

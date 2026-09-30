@@ -3,9 +3,8 @@ import { getTestimonials } from "@/cms/content";
 import { TestimonialCard } from "@/components/sections/TestimonialCard";
 
 /**
- * Video testimonials — 992 × 536, 60px between the heading and the row
- * and between the three cards. Every card starts the same size. A click
- * enlarges that card and hides the quote.
+ * Video testimonials — 992 wide. 16px between the three cards.
+ * Each card is 320px. A click enlarges that card and hides the quote.
  */
 export async function TestimonialVideos() {
   const testimonials = await getTestimonials();
@@ -17,7 +16,7 @@ export async function TestimonialVideos() {
           Client words, backing the <Accent>brand strategy</Accent> results
         </SectionHeading>
 
-        <div className="grid grid-cols-1 items-start gap-[60px] lg:grid-cols-3">
+        <div className="mx-auto grid w-full grid-cols-1 items-start justify-center gap-4 lg:grid-cols-3 lg:gap-4">
           {testimonials.map((item, i) => (
             <TestimonialCard key={`${item.alt}-${i}`} item={item} />
           ))}

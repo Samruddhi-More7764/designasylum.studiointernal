@@ -25,7 +25,15 @@ export async function CaseStudyDetails({
           <p className="font-figtree text-[24px] leading-[120%] font-normal tracking-[-1px] text-black sm:text-[32px] sm:tracking-[-2px] lg:text-[40px] lg:tracking-[-3px]">
             {details.quote}
           </p>
-          <CaseStudyQuoteIcon className="h-10 w-10 sm:h-12 sm:w-12 lg:h-[54px] lg:w-[54px]" />
+          {details.logo?.src ? (
+            <img
+              src={details.logo.src}
+              alt={details.logo.alt || "Client logo"}
+              className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12 lg:h-[54px] lg:w-[54px]"
+            />
+          ) : (
+            <CaseStudyQuoteIcon className="h-10 w-10 sm:h-12 sm:w-12 lg:h-[54px] lg:w-[54px]" />
+          )}
         </div>
 
         <div className="flex w-full max-w-[646px] flex-col gap-5 px-0 sm:gap-6 sm:px-4 lg:px-6">

@@ -1,20 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
 import {
   SocialLinkedIn,
   SocialInstagram,
   SocialYouTube,
 } from "@/components/ui/SocialIcons";
 import { FitWordmark } from "@/components/ui/FitWordmark";
-import {
-  FOOTER_COLUMNS,
-  AI_LINKS,
-  aiHomepage,
-  aiButtonWidth,
-  type FooterColumn,
-} from "@/data/footer";
+import { AiSummaryLinks } from "@/components/ui/AiSummaryLinks";
+import { FOOTER_COLUMNS, AI_LINKS, type FooterColumn } from "@/data/footer";
 
 /**
  * Full Homepage footer:
@@ -59,25 +53,8 @@ export function Footer({
           </a>
         </div>
 
-        <div className="flex flex-col items-start gap-5 lg:items-end">
-          <p className="font-figtree text-[11px] font-medium uppercase tracking-[0.14em] text-[#1D1D1D]">
-            Ask AI for a summary of Design Asylum
-          </p>
-
-          <div className="flex max-w-[360px] flex-wrap gap-3 lg:max-w-none lg:justify-end">
-            {aiLinks.map((name) => (
-              <a
-                key={name}
-                href={aiHomepage(name) ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-pill border border-[#1D1D1D]/30 bg-transparent px-4 font-figtree text-[11px] font-medium uppercase tracking-[0.04em] text-[#1D1D1D] ${aiButtonWidth(name)}`}
-              >
-                {name}
-                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
+        <div className="flex flex-col items-end">
+          <AiSummaryLinks links={aiLinks} />
         </div>
       </div>
 
