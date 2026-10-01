@@ -38,7 +38,10 @@ const FRAME_H = 913;
  */
 export function AboutPoints() {
   return (
-    <section className="relative w-full overflow-hidden lg:aspect-[1470/913]">
+    <section
+      data-nav="dark"
+      className="relative w-full overflow-hidden lg:aspect-[1470/913]"
+    >
       <div className="absolute inset-0 lg:hidden" aria-hidden="true">
         <Image
           src="/assets/images/about-points-photo.png"

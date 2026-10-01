@@ -30,7 +30,7 @@ export default async function ClientPage({ params }: Props) {
   return (
     <>
       <NavBar />
-      <main className="bg-white pt-28">
+      <main data-nav="light" className="bg-white pt-28">
         <ClientHubHero name={client.name} slug={client.slug} />
         <ClientHubBody clientSlug={slug} />
         <ClientHubPartnership clientSlug={slug} />

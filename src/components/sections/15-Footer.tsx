@@ -27,7 +27,7 @@ export function Footer({
   aiLinks?: string[];
 }) {
   return (
-    <footer className="relative overflow-hidden bg-black">
+    <footer data-nav="dark" className="relative overflow-hidden bg-black">
       <Image
         src="/assets/images/footer-gradient.png"
         alt=""

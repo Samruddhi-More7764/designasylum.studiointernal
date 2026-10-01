@@ -42,7 +42,11 @@ export function VideoEmbed() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative aspect-[1470/831] w-full bg-black">
+    <section
+      ref={sectionRef}
+      data-nav="dark"
+      className="relative aspect-[1470/831] w-full bg-black"
+    >
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"

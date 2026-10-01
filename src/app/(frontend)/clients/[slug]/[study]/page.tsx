@@ -22,7 +22,7 @@ export default async function CaseStudyRoutePage({ params }: Props) {
   return (
     <>
       <NavBar />
-      <main className="bg-white pt-28">
+      <main data-nav="light" className="bg-white pt-28">
         <CaseStudyHero clientSlug={slug} studySlug={study} />
         <CaseStudyDetails clientSlug={slug} studySlug={study} />
         <CaseStudyGallery clientSlug={slug} studySlug={study} />

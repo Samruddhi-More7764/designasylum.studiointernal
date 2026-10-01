@@ -27,7 +27,7 @@ export default async function Home() {
   return (
     <>
       <NavBar />
-      <main className="bg-white">
+      <main data-nav="light" className="bg-white">
         <Hero />
         <LogoMarquee />
         <FeaturedProjects />

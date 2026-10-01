@@ -7,6 +7,8 @@ interface LiveClockProps {
   label: string;
   /** IANA time zone, e.g. "Asia/Kolkata" */
   timeZone: string;
+  /** Dark bar uses white type. Light bar uses black type. */
+  tone?: "dark" | "light";
   className?: string;
 }
 
@@ -58,7 +60,12 @@ function subscribe(onTick: () => void) {
  *   rounded boxes), with AM/PM + real GMT offset beside them.
  * - Digits update live; no flip animation (page remains otherwise static).
  */
-export function LiveClock({ label, timeZone, className = "" }: LiveClockProps) {
+export function LiveClock({
+  label,
+  timeZone,
+  tone = "dark",
+  className = "",
+}: LiveClockProps) {
   const cacheRef = useRef<ClockParts | null>(null);
 
   const getSnapshot = () => {
@@ -83,19 +90,22 @@ export function LiveClock({ label, timeZone, className = "" }: LiveClockProps) {
     () => null,
   );
 
+  const ink = tone === "light" ? "text-black" : "text-white";
+  const chip = tone === "light" ? "bg-black/10" : "bg-white/10";
+
   return (
     <div className={`flex flex-col gap-1 leading-tight ${className}`}>
-      <span className="font-figtree text-[10px] uppercase tracking-wider text-white/80">
+      <span className={`font-figtree text-[10px] uppercase tracking-wider ${ink}`}>
         {label}
       </span>
-      <span className="flex items-center gap-1 font-figtree text-xs text-white">
-        <span className="rounded-[3px] bg-white/10 px-1 py-px tabular-nums">
+      <span className={`flex items-center gap-1 font-figtree text-xs ${ink}`}>
+        <span className={`rounded-[3px] px-1 py-px tabular-nums ${chip}`}>
           {parts?.hour ?? "--"}
         </span>
-        <span className="rounded-[3px] bg-white/10 px-1 py-px tabular-nums">
+        <span className={`rounded-[3px] px-1 py-px tabular-nums ${chip}`}>
           {parts?.minute ?? "--"}
         </span>
-        <span className="ml-1 text-[10px] uppercase text-white/80">
+        <span className={`ml-1 text-[10px] uppercase ${ink}`}>
           {parts?.dayPeriod ?? "AM"} ({parts?.offset ?? "GMT"})
         </span>
       </span>

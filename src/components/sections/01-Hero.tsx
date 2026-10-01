@@ -13,6 +13,7 @@ export function Hero() {
     <section className="relative z-0 h-[720px] w-full overflow-visible bg-white sm:h-[780px] lg:aspect-[1470/1225] lg:h-auto lg:min-h-0">
       {/* Rectangle 1 — hero photograph, rotated 180° */}
       <div
+        data-nav="dark"
         className="absolute inset-x-0 top-0 h-[58%] rotate-180 overflow-hidden lg:top-[calc(-160/1225*100%)] lg:aspect-[1470/831] lg:h-auto"
         aria-hidden="true"
       >
@@ -34,6 +35,7 @@ export function Hero() {
         before LogoMarquee. Desktop (lg+): unchanged.
       */}
       <div
+        data-nav="light"
         className="pointer-events-none absolute inset-x-0 top-[40%] aspect-[390/636] w-full lg:hidden"
         aria-hidden="true"
       >
@@ -47,6 +49,7 @@ export function Hero() {
         />
       </div>
       <div
+        data-nav="light"
         className="pointer-events-none absolute inset-x-0 top-[calc(429/1225*100%)] hidden h-[calc(636/1225*100%)] lg:block"
         aria-hidden="true"
       >
