@@ -30,6 +30,10 @@ import { FaqPage } from "./globals/FaqPage";
 import { FaqDetail } from "./globals/FaqDetail";
 import { CareersPage } from "./globals/CareersPage";
 import { WorkPage } from "./globals/WorkPage";
+import { ClientsIndex } from "./globals/ClientsIndex";
+import { StudioPage } from "./globals/StudioPage";
+import { TeamPage } from "./globals/TeamPage";
+import { TeamPerson } from "./globals/TeamPerson";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -72,6 +76,10 @@ export default buildConfig({
     FaqDetail,
     CareersPage,
     WorkPage,
+    ClientsIndex,
+    StudioPage,
+    TeamPage,
+    TeamPerson,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",

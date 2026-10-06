@@ -119,6 +119,10 @@ export interface Config {
     'faq-detail': FaqDetail;
     'careers-page': CareersPage;
     'work-page': WorkPage;
+    'clients-index': ClientsIndex;
+    'studio-page': StudioPage;
+    'team-page': TeamPage;
+    'team-person': TeamPerson;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
@@ -132,6 +136,10 @@ export interface Config {
     'faq-detail': FaqDetailSelect<false> | FaqDetailSelect<true>;
     'careers-page': CareersPageSelect<false> | CareersPageSelect<true>;
     'work-page': WorkPageSelect<false> | WorkPageSelect<true>;
+    'clients-index': ClientsIndexSelect<false> | ClientsIndexSelect<true>;
+    'studio-page': StudioPageSelect<false> | StudioPageSelect<true>;
+    'team-page': TeamPageSelect<false> | TeamPageSelect<true>;
+    'team-person': TeamPersonSelect<false> | TeamPersonSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2156,6 +2164,21 @@ export interface FaqDetail {
  */
 export interface CareersPage {
   id: number;
+  rolesBefore?: string | null;
+  rolesAccent?: string | null;
+  rolesAfter?: string | null;
+  rolesBody?: string | null;
+  rolesButton?: string | null;
+  formBefore?: string | null;
+  formAccent?: string | null;
+  formAfter?: string | null;
+  formDek?: string | null;
+  interests?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
   breadcrumbCurrent?: string | null;
   titleBefore?: string | null;
   titleAccent?: string | null;
@@ -2202,21 +2225,6 @@ export interface CareersPage {
         id?: string | null;
       }[]
     | null;
-  rolesBefore?: string | null;
-  rolesAccent?: string | null;
-  rolesAfter?: string | null;
-  rolesBody?: string | null;
-  rolesButton?: string | null;
-  formBefore?: string | null;
-  formAccent?: string | null;
-  formAfter?: string | null;
-  formDek?: string | null;
-  interests?:
-    | {
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2251,6 +2259,262 @@ export interface WorkPage {
          * Where the card goes. Leave empty until that page exists.
          */
         href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients-index".
+ */
+export interface ClientsIndex {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  heading?: string | null;
+  cards?:
+    | {
+        /**
+         * The picture on the card. Leave empty to keep the DirectMeds cover.
+         */
+        image?: (number | null) | Media;
+        name: string;
+        service?: string | null;
+        /**
+         * Where the card goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "studio-page".
+ */
+export interface StudioPage {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  headingBefore?: string | null;
+  headingAccent?: string | null;
+  headingAfter?: string | null;
+  /**
+   * The wide photograph under the heading. Leave empty to keep the designed photo.
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * A photo or a video. Leave empty to keep the designed photo.
+   */
+  portrait?: (number | null) | Media;
+  videoUrl?: string | null;
+  quote?: string | null;
+  quoteName?: string | null;
+  quoteRole?: string | null;
+  chips?:
+    | {
+        label: string;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  projectsBefore?: string | null;
+  projectsAccent?: string | null;
+  projects?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        body?: string | null;
+        /**
+         * Where View website goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  fitBefore?: string | null;
+  fitAccent?: string | null;
+  fitAfter?: string | null;
+  fitCards?:
+    | {
+        caption: string;
+        id?: string | null;
+      }[]
+    | null;
+  missBefore?: string | null;
+  missAccent?: string | null;
+  missAfter?: string | null;
+  missCards?:
+    | {
+        caption: string;
+        id?: string | null;
+      }[]
+    | null;
+  teamBefore?: string | null;
+  teamAccent?: string | null;
+  people?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-page".
+ */
+export interface TeamPage {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  heading?: string | null;
+  intro?: string | null;
+  leadershipHeading?: string | null;
+  leadership?:
+    | {
+        /**
+         * Leave empty to keep the designed portrait.
+         */
+        image?: (number | null) | Media;
+        name: string;
+        role?: string | null;
+        /**
+         * Where Read more goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  teamAccent?: string | null;
+  teamAfter?: string | null;
+  members?:
+    | {
+        /**
+         * Leave empty to keep the designed portrait.
+         */
+        image?: (number | null) | Media;
+        name: string;
+        role?: string | null;
+        /**
+         * Where Read more goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-person".
+ */
+export interface TeamPerson {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  name?: string | null;
+  role?: string | null;
+  /**
+   * Front card. Leave empty to keep the grey placeholder.
+   */
+  photoOne?: (number | null) | Media;
+  /**
+   * Middle card. Leave empty to keep the grey placeholder.
+   */
+  photoTwo?: (number | null) | Media;
+  /**
+   * Back card. Leave empty to keep the grey placeholder.
+   */
+  photoThree?: (number | null) | Media;
+  paragraphs?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  servicesBefore?: string | null;
+  servicesAccent?: string | null;
+  servicesAfter?: string | null;
+  services?:
+    | {
+        /**
+         * Leave empty to keep the grey placeholder.
+         */
+        icon?: (number | null) | Media;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  logos?:
+    | {
+        /**
+         * Leave the list empty to keep the temporary logos.
+         */
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  projectsBefore?: string | null;
+  projectsAccent?: string | null;
+  projectsAfter?: string | null;
+  projects?:
+    | {
+        /**
+         * Leave empty to keep the designed photo.
+         */
+        image?: (number | null) | Media;
+        name: string;
+        body?: string | null;
+        /**
+         * Where View website goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blogsBefore?: string | null;
+  blogsAccent?: string | null;
+  blogsAfter?: string | null;
+  posts?:
+    | {
+        title: string;
+        /**
+         * Where the row goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  solutionsBefore?: string | null;
+  solutionsAccent?: string | null;
+  solutionsAfter?: string | null;
+  solutions?:
+    | {
+        /**
+         * Leave empty to keep the grey placeholder.
+         */
+        icon?: (number | null) | Media;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  industriesBefore?: string | null;
+  industriesAccent?: string | null;
+  industriesAfter?: string | null;
+  industries?:
+    | {
+        /**
+         * Leave empty to keep the grey placeholder.
+         */
+        icon?: (number | null) | Media;
+        label: string;
         id?: string | null;
       }[]
     | null;
@@ -2972,6 +3236,21 @@ export interface FaqDetailSelect<T extends boolean = true> {
  * via the `definition` "careers-page_select".
  */
 export interface CareersPageSelect<T extends boolean = true> {
+  rolesBefore?: T;
+  rolesAccent?: T;
+  rolesAfter?: T;
+  rolesBody?: T;
+  rolesButton?: T;
+  formBefore?: T;
+  formAccent?: T;
+  formAfter?: T;
+  formDek?: T;
+  interests?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
   breadcrumbCurrent?: T;
   titleBefore?: T;
   titleAccent?: T;
@@ -3012,21 +3291,6 @@ export interface CareersPageSelect<T extends boolean = true> {
         body?: T;
         id?: T;
       };
-  rolesBefore?: T;
-  rolesAccent?: T;
-  rolesAfter?: T;
-  rolesBody?: T;
-  rolesButton?: T;
-  formBefore?: T;
-  formAccent?: T;
-  formAfter?: T;
-  formDek?: T;
-  interests?:
-    | T
-    | {
-        label?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -3053,6 +3317,205 @@ export interface WorkPageSelect<T extends boolean = true> {
         service?: T;
         category?: T;
         href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients-index_select".
+ */
+export interface ClientsIndexSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  heading?: T;
+  cards?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        service?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "studio-page_select".
+ */
+export interface StudioPageSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  headingBefore?: T;
+  headingAccent?: T;
+  headingAfter?: T;
+  heroImage?: T;
+  portrait?: T;
+  videoUrl?: T;
+  quote?: T;
+  quoteName?: T;
+  quoteRole?: T;
+  chips?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  projectsBefore?: T;
+  projectsAccent?: T;
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        body?: T;
+        href?: T;
+        id?: T;
+      };
+  fitBefore?: T;
+  fitAccent?: T;
+  fitAfter?: T;
+  fitCards?:
+    | T
+    | {
+        caption?: T;
+        id?: T;
+      };
+  missBefore?: T;
+  missAccent?: T;
+  missAfter?: T;
+  missCards?:
+    | T
+    | {
+        caption?: T;
+        id?: T;
+      };
+  teamBefore?: T;
+  teamAccent?: T;
+  people?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-page_select".
+ */
+export interface TeamPageSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  heading?: T;
+  intro?: T;
+  leadershipHeading?: T;
+  leadership?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        href?: T;
+        id?: T;
+      };
+  teamAccent?: T;
+  teamAfter?: T;
+  members?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-person_select".
+ */
+export interface TeamPersonSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  name?: T;
+  role?: T;
+  photoOne?: T;
+  photoTwo?: T;
+  photoThree?: T;
+  paragraphs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  servicesBefore?: T;
+  servicesAccent?: T;
+  servicesAfter?: T;
+  services?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  logos?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  projectsBefore?: T;
+  projectsAccent?: T;
+  projectsAfter?: T;
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        body?: T;
+        href?: T;
+        id?: T;
+      };
+  blogsBefore?: T;
+  blogsAccent?: T;
+  blogsAfter?: T;
+  posts?:
+    | T
+    | {
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  solutionsBefore?: T;
+  solutionsAccent?: T;
+  solutionsAfter?: T;
+  solutions?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
+      };
+  industriesBefore?: T;
+  industriesAccent?: T;
+  industriesAfter?: T;
+  industries?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
         id?: T;
       };
   updatedAt?: T;

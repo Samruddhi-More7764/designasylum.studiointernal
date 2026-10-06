@@ -16,6 +16,8 @@ export interface FooterColumn {
 const FOOTER_HREFS: Record<string, string> = {
   "Why Design Asylum": "/why-design-asylum",
   Work: "/work",
+  Clients: "/clients",
+  Team: "/team",
   Blogs: "/blogs",
   Careers: "/why-design-asylum",
   Contact: "/contact",

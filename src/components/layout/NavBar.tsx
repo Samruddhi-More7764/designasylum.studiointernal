@@ -14,6 +14,9 @@ const RIGHT_NAV_LINKS = ["Team", "Studio"];
 const ALL_NAV_LINKS = [...LEFT_NAV_LINKS, ...RIGHT_NAV_LINKS];
 const NAV_HREFS: Record<string, string> = {
   Works: "/work",
+  Clients: "/clients",
+  Team: "/team",
+  Studio: "/studio",
 };
 
 function NavLink({
