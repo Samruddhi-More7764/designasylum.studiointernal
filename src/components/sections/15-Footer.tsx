@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/SocialIcons";
 import { FitWordmark } from "@/components/ui/FitWordmark";
 import { AiSummaryLinks } from "@/components/ui/AiSummaryLinks";
-import { FOOTER_COLUMNS, AI_LINKS, type FooterColumn } from "@/data/footer";
+import { FOOTER_COLUMNS, AI_LINKS, footerLinkHref, type FooterColumn } from "@/data/footer";
 
 /**
  * Full Homepage footer:
@@ -37,43 +37,43 @@ export function Footer({
       />
 
       {/* Contact + AI */}
-      <div className="relative mx-auto grid max-w-[1470px] grid-cols-1 gap-10 px-5 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-20 lg:px-[60px]">
-        <div className="flex flex-col gap-1">
+      <div className="relative mx-auto grid max-w-[1470px] grid-cols-1 gap-10 px-5 pt-12 pb-8 sm:px-6 sm:pt-14 lg:grid-cols-2 lg:items-start lg:gap-8 lg:px-12 lg:pt-14 lg:pb-24">
+        <div className="flex flex-col">
           <a
             href="mailto:accounts@designasylum.in"
-            className="break-all font-figtree text-[22px] font-medium tracking-[-0.5px] text-[#1D1D1D] sm:text-[28px] lg:break-normal lg:text-[36px]"
+            className="block whitespace-nowrap font-figtree text-[clamp(26px,7.8vw,32px)] leading-[1.2] font-normal tracking-[-1.38px] text-[#1D1D1D] lg:text-[55px] lg:leading-[73px]"
           >
             accounts@designasylum.in
           </a>
           <a
             href="tel:+918547807934"
-            className="font-figtree text-[22px] font-medium tracking-[-0.5px] text-[#1D1D1D] sm:text-[28px] lg:text-[36px]"
+            className="block whitespace-nowrap font-figtree text-[clamp(26px,7.8vw,32px)] leading-[1.2] font-normal tracking-[-1.38px] text-[#111] lg:text-[55px] lg:leading-[73px]"
           >
             +91 8547807934
           </a>
         </div>
 
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-start lg:items-end">
           <AiSummaryLinks links={aiLinks} />
         </div>
       </div>
 
       {/* Link columns */}
-      <div className="relative mx-auto max-w-[1470px] px-5 pt-8 sm:px-6 sm:pt-10 lg:px-[60px]">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-8 lg:gap-8">
+      <div className="relative mx-auto max-w-[1470px] px-5 sm:px-6 lg:px-12">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-8 lg:gap-x-6">
           {columns.map((col) => (
-            <div key={col.title} className="flex flex-col gap-3">
-              <h3 className="font-figtree text-[11px] font-semibold uppercase tracking-[0.12em] text-[#1D1D1D]">
+            <div key={col.title} className="flex flex-col gap-4">
+              <h3 className="font-satoshi text-[14px] leading-[15px] font-bold tracking-[-0.4px] text-black uppercase">
                 {col.title}
               </h3>
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-[9px]">
                 {col.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
-                      className="font-satoshi text-[13px] text-[#1D1D1D]/70 transition-opacity hover:opacity-70"
+                      href={link.href || footerLinkHref(link.label)}
+                      className="font-satoshi text-[16px] leading-[21px] font-medium tracking-[-0.4px] text-black/70 capitalize transition-opacity hover:opacity-70"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -81,8 +81,8 @@ export function Footer({
             </div>
           ))}
 
-          <div className="flex flex-col gap-3">
-            <h3 className="font-figtree text-[11px] font-semibold uppercase tracking-[0.12em] text-[#1D1D1D]">
+          <div className="flex flex-col gap-4">
+            <h3 className="font-satoshi text-[14px] leading-[15px] font-bold tracking-[-0.4px] text-black uppercase">
               Follow Us
             </h3>
             <div className="flex gap-4 text-[#1D1D1D]">
@@ -106,8 +106,8 @@ export function Footer({
       </div>
 
       <div className="relative mx-auto max-w-[1470px] px-5 pb-8 sm:px-6 lg:px-[60px]">
-        <div className="mt-8 flex flex-col gap-2 pt-4 font-figtree text-[10px] uppercase tracking-wider text-white lg:mt-10 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:pt-6">
-          <span className="inline-flex items-center gap-4 lg:contents">
+        <div className="mt-8 flex flex-col gap-2 pt-4 font-figtree text-[11px] leading-[15px] font-semibold tracking-[0.8px] text-white uppercase lg:mt-10 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:pt-6">
+          <span className="flex w-full items-center justify-between gap-4 lg:contents">
             <span>&copy; Design Asylum 2026</span>
             <span className="whitespace-nowrap lg:order-last">
               Last updated 10 June 2026

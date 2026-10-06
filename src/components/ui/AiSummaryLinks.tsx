@@ -31,13 +31,13 @@ export function AiSummaryLinks({ links = AI_LINKS }: { links?: string[] }) {
   }
 
   return (
-    <div className="flex w-full flex-col items-end gap-5">
-      <p className="h-[15px] w-[290px] max-w-full text-right font-figtree text-[11px] font-medium leading-[15px] tracking-[0.14em] whitespace-nowrap text-[#1D1D1D] uppercase">
+    <div className="flex w-full flex-col items-start gap-5 lg:items-end">
+      <p className="h-[15px] max-w-full text-left font-satoshi text-[12px] leading-[15px] font-bold tracking-[-0.4px] whitespace-nowrap text-black uppercase lg:w-[290px] lg:text-right lg:font-figtree lg:text-[11px] lg:font-medium lg:tracking-[0.14em] lg:text-[#1D1D1D]">
         Ask AI for a summary of Design Asylum
       </p>
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex flex-col items-start gap-2 lg:items-end">
         {rows.map((row) => (
-          <div key={row.join("-")} className="flex justify-end gap-2">
+          <div key={row.join("-")} className="flex justify-start gap-2 lg:justify-end">
             {row.map((name) => (
               <AiPill key={name} name={name} />
             ))}

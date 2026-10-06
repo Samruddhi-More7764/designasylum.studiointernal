@@ -66,14 +66,38 @@ function LogoRow({ logos }: { logos: ClientLogo[] }) {
  * Desktop (lg+): 1130×304, gap 24, two static rows (4 + 5).
  * Mobile (<lg): 2-column grid matching Homepagemobile reference.
  */
-export async function LogoMarquee() {
-  const { marqueeRow1, marqueeRow2 } = await getClientLogoLayouts();
+export async function LogoMarquee({
+  placement = "home",
+  logos,
+}: {
+  /** Service and location pages use Figma gaps; homepage keeps its own pull and padding. */
+  placement?: "home" | "service" | "location";
+  /** When set, these logos replace the homepage list. Used by the branding strategy page. */
+  logos?: { row1: ClientLogo[]; row2: ClientLogo[] };
+} = {}) {
+  const { marqueeRow1, marqueeRow2 } = logos
+    ? { marqueeRow1: logos.row1, marqueeRow2: logos.row2 }
+    : await getClientLogoLayouts();
   const mobileLogos = [...marqueeRow1, ...marqueeRow2];
+  const service = placement === "service";
+  const location = placement === "location";
 
   return (
-    <section className="relative z-10 mt-0 bg-transparent px-5 pb-12 sm:px-6 sm:pb-16 lg:-mt-[calc(116/1470*100%)] lg:px-0 lg:pb-20">
+    <section
+      className={
+        location
+          ? "relative z-10 bg-white px-4 py-[120px] lg:px-0 lg:py-[200px]"
+          : service
+            ? "relative z-10 bg-white px-4 pb-0 lg:bg-transparent lg:px-0 lg:pb-[150px]"
+            : "relative z-10 mt-0 bg-transparent px-5 pb-12 sm:px-6 sm:pb-16 lg:-mt-[calc(116/1470*100%)] lg:px-0 lg:pb-20"
+      }
+    >
       {/* Mobile 2-col grid — 9 cards; last card sits in the right column */}
-      <div className="mx-auto grid w-full max-w-[360px] grid-cols-2 gap-3 sm:gap-4 lg:hidden">
+      <div
+        className={`mx-auto grid w-full grid-cols-2 lg:hidden ${
+          service ? "max-w-[292px] gap-3" : "max-w-[358px] gap-3 sm:gap-4"
+        }`}
+      >
         {mobileLogos.map((logo, i) => (
           <LogoCard
             key={`m-${logo.name}-${i}`}

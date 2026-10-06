@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/SocialIcons";
 import { FitWordmark } from "@/components/ui/FitWordmark";
 import { AiSummaryLinks } from "@/components/ui/AiSummaryLinks";
-import { FOOTER_COLUMNS, AI_LINKS, type FooterColumn } from "@/data/footer";
+import { FOOTER_COLUMNS, AI_LINKS, footerLinkHref, type FooterColumn } from "@/data/footer";
 
 /**
  * Case study — footer: same gradient background, wordmark and copyright
@@ -98,17 +98,17 @@ export function CaseStudyFooter({
               key={col.title}
               className="flex w-auto flex-col gap-3 sm:w-[150px]"
             >
-              <h3 className="font-figtree text-[11px] font-semibold uppercase tracking-[0.12em] text-[#1D1D1D]">
+              <h3 className="font-satoshi text-[14px] leading-[15px] font-bold tracking-[-0.4px] text-black uppercase">
                 {col.title}
               </h3>
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-[9px]">
                 {col.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
-                      className="font-satoshi text-[13px] text-[#1D1D1D]/70 transition-opacity hover:opacity-70"
+                      href={link.href || footerLinkHref(link.label)}
+                      className="font-satoshi text-[16px] leading-[21px] font-medium tracking-[-0.4px] text-black/70 capitalize transition-opacity hover:opacity-70"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -121,7 +121,7 @@ export function CaseStudyFooter({
       <div className="relative mx-auto w-full max-w-[1470px] px-5 pb-8 sm:px-6 lg:px-[60px]">
         <FitWordmark text="Design_ Asylum" />
 
-        <div className="mt-8 flex flex-col gap-2 pt-4 font-figtree text-[10px] uppercase tracking-wider text-white sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-6">
+        <div className="mt-8 flex flex-col gap-2 pt-4 font-figtree text-[11px] leading-[15px] font-semibold tracking-[0.8px] text-white uppercase sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-6">
           <span>&copy; Design Asylum 2026</span>
           <span>Built in-house by Asylum Build</span>
           <span>Last updated 10 June 2026</span>

@@ -109,9 +109,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-footer': SiteFooter;
+    'branding-strategy': BrandingStrategy;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
+    'branding-strategy': BrandingStrategySelect<false> | BrandingStrategySelect<true>;
   };
   locale: null;
   widgets: {
@@ -1271,6 +1273,220 @@ export interface SiteFooter {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Links under Work. Leave URL empty to keep the built-in page, or type a path such as /work.
+   */
+  work?:
+    | {
+        label: string;
+        /**
+         * Optional. Example: /blogs/branding-agency-in-pune
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Links under Company. Leave URL empty to keep the built-in page, or type a path such as /work.
+   */
+  company?:
+    | {
+        label: string;
+        /**
+         * Optional. Example: /blogs/branding-agency-in-pune
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Links under Solutions. Leave URL empty to keep the built-in page, or type a path such as /work.
+   */
+  solutions?:
+    | {
+        label: string;
+        /**
+         * Optional. Example: /blogs/branding-agency-in-pune
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Links under Services. Leave URL empty to keep the built-in page, or type a path such as /work.
+   */
+  services?:
+    | {
+        label: string;
+        /**
+         * Optional. Example: /blogs/branding-agency-in-pune
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Links under Industries. Leave URL empty to keep the built-in page, or type a path such as /work.
+   */
+  industries?:
+    | {
+        label: string;
+        /**
+         * Optional. Example: /blogs/branding-agency-in-pune
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Links under Studio. Leave URL empty to keep the built-in page, or type a path such as /work.
+   */
+  studio?:
+    | {
+        label: string;
+        /**
+         * Optional. Example: /blogs/branding-agency-in-pune
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branding-strategy".
+ */
+export interface BrandingStrategy {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * The large paragraph above the first section.
+   */
+  lead?: string | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example definitive-guide.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        pointers?:
+          | {
+              term?: string | null;
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        closing?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        highlightTitle?: string | null;
+        highlightBody?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Logos on the branding strategy page only. They do not change the homepage.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside the card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside the card, in pixels. Default 48.
+         */
+        height?: number | null;
+        /**
+         * Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.
+         */
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        description: string;
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show it on every tab. The value must match the tab Id.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  expertsBefore?: string | null;
+  expertsAccent?: string | null;
+  expertsSubheading?: string | null;
+  experts?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        role: string;
+        /**
+         * Where the Read more button goes.
+         */
+        readMoreUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedBefore?: string | null;
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        title: string;
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1295,6 +1511,154 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
+        id?: T;
+      };
+  work?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  company?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  solutions?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  services?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  industries?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  studio?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branding-strategy_select".
+ */
+export interface BrandingStrategySelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        pointers?:
+          | T
+          | {
+              term?: T;
+              text?: T;
+              id?: T;
+            };
+        closing?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        highlightTitle?: T;
+        highlightBody?: T;
+        id?: T;
+      };
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  expertsBefore?: T;
+  expertsAccent?: T;
+  expertsSubheading?: T;
+  experts?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        readMoreUrl?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
         id?: T;
       };
   updatedAt?: T;

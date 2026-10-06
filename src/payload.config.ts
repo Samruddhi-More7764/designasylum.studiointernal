@@ -20,6 +20,7 @@ import { FaqItems } from "./collections/FaqItems";
 import { Clients } from "./collections/Clients";
 import { CaseStudies } from "./collections/CaseStudies";
 import { SiteFooter } from "./globals/SiteFooter";
+import { BrandingStrategy } from "./globals/BrandingStrategy";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -50,7 +51,7 @@ export default buildConfig({
     Clients,
     CaseStudies,
   ],
-  globals: [SiteFooter],
+  globals: [SiteFooter, BrandingStrategy],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",
   typescript: {

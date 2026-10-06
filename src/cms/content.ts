@@ -29,7 +29,9 @@ import { faqItems as fallbackFaq, type FaqItem } from "@/data/faq";
 import {
   FOOTER_COLUMNS as fallbackFooterColumns,
   AI_LINKS as fallbackAiLinks,
+  footerLinkHref,
   type FooterColumn,
+  type FooterLink,
 } from "@/data/footer";
 import {
   clientHubNavItems as fallbackNavItems,
@@ -617,6 +619,27 @@ export type FooterContent = {
   aiLinks: string[];
 };
 
+const FOOTER_LISTS = {
+  Work: "work",
+  Company: "company",
+  Solutions: "solutions",
+  Services: "services",
+  Industries: "industries",
+  Studio: "studio",
+} as const;
+
+type FooterListRow = { label?: string | null; href?: string | null };
+
+function footerList(rows: FooterListRow[] | null | undefined): FooterLink[] | null {
+  if (!rows?.length) return null;
+  const links = rows.flatMap((row) => {
+    const label = row?.label?.trim() || "";
+    if (!label) return [];
+    return [{ label, href: row?.href?.trim() || footerLinkHref(label) }];
+  });
+  return links.length ? links : null;
+}
+
 export const getFooter = cache(async (): Promise<FooterContent> => {
   const fallback: FooterContent = {
     columns: fallbackFooterColumns,
@@ -626,19 +649,17 @@ export const getFooter = cache(async (): Promise<FooterContent> => {
   if (!payload) return fallback;
 
   try {
-    const global = await payload.findGlobal({ slug: "site-footer", depth: 0 });
-    const columns = (global.columns || [])
-      .map((col) => ({
-        title: col.title?.trim() || "",
-        links: labels(col.links as LabelRow[]),
-      }))
-      .filter((col) => col.title);
-    const aiLinks = labels(global.aiLinks as LabelRow[]);
-    if (!columns.length) return fallback;
-    return {
-      columns,
-      aiLinks: aiLinks.length ? aiLinks : fallback.aiLinks,
-    };
+    const global = (await payload.findGlobal({
+      slug: "site-footer",
+      depth: 0,
+    })) as Partial<Record<(typeof FOOTER_LISTS)[keyof typeof FOOTER_LISTS], FooterListRow[] | null>>;
+    const columns = fallbackFooterColumns.map((column) => {
+      const key = FOOTER_LISTS[column.title as keyof typeof FOOTER_LISTS];
+      if (!key) return column;
+      const links = footerList(global[key]);
+      return links ? { ...column, links } : column;
+    });
+    return { columns, aiLinks: fallback.aiLinks };
   } catch (error) {
     console.warn("[cms] footer fallback", error);
     return fallback;

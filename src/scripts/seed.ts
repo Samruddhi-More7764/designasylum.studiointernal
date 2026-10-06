@@ -7,11 +7,23 @@ import config from "@payload-config";
 import { featuredProjects } from "../data/projects";
 import { portfolioItems } from "../data/portfolio";
 import { painPoints } from "../data/painPoints";
-import { clientLogos } from "../data/clients";
+import { clientLogos, marqueeRow1, marqueeRow2 } from "../data/clients";
 import { caseStudies } from "../data/caseStudies";
 import { testimonials } from "../data/testimonials";
 import { faqItems } from "../data/faq";
-import { FOOTER_COLUMNS, AI_LINKS } from "../data/footer";
+import { FOOTER_COLUMNS } from "../data/footer";
+import {
+  articleSections,
+  brandingExperts,
+  brandingExpertsHeading,
+  brandingProjects,
+  breadcrumbCurrent,
+  clientBrandingTabs,
+  introduction,
+  relatedBlogs,
+  relatedBlogsHeading,
+  serviceFaqItems,
+} from "../data/brandingAgencyPage";
 import {
   clientHubNavItems,
   sevenloopAbout,
@@ -389,14 +401,91 @@ async function seed() {
     })),
   );
 
+  const footerFields = {
+    Work: "work",
+    Company: "company",
+    Solutions: "solutions",
+    Services: "services",
+    Industries: "industries",
+    Studio: "studio",
+  } as const;
+
   await payload.updateGlobal({
     slug: "site-footer",
+    data: Object.fromEntries(
+      Object.entries(footerFields).map(([title, field]) => {
+        const column = FOOTER_COLUMNS.find((item) => item.title === title);
+        return [
+          field,
+          (column?.links ?? []).map((link) => ({
+            label: link.label,
+            href: link.href === "#" ? undefined : link.href,
+          })),
+        ];
+      }),
+    ),
+  });
+
+  await payload.updateGlobal({
+    slug: "branding-strategy",
     data: {
-      columns: FOOTER_COLUMNS.map((col) => ({
-        title: col.title,
-        links: col.links.map((label) => ({ label })),
+      breadcrumbCurrent,
+      heroTitle: "Branding agency in Pune",
+      heroIntro:
+        "A branding agency should answer one question first: what do you want a buyer, an investor, or a hire to believe about you before they meet you. Most agencies skip the question and go straight to logo exploration. Design Asylum starts where every B2B brand actually has to start — with diagnosis, positioning, and the words on the page — and only then builds the identity.",
+      lead: introduction,
+      sections: articleSections.map((section) => ({
+        anchor: section.id,
+        tocLabel: section.tocLabel,
+        headingBefore: section.before,
+        headingAccent: section.accent,
+        headingAfter: section.after,
+        paragraphs: section.paragraphs.map((text) => ({ text })),
+        pointers: (section.pointers ?? []).map((item) => ({
+          term: item.term,
+          text: item.text,
+        })),
+        closing: (section.closing ?? []).map((text) => ({ text })),
+        highlightTitle: section.highlight?.title,
+        highlightBody: section.highlight?.body,
       })),
-      aiLinks: AI_LINKS.map((label) => ({ label })),
+      logos: [...marqueeRow1, ...marqueeRow2].map((logo, index) => ({
+        name: logo.name,
+        width: logo.width,
+        height: logo.height,
+        row: (index < marqueeRow1.length ? "1" : "2") as "1" | "2",
+      })),
+      clientsBefore: "Clients we did ",
+      clientsAccent: "branding",
+      clientsAfter: " for",
+      clientTabs: clientBrandingTabs.map((tab) => ({
+        tabId: tab.id,
+        label: tab.label,
+      })),
+      projects: brandingProjects.map((project) => ({
+        name: project.name,
+        description: project.description,
+        href: project.href,
+      })),
+      faqs: serviceFaqItems.map((item) => ({
+        question: item.question,
+        answer: item.answer,
+      })),
+      expertsBefore: brandingExpertsHeading.before,
+      expertsAccent: brandingExpertsHeading.accent,
+      expertsSubheading: brandingExpertsHeading.subheading,
+      experts: brandingExperts.map((member) => ({
+        name: member.name,
+        role: member.role,
+      })),
+      relatedBefore: relatedBlogsHeading.before,
+      relatedAccent: relatedBlogsHeading.accent,
+      relatedBlogs: relatedBlogs.map((post) => ({
+        date: post.date,
+        readTime: post.readTime,
+        title: post.title,
+        href: post.href,
+      })),
     },
   });
 

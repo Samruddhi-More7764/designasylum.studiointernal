@@ -3,15 +3,39 @@
 // (`CaseStudyFooter`), which reuses the same column copy minus "Sales"
 // (folded into the Case Study's top contact block instead) and without a
 // dedicated "Follow Us" column (social icons move into that same block).
+export interface FooterLink {
+  label: string;
+  href: string;
+}
+
 export interface FooterColumn {
   title: string;
-  links: string[];
+  links: FooterLink[];
+}
+
+const FOOTER_HREFS: Record<string, string> = {
+  "Why Design Asylum": "/why-design-asylum",
+  Work: "/work",
+  Blogs: "/blogs",
+  Careers: "/why-design-asylum",
+  Contact: "/contact",
+  FAQs: "/faq",
+  Manufacturing: "/industries/manufacturing",
+  "Brand Systems": "/blogs/branding-agency-in-pune",
+};
+
+export function footerLinkHref(label: string): string {
+  return FOOTER_HREFS[label] ?? "#";
+}
+
+function footerLink(label: string): FooterLink {
+  return { label, href: footerLinkHref(label) };
 }
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Sales",
-    links: ["+91 9767085896", "+91 9158315015"],
+    links: ["+91 9767085896", "+91 9158315015"].map(footerLink),
   },
   {
     title: "Work",
@@ -23,7 +47,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       "Website Audit",
       "Print Studio",
       "Studio Reviews",
-    ],
+    ].map(footerLink),
   },
   {
     title: "Company",
@@ -34,7 +58,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       "Our Terms",
       "FAQs",
       "The No Brainer Offer",
-    ],
+    ].map(footerLink),
   },
   {
     title: "Solutions",
@@ -45,7 +69,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       "Naming",
       "Positioning",
       "Visual Identity",
-    ],
+    ].map(footerLink),
   },
   {
     title: "Services",
@@ -56,7 +80,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       "Print Design",
       "Campaigns",
       "Brand Systems",
-    ],
+    ].map(footerLink),
   },
   {
     title: "Industries",
@@ -67,11 +91,13 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       "Manufacturing",
       "Cybersecurity",
       "Healthcare",
-    ],
+    ].map(footerLink),
   },
   {
     title: "Studio",
-    links: ["Work", "Thinking", "Clients", "Team", "Reviews", "Contact"],
+    links: ["Work", "Blogs", "Clients", "Team", "Careers", "Reviews", "Contact"].map(
+      footerLink,
+    ),
   },
 ];
 
