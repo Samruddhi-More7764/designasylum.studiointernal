@@ -4,6 +4,7 @@ import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { Accent } from "@/components/ui/SectionHeading";
+import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { CareersApplicationForm } from "@/components/why-design-asylum/CareersApplicationForm";
 import { LifeOutside } from "@/components/why-design-asylum/LifeOutside";
 import { getFooter } from "@/cms/content";
@@ -179,9 +180,9 @@ export default async function WhyDesignAsylumPage() {
               </div>
               <a
                 href="#apply"
-                className="inline-flex h-14 w-[189px] items-center justify-center gap-2 rounded-pill border border-black bg-black px-5 font-satoshi text-[14px] font-medium leading-4 tracking-[-0.5px] text-white uppercase"
+                className="group inline-flex h-14 w-[189px] items-center justify-center gap-2 rounded-pill border border-black bg-black px-5 font-satoshi text-[14px] font-medium leading-4 tracking-[-0.5px] text-white uppercase"
               >
-                {openRoles.button}
+                <CtaHoverLabel>{openRoles.button}</CtaHoverLabel>
                 <Image
                   src="/assets/images/branding-agency/arrow-up-right-white.png"
                   alt=""
@@ -189,7 +190,7 @@ export default async function WhyDesignAsylumPage() {
                   height={9}
                   unoptimized
                   aria-hidden="true"
-                  className="h-[9px] w-[9px] shrink-0"
+                  className={`h-[9px] w-[9px] ${ctaArrowClass}`}
                 />
               </a>
             </div>

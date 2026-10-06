@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { CtaHoverLabel } from "@/components/ui/CtaHoverLabel";
 import { LiveClock } from "@/components/ui/LiveClock";
 import { PillButton } from "@/components/ui/PillButton";
 
@@ -26,21 +27,22 @@ function NavLink({
 }) {
   const className =
     tone === "light"
-      ? "font-figtree text-[12px] leading-[16.8px] font-normal uppercase tracking-[-0.12px] text-black transition-colors duration-300 hover:opacity-70"
-      : "font-figtree text-[13px] font-medium uppercase tracking-[0.12em] text-white transition-colors duration-300 hover:opacity-70";
+      ? "group whitespace-nowrap font-figtree text-[12px] leading-[16.8px] font-normal uppercase tracking-[-0.12px] text-black"
+      : "group whitespace-nowrap font-figtree text-[13px] font-medium uppercase tracking-[0.12em] text-white";
   const href = typeof children === "string" ? NAV_HREFS[children] : undefined;
+  const label = <CtaHoverLabel>{children}</CtaHoverLabel>;
 
   if (href) {
     return (
       <Link href={href} onClick={onClick} className={className}>
-        {children}
+        {label}
       </Link>
     );
   }
 
   return (
     <button type="button" onClick={onClick} className={className}>
-      {children}
+      {label}
     </button>
   );
 }

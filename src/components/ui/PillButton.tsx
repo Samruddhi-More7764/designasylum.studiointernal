@@ -3,6 +3,7 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 
 export type PillButtonVariant = "dark" | "light" | "invert" | "outline";
 export type PillButtonSize = "xs" | "sm" | "lg";
@@ -65,9 +66,8 @@ export function PillButton({
   ...rest
 }: PillButtonProps) {
   const classes = [
-    "inline-flex items-center justify-center gap-2 rounded-pill",
+    "group inline-flex items-center justify-center gap-2 rounded-pill",
     "font-figtree uppercase tracking-[0.04em] whitespace-nowrap",
-    "transition-opacity hover:opacity-80",
     variantClasses[variant],
     sizeClasses[size],
     className,
@@ -75,8 +75,10 @@ export function PillButton({
 
   const content = (
     <>
-      <span>{children}</span>
-      {showArrow && <ArrowUpRight className="h-4 w-4" aria-hidden="true" />}
+      <CtaHoverLabel>{children}</CtaHoverLabel>
+      {showArrow && (
+        <ArrowUpRight className={`h-4 w-4 ${ctaArrowClass}`} aria-hidden="true" />
+      )}
     </>
   );
 

@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { AI_LINKS, aiButtonWidth, aiHomepage } from "@/data/footer";
 
 /**
@@ -12,11 +13,11 @@ function AiPill({ name }: { name: string }) {
       href={aiHomepage(name) ?? "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex h-12 shrink-0 items-center justify-between rounded-pill border border-black px-4 font-satoshi text-[13px] font-medium leading-[16px] tracking-[-0.26px] text-black uppercase ${aiButtonWidth(name)}`}
+      className={`group inline-flex h-12 shrink-0 items-center justify-between rounded-pill border border-black px-4 font-satoshi text-[13px] font-medium leading-[16px] tracking-[-0.26px] text-black uppercase ${aiButtonWidth(name)}`}
     >
-      <span className="whitespace-nowrap">{name}</span>
+      <CtaHoverLabel>{name}</CtaHoverLabel>
       <ArrowUpRight
-        className="shrink-0"
+        className={ctaArrowClass}
         style={{ width: 10.203, height: 13.008 }}
         aria-hidden="true"
       />

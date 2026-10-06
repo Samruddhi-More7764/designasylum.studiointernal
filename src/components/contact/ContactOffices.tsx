@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { Accent } from "@/components/ui/SectionHeading";
 import { contactOffices } from "@/data/contactPage";
@@ -45,10 +46,10 @@ export function ContactOffices() {
                 <a
                   key={link.href + link.label}
                   href={link.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-black px-4 py-2.5 font-satoshi text-[12px] leading-4 font-medium text-black lg:px-[17px] lg:py-[17px] lg:text-[14px]"
+                  className="group inline-flex items-center gap-2 rounded-full border border-black px-4 py-2.5 font-satoshi text-[12px] leading-4 font-medium text-black lg:px-[17px] lg:py-[17px] lg:text-[14px]"
                 >
-                  {link.label}
-                  <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
+                  <CtaHoverLabel>{link.label}</CtaHoverLabel>
+                  <ArrowUpRight className={`size-3 ${ctaArrowClass}`} aria-hidden="true" />
                 </a>
               ))}
             </div>

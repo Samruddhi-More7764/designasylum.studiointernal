@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, ChevronDown, Search } from "lucide-react";
+import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { Accent } from "@/components/ui/SectionHeading";
 import {
   faqCategories,
@@ -124,10 +125,10 @@ export function FaqExplorer() {
                         {entry.detailSlug ? (
                           <Link
                             href={`/faq/${entry.detailSlug}`}
-                            className="inline-flex h-10 items-center gap-2 rounded-full border border-black px-[17px] font-satoshi text-[13px] leading-4 font-medium tracking-[-0.26px] text-black uppercase"
+                            className="group inline-flex h-10 items-center gap-2 rounded-full border border-black px-[17px] font-satoshi text-[13px] leading-4 font-medium tracking-[-0.26px] text-black uppercase"
                           >
-                            Read full answer
-                            <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                            <CtaHoverLabel>Read full answer</CtaHoverLabel>
+                            <ArrowUpRight className={`size-3.5 ${ctaArrowClass}`} aria-hidden="true" />
                           </Link>
                         ) : null}
                       </div>

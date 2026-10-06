@@ -17,12 +17,13 @@ const image: Field = {
 };
 
 /**
- * The branding strategy service page at /blogs/branding-agency-in-pune.
+ * The manufacturing industry page at /industries/manufacturing.
  * Empty fields fall back to the designed page copy.
+ * The “Design your right to win” call to action stays in code.
  */
-export const BrandingStrategy: GlobalConfig = {
-  slug: "branding-strategy",
-  label: "Branding strategy",
+export const ManufacturingIndustry: GlobalConfig = {
+  slug: "manufacturing-industry",
+  label: "Manufacturing",
   access: { read: () => true },
   fields: [
     {
@@ -43,7 +44,13 @@ export const BrandingStrategy: GlobalConfig = {
             {
               name: "lead",
               type: "textarea",
-              admin: { description: "The large paragraph above the first section." },
+              admin: { description: "The large paragraph at the top of the article." },
+            },
+            {
+              ...lines("preface", "Preface"),
+              admin: {
+                description: "The paragraphs between the lead and the first heading.",
+              },
             },
             {
               name: "sections",
@@ -58,7 +65,7 @@ export const BrandingStrategy: GlobalConfig = {
                   name: "anchor",
                   type: "text",
                   required: true,
-                  admin: { description: "Stable id, for example definitive-guide." },
+                  admin: { description: "Stable id, for example manufacturing-website-orders." },
                 },
                 { name: "tocLabel", label: "Table of contents label", type: "text", required: true },
                 { name: "headingBefore", label: "Heading before the italic", type: "text" },
@@ -66,14 +73,15 @@ export const BrandingStrategy: GlobalConfig = {
                 { name: "headingAfter", label: "Heading after the italic", type: "text" },
                 lines("paragraphs", "Paragraphs"),
                 {
-                  name: "pointers",
+                  name: "blocks",
                   type: "array",
+                  labels: { singular: "Block", plural: "Blocks" },
+                  admin: { description: "A bold subheading followed by paragraphs." },
                   fields: [
-                    { name: "term", type: "text" },
-                    { name: "text", type: "textarea", required: true },
+                    { name: "title", type: "text", required: true },
+                    lines("paragraphs", "Paragraphs"),
                   ],
                 },
-                lines("closing", "Closing paragraphs"),
                 { name: "highlightTitle", label: "Highlight title", type: "textarea" },
                 { name: "highlightBody", label: "Highlight body", type: "textarea" },
               ],
@@ -89,7 +97,7 @@ export const BrandingStrategy: GlobalConfig = {
               labels: { singular: "Logo", plural: "Logos" },
               admin: {
                 description:
-                  "Logos on the branding strategy page only. They do not change the homepage.",
+                  "Logos on the manufacturing page only. Leave this empty to keep using the homepage logos. Filling it does not change the homepage.",
               },
               fields: [
                 image,
@@ -112,7 +120,8 @@ export const BrandingStrategy: GlobalConfig = {
                     { label: "Bottom row", value: "2" },
                   ],
                   admin: {
-                    description: "Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.",
+                    description:
+                      "Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.",
                   },
                 },
               ],
@@ -141,7 +150,15 @@ export const BrandingStrategy: GlobalConfig = {
                 image,
                 { name: "name", type: "text", required: true },
                 { name: "description", type: "textarea", required: true },
-                { name: "href", label: "URL", type: "text" },
+                {
+                  name: "href",
+                  label: "URL",
+                  type: "text",
+                  admin: {
+                    description:
+                      "Where the View website button goes. Leave empty until that page exists.",
+                  },
+                },
                 {
                   name: "tab",
                   label: "Client tab",
@@ -154,7 +171,7 @@ export const BrandingStrategy: GlobalConfig = {
                   ],
                   admin: {
                     description:
-                      "Which tab this project appears under. Leave empty to show it on every tab. The value must match the tab Id.",
+                      "Which tab this project appears under. Leave empty to show it on every tab.",
                   },
                 },
               ],
@@ -223,14 +240,5 @@ export const BrandingStrategy: GlobalConfig = {
         },
       ],
     },
-    // Kept so a schema push does not drop columns that used to back removed tabs.
-    { name: "metaTitle", type: "text", admin: { hidden: true } },
-    { name: "metaDescription", type: "textarea", admin: { hidden: true } },
-    { name: "primaryCta", type: "text", admin: { hidden: true } },
-    { name: "secondaryCta", type: "text", admin: { hidden: true } },
-    { name: "ctaBefore", type: "text", admin: { hidden: true } },
-    { name: "ctaAccent", type: "text", admin: { hidden: true } },
-    { name: "ctaBody", type: "textarea", admin: { hidden: true } },
-    { name: "ctaButton", type: "text", admin: { hidden: true } },
   ],
 };

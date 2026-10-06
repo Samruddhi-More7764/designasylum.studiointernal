@@ -103,7 +103,7 @@ export function ClientBrandingSection({
                   {project.description}
                 </p>
                 <ResourceButton
-                  href={project.href}
+                  href={project.href || "#"}
                   tone="outline"
                   className="!w-auto self-start"
                 >

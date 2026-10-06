@@ -110,10 +110,12 @@ export interface Config {
   globals: {
     'site-footer': SiteFooter;
     'branding-strategy': BrandingStrategy;
+    'manufacturing-industry': ManufacturingIndustry;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
     'branding-strategy': BrandingStrategySelect<false> | BrandingStrategySelect<true>;
+    'manufacturing-industry': ManufacturingIndustrySelect<false> | ManufacturingIndustrySelect<true>;
   };
   locale: null;
   widgets: {
@@ -1487,6 +1489,164 @@ export interface BrandingStrategy {
         id?: string | null;
       }[]
     | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  primaryCta?: string | null;
+  secondaryCta?: string | null;
+  ctaBefore?: string | null;
+  ctaAccent?: string | null;
+  ctaBody?: string | null;
+  ctaButton?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "manufacturing-industry".
+ */
+export interface ManufacturingIndustry {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * The large paragraph at the top of the article.
+   */
+  lead?: string | null;
+  /**
+   * The paragraphs between the lead and the first heading.
+   */
+  preface?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example manufacturing-website-orders.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * A bold subheading followed by paragraphs.
+         */
+        blocks?:
+          | {
+              title: string;
+              paragraphs?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        highlightTitle?: string | null;
+        highlightBody?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Logos on the manufacturing page only. Leave this empty to keep using the homepage logos. Filling it does not change the homepage.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside the card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside the card, in pixels. Default 48.
+         */
+        height?: number | null;
+        /**
+         * Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.
+         */
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        description: string;
+        /**
+         * Where the View website button goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show it on every tab.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  expertsBefore?: string | null;
+  expertsAccent?: string | null;
+  expertsSubheading?: string | null;
+  experts?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        role: string;
+        /**
+         * Where the Read more button goes.
+         */
+        readMoreUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedBefore?: string | null;
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        title: string;
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1594,6 +1754,125 @@ export interface BrandingStrategySelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              id?: T;
+            };
+        highlightTitle?: T;
+        highlightBody?: T;
+        id?: T;
+      };
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  expertsBefore?: T;
+  expertsAccent?: T;
+  expertsSubheading?: T;
+  experts?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        readMoreUrl?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  metaTitle?: T;
+  metaDescription?: T;
+  primaryCta?: T;
+  secondaryCta?: T;
+  ctaBefore?: T;
+  ctaAccent?: T;
+  ctaBody?: T;
+  ctaButton?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "manufacturing-industry_select".
+ */
+export interface ManufacturingIndustrySelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  lead?: T;
+  preface?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              title?: T;
+              paragraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
               id?: T;
             };
         highlightTitle?: T;
