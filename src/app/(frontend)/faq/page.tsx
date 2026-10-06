@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/sections/15-Footer";
 import { FaqExplorer } from "@/components/faq/FaqExplorer";
+import { getFaqPage } from "@/cms/faqPage";
 import { getFooter } from "@/cms/content";
 
 export const dynamic = "force-dynamic";
@@ -12,13 +13,19 @@ export const metadata: Metadata = {
 };
 
 export default async function FaqPage() {
-  const footer = await getFooter();
+  const [page, footer] = await Promise.all([getFaqPage(), getFooter()]);
 
   return (
     <>
       <NavBar />
       <main data-nav="light" className="bg-white pt-28">
-        <FaqExplorer />
+        <FaqExplorer
+          titleBefore={page.titleBefore}
+          titleAccent={page.titleAccent}
+          titleAfter={page.titleAfter}
+          categories={page.categories}
+          entries={page.entries}
+        />
       </main>
       <Footer columns={footer.columns} aiLinks={footer.aiLinks} />
     </>

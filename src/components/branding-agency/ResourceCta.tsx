@@ -46,6 +46,10 @@ const defaultHeading = (
 const defaultBody =
   "From strategy and design to development and marketing, we're ready when you are.";
 
+/** Stops from the Location CTA frame 1454:119356. Both radial layers share them. */
+const LOCATION_RADIAL_STOPS =
+  "rgb(255,255,255) 25.895%, rgb(200,230,251) 35.166%, rgb(145,205,248) 44.438%, rgb(91,180,244) 53.709%, rgb(63,168,242) 58.345%, rgb(36,155,240) 62.981%, rgb(22,127,238) 76.442%, rgb(8,99,237) 89.904%, rgba(52,129,244,0) 100%";
+
 export function ResourceCta({
   id,
   variant = "service",
@@ -70,38 +74,84 @@ export function ResourceCta({
       data-nav="dark"
       className={`relative isolate bg-white${id ? " scroll-mt-[100px]" : ""}`}
     >
-      <div
-        className="pointer-events-none absolute inset-0 overflow-hidden lg:-top-[150px]"
-        aria-hidden="true"
-      >
-        <div className="absolute bottom-0 left-1/2 h-full w-auto -translate-x-1/2 aspect-[1470/1374] lg:inset-x-0 lg:h-auto lg:w-full lg:translate-x-0">
-          <CtaArtwork />
-        </div>
-        {/* Dissolves the top of the artwork into the white above the logos.
-            The bottom of the artwork already fades to white on its own. */}
+      {location ? (
+        <>
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden lg:hidden"
+            aria-hidden="true"
+          >
+            <div className="absolute bottom-0 left-1/2 h-full w-auto -translate-x-1/2 aspect-[1470/1374]">
+              <CtaArtwork />
+            </div>
+            <div
+              className="absolute inset-x-0 top-0 h-[300px]"
+              style={{
+                background:
+                  "linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.94) 22%, rgba(255,255,255,0.62) 50%, rgba(255,255,255,0.22) 78%, rgba(255,255,255,0) 100%)",
+              }}
+            />
+          </div>
+          {/* Desktop frame 1454:119356. Two radial layers, 732px then 532px, inside the 1029px frame. */}
+          <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden="true">
+            <div
+              className="absolute inset-x-0 top-0"
+              style={{
+                height: "71.137%",
+                background: `radial-gradient(ellipse 175.707% 95.654% at 50% 2.399%, ${LOCATION_RADIAL_STOPS})`,
+              }}
+            />
+            <div
+              className="absolute inset-x-0"
+              style={{
+                top: "48.299%",
+                height: "51.701%",
+                background: `radial-gradient(ellipse 175.707% 95.654% at 50% 104.3%, ${LOCATION_RADIAL_STOPS})`,
+              }}
+            />
+          </div>
+        </>
+      ) : (
         <div
-          className="absolute inset-x-0 top-0 h-[300px] lg:h-[380px]"
-          style={{
-            background:
-              "linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.94) 22%, rgba(255,255,255,0.62) 50%, rgba(255,255,255,0.22) 78%, rgba(255,255,255,0) 100%)",
-          }}
-        />
-      </div>
+          className="pointer-events-none absolute inset-0 overflow-hidden lg:-top-[150px]"
+          aria-hidden="true"
+        >
+          <div className="absolute bottom-0 left-1/2 h-full w-auto -translate-x-1/2 aspect-[1470/1374] lg:inset-x-0 lg:h-auto lg:w-full lg:translate-x-0">
+            <CtaArtwork />
+          </div>
+          {/* Dissolves the top of the artwork into the white above the logos.
+              The bottom of the artwork already fades to white on its own. */}
+          <div
+            className="absolute inset-x-0 top-0 h-[300px] lg:h-[380px]"
+            style={{
+              background:
+                "linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.94) 22%, rgba(255,255,255,0.62) 50%, rgba(255,255,255,0.22) 78%, rgba(255,255,255,0) 100%)",
+            }}
+          />
+        </div>
+      )}
 
       <div className="relative z-10 mx-auto aspect-[390/1030] w-full max-w-[1470px] lg:aspect-[1470/1029]">
 
         <div
           className={
             location
-              ? "absolute top-1/2 left-1/2 z-10 flex w-[min(360px,calc(100%-1.5rem))] -translate-x-1/2 -translate-y-[calc(50%+1.5rem)] flex-col items-center gap-10 text-center lg:w-[545px] lg:gap-[39px]"
+              ? "absolute top-1/2 left-1/2 z-10 flex w-[min(360px,calc(100%-1.5rem))] -translate-x-1/2 -translate-y-[calc(50%+1.5rem)] flex-col items-center gap-10 text-center lg:top-[calc(394/1029*100%)] lg:w-[545px] lg:translate-y-0 lg:gap-[39px]"
               : "absolute top-[calc(50.44%-86px)] left-1/2 z-10 flex w-[min(360px,calc(100%-1.5rem))] -translate-x-1/2 flex-col items-center gap-10 text-center lg:top-[calc(33.82%-109px)] lg:w-[545px] lg:gap-[39px]"
           }
         >
           <div className="flex w-full flex-col items-center gap-3 lg:gap-6">
-            <h2 className="font-figtree text-[32px] leading-[1.15] font-medium text-white lg:text-[44px] lg:leading-[44px]">
+            <h2
+              className={`font-figtree text-[32px] leading-[1.15] font-medium text-white lg:text-[44px] lg:leading-[44px]${
+                location ? " lg:w-full lg:tracking-[-2px]" : ""
+              }`}
+            >
               {heading}
             </h2>
-            <p className="font-satoshi text-[16px] leading-snug font-medium tracking-[-0.5px] text-white lg:text-[20.24px] lg:leading-[26px]">
+            <p
+              className={`font-satoshi text-[16px] leading-snug font-medium tracking-[-0.5px] text-white lg:text-[20.24px] lg:leading-[26px]${
+                location ? " lg:w-full" : ""
+              }`}
+            >
               {body}
             </p>
           </div>

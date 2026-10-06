@@ -3,21 +3,35 @@ import { ArrowUpRight } from "lucide-react";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { Accent } from "@/components/ui/SectionHeading";
-import { contactOffices } from "@/data/contactPage";
+import { contactOffices, type ContactOffice } from "@/data/contactPage";
 import { OfficeClock } from "@/components/contact/OfficeClock";
 
-export function ContactOffices() {
+export function ContactOffices({
+  breadcrumbCurrent = "Contact us",
+  titleBefore = "Get in ",
+  titleAccent = "Touch",
+  titleAfter = "!",
+  offices = contactOffices,
+}: {
+  breadcrumbCurrent?: string;
+  titleBefore?: string;
+  titleAccent?: string;
+  titleAfter?: string;
+  offices?: ContactOffice[];
+} = {}) {
   return (
     <header className="bg-white px-4 pt-10 lg:pt-20">
       <div className="mx-auto flex w-full max-w-[1136px] flex-col items-center gap-4 text-center">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }]} current="Contact us" />
+        <Breadcrumbs items={[{ label: "Home", href: "/" }]} current={breadcrumbCurrent} />
         <h1 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[56px]">
-          Get in <Accent className="text-[32px] tracking-[-2.09px] lg:text-[56px]">Touch</Accent>!
+          {titleBefore}
+          <Accent className="text-[32px] tracking-[-2.09px] lg:text-[56px]">{titleAccent}</Accent>
+          {titleAfter}
         </h1>
       </div>
 
       <div className="mx-auto mt-8 flex w-full max-w-[964px] flex-col items-center gap-8 lg:mt-8 lg:flex-row lg:items-start lg:justify-center lg:gap-6">
-        {contactOffices.map((office) => (
+        {offices.map((office) => (
           <article key={office.city} className="flex w-full max-w-[470px] flex-col gap-4">
             <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
               <Image

@@ -10,7 +10,17 @@ import { submitContactLead } from "@/lib/submitContactLead";
 const inputClasses =
   "h-12 w-full rounded-lg bg-input-bg px-4 font-satoshi text-base font-normal text-black placeholder:text-black/50 outline-none";
 
-export function ContactInquiryForm() {
+export function ContactInquiryForm({
+  before = "Let's talk about ",
+  accent = "your ",
+  after = "brand",
+  body = "Tell us what you're building. We reply within a day, usually with questions, sometimes with opinions.",
+}: {
+  before?: string;
+  accent?: string;
+  after?: string;
+  body?: string;
+} = {}) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [count, setCount] = useState(0);
@@ -54,10 +64,12 @@ export function ContactInquiryForm() {
       <div className="mx-auto grid w-full max-w-[1362px] grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,688px)] lg:gap-x-16">
         <div className="flex flex-col gap-6 lg:max-w-[420px] lg:gap-9 lg:pt-1">
           <h2 className="max-w-[320px] font-figtree text-[32px] leading-none font-normal tracking-[-1px] text-[#05201F] lg:text-[44px] lg:tracking-[-2px]">
-            Let&apos;s talk about <Accent>your </Accent>brand
+            {before}
+            <Accent>{accent}</Accent>
+            {after}
           </h2>
           <p className="max-w-[420px] font-satoshi text-[16px] leading-[1.3] font-normal tracking-[-0.1px] text-black lg:text-[20px] lg:leading-[25.9px]">
-            Tell us what you&apos;re building. We reply within a day, usually with questions, sometimes with opinions.
+            {body}
           </p>
         </div>
 

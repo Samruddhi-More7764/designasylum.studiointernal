@@ -11,54 +11,67 @@ import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { FAQ } from "@/components/sections/14-FAQ";
 import { Accent } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
+import { getAhmedabadLocation } from "@/cms/ahmedabadLocation";
 import {
   AHMEDABAD_CTA_ID,
-  ahmedabadBreadcrumbCurrent,
   ahmedabadBreadcrumbs,
   ahmedabadCta,
-  ahmedabadFaqItems,
-  ahmedabadHero,
-  ahmedabadLead,
-  ahmedabadProjectTabs,
-  ahmedabadSections,
-  ahmedabadToc,
 } from "@/data/ahmedabadLocationPage";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Best Web Design & Branding Agency in Ahmedabad",
-  description: ahmedabadHero.intro,
+  description:
+    "Ahmedabad’s economy has three layers — a deep manufacturing base, a fast-growing B2B and product-tech base, and the GIFT City fintech build-out. Each one needs a different kind of brand, but they share a buyer who has been around for a while and is hard to impress.",
 };
 
 export default async function AhmedabadLocationPage() {
-  const footer = await getFooter();
+  const [page, footer] = await Promise.all([getAhmedabadLocation(), getFooter()]);
 
   return (
     <>
       <NavBar />
       <main data-nav="light" className="bg-white pt-28">
         <ServiceResourceHero
-          title={ahmedabadHero.title}
-          intro={ahmedabadHero.intro}
+          title={page.heroTitle}
+          intro={page.heroIntro}
           crumbs={ahmedabadBreadcrumbs}
-          current={ahmedabadBreadcrumbCurrent}
+          current={page.breadcrumbCurrent}
+          imageSrc={page.heroImage}
         />
         <ClientBrandingSection
           flushTop
-          tabs={ahmedabadProjectTabs}
-          heading={
-            <>
-              Design projects for <Accent>Ahmedabad</Accent> brands
-            </>
-          }
+          headingBefore={page.clientsBefore}
+          headingAccent={page.clientsAccent}
+          headingAfter={page.clientsAfter}
+          tabs={page.clientTabs}
+          projects={page.projects}
         />
-        <LocationCallout />
-        <LogoMarquee placement="location" />
+        <LocationCallout
+          before={page.calloutBefore}
+          accent={page.calloutAccent}
+          after={page.calloutAfter}
+          body={page.calloutBody}
+        />
+        {page.logos ? (
+          <LogoMarquee placement="location" logos={page.logos} />
+        ) : (
+          <LogoMarquee placement="location" />
+        )}
         <BrandingAgencyArticle
-          lead={ahmedabadLead}
-          sections={ahmedabadSections}
-          toc={ahmedabadToc}
+          lead={page.lead}
+          sections={page.sections}
+          toc={[
+            ...page.sections.map((section) => ({
+              id: section.id,
+              label: section.tocLabel,
+            })),
+            {
+              id: AHMEDABAD_CTA_ID,
+              label: "Ready to transform your Ahmedabad brand?",
+            },
+          ]}
           spacing="cta"
         />
         <ResourceCta
@@ -74,14 +87,16 @@ export default async function AhmedabadLocationPage() {
           buttonLabel={ahmedabadCta.button}
           buttonClassName="!h-11 !min-h-11 !w-[214px] lg:!h-14 lg:!min-h-14 lg:!w-[243px]"
         />
-        <FAQ items={ahmedabadFaqItems} heading="FAQs" showCta={false} />
+        <FAQ items={page.faqs} heading="FAQs" showCta={false} />
         <RelatedBlogs
           heading={
             <>
-              <Accent>Related </Accent>
-              blogs
+              {page.relatedBefore}
+              <Accent>{page.relatedAccent}</Accent>
+              {page.relatedAfter}
             </>
           }
+          posts={page.relatedBlogs}
         />
       </main>
       <Footer columns={footer.columns} aiLinks={footer.aiLinks} />

@@ -4,8 +4,8 @@ import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { StickyTableOfContents } from "@/components/branding-agency/StickyTableOfContents";
+import { getFaqDetail } from "@/cms/faqDetail";
 import { getFooter } from "@/cms/content";
-import { faqDetails } from "@/data/faqDetailPage";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const detail = faqDetails[slug];
+  const detail = await getFaqDetail(slug);
   if (!detail) return { title: "FAQ" };
   return {
     title: detail.question,
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function FaqDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const detail = faqDetails[slug];
+  const detail = await getFaqDetail(slug);
   if (!detail) notFound();
 
   const footer = await getFooter();
@@ -39,7 +39,7 @@ export default async function FaqDetailPage({ params }: PageProps) {
           <div className="mx-auto flex w-full max-w-[1136px] flex-col items-center gap-4 text-center">
             <Breadcrumbs
               items={[{ label: "FAQs", href: "/faq" }]}
-              current="Sevenloop Brand Website Redesign"
+              current={detail.breadcrumbCurrent}
             />
             <h1 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[56px]">
               {detail.question}

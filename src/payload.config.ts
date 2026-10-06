@@ -22,6 +22,14 @@ import { CaseStudies } from "./collections/CaseStudies";
 import { SiteFooter } from "./globals/SiteFooter";
 import { BrandingStrategy } from "./globals/BrandingStrategy";
 import { ManufacturingIndustry } from "./globals/ManufacturingIndustry";
+import { AhmedabadLocation } from "./globals/AhmedabadLocation";
+import { BlogIndex } from "./globals/BlogIndex";
+import { BlogArticleGlobal } from "./globals/BlogArticle";
+import { ContactPage } from "./globals/ContactPage";
+import { FaqPage } from "./globals/FaqPage";
+import { FaqDetail } from "./globals/FaqDetail";
+import { CareersPage } from "./globals/CareersPage";
+import { WorkPage } from "./globals/WorkPage";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -52,7 +60,19 @@ export default buildConfig({
     Clients,
     CaseStudies,
   ],
-  globals: [SiteFooter, BrandingStrategy, ManufacturingIndustry],
+  globals: [
+    SiteFooter,
+    BrandingStrategy,
+    ManufacturingIndustry,
+    AhmedabadLocation,
+    BlogIndex,
+    BlogArticleGlobal,
+    ContactPage,
+    FaqPage,
+    FaqDetail,
+    CareersPage,
+    WorkPage,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",
   typescript: {

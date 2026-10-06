@@ -111,11 +111,27 @@ export interface Config {
     'site-footer': SiteFooter;
     'branding-strategy': BrandingStrategy;
     'manufacturing-industry': ManufacturingIndustry;
+    'ahmedabad-location': AhmedabadLocation;
+    'blog-index': BlogIndex;
+    'blog-article': BlogArticle;
+    'contact-page': ContactPage;
+    'faq-page': FaqPage;
+    'faq-detail': FaqDetail;
+    'careers-page': CareersPage;
+    'work-page': WorkPage;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
     'branding-strategy': BrandingStrategySelect<false> | BrandingStrategySelect<true>;
     'manufacturing-industry': ManufacturingIndustrySelect<false> | ManufacturingIndustrySelect<true>;
+    'ahmedabad-location': AhmedabadLocationSelect<false> | AhmedabadLocationSelect<true>;
+    'blog-index': BlogIndexSelect<false> | BlogIndexSelect<true>;
+    'blog-article': BlogArticleSelect<false> | BlogArticleSelect<true>;
+    'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
+    'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
+    'faq-detail': FaqDetailSelect<false> | FaqDetailSelect<true>;
+    'careers-page': CareersPageSelect<false> | CareersPageSelect<true>;
+    'work-page': WorkPageSelect<false> | WorkPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1652,6 +1668,597 @@ export interface ManufacturingIndustry {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ahmedabad-location".
+ */
+export interface AhmedabadLocation {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        description: string;
+        /**
+         * Where the View website button goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show it on every tab.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'location') | null;
+        id?: string | null;
+      }[]
+    | null;
+  calloutBefore?: string | null;
+  calloutAccent?: string | null;
+  calloutAfter?: string | null;
+  calloutBody?: string | null;
+  /**
+   * Logos on the Ahmedabad page only. Leave this empty to keep using the homepage logos. Filling it does not change the homepage.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside the card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside the card, in pixels. Default 48.
+         */
+        height?: number | null;
+        /**
+         * Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.
+         */
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The large paragraph at the top of the article.
+   */
+  lead?: string | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example why-ahmedabad-brands.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * A bold subheading followed by paragraphs.
+         */
+        blocks?:
+          | {
+              title: string;
+              paragraphs?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        pointers?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedBefore?: string | null;
+  relatedAccent?: string | null;
+  relatedAfter?: string | null;
+  relatedBlogs?:
+    | {
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        title: string;
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-index".
+ */
+export interface BlogIndex {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleAfter?: string | null;
+  intro?: string | null;
+  /**
+   * The wide image under the heading. Leave empty to keep the black block.
+   */
+  heroImage?: (number | null) | Media;
+  featuredBefore?: string | null;
+  featuredAccent?: string | null;
+  featuredAfter?: string | null;
+  featuredPosts?:
+    | {
+        image?: (number | null) | Media;
+        title: string;
+        date?: string | null;
+        /**
+         * Which filter this post appears under. All always shows every post.
+         */
+        category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
+        /**
+         * Where the card goes.
+         */
+        href?: string | null;
+        badge?: string | null;
+        badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
+        id?: string | null;
+      }[]
+    | null;
+  listingBefore?: string | null;
+  listingAccent?: string | null;
+  listingAfter?: string | null;
+  /**
+   * Filter labels. Include All first.
+   */
+  categories?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  posts?:
+    | {
+        image?: (number | null) | Media;
+        title: string;
+        date?: string | null;
+        /**
+         * Which filter this post appears under. All always shows every post.
+         */
+        category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
+        /**
+         * Where the card goes.
+         */
+        href?: string | null;
+        badge?: string | null;
+        badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-article".
+ */
+export interface BlogArticle {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleMiddle?: string | null;
+  titleLine?: string | null;
+  intro?: string | null;
+  /**
+   * The wide image under the heading. Leave empty to keep the black block.
+   */
+  heroImage?: (number | null) | Media;
+  bylineName?: string | null;
+  bylineDate?: string | null;
+  bylineAvatar?: (number | null) | Media;
+  lead?: string | null;
+  /**
+   * Each section is a heading, its blocks, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        blocks?:
+          | (
+              | {
+                  items?:
+                    | {
+                        text: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'paragraphs';
+                }
+              | {
+                  parts?:
+                    | {
+                        text: string;
+                        strong?: boolean | null;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'rich';
+                }
+              | {
+                  title: string;
+                  body?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'subhead';
+                }
+              | {
+                  items?:
+                    | {
+                        lead?: string | null;
+                        rest: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'arrows';
+                }
+              | {
+                  items?:
+                    | {
+                        label: string;
+                        value: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'rows';
+                }
+              | {
+                  image?: (number | null) | Media;
+                  src?: string | null;
+                  alt?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'image';
+                }
+              | {
+                  alt?: string | null;
+                  images?:
+                    | {
+                        image?: (number | null) | Media;
+                        src: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'gallery';
+                }
+              | {
+                  quote: string;
+                  name: string;
+                  role?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'quote';
+                }
+              | {
+                  kicker?: string | null;
+                  body: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'note';
+                }
+              | {
+                  kicker?: string | null;
+                  items?:
+                    | {
+                        label: string;
+                        href: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'links';
+                }
+            )[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  authorImage?: (number | null) | Media;
+  authorName?: string | null;
+  authorRole?: string | null;
+  authorBio?: string | null;
+  topicsBefore?: string | null;
+  topicsAccent?: string | null;
+  topicsAfter?: string | null;
+  topics?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedBefore?: string | null;
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        title: string;
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page".
+ */
+export interface ContactPage {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleAfter?: string | null;
+  offices?:
+    | {
+        city: string;
+        image?: (number | null) | Media;
+        /**
+         * Used when no image is uploaded.
+         */
+        imageSrc?: string | null;
+        /**
+         * IANA name, for example Asia/Kolkata.
+         */
+        timeZone?: string | null;
+        tint?: boolean | null;
+        links?:
+          | {
+              label: string;
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  formBefore?: string | null;
+  formAccent?: string | null;
+  formAfter?: string | null;
+  formBody?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-page".
+ */
+export interface FaqPage {
+  id: number;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleAfter?: string | null;
+  categories?:
+    | {
+        categoryId: 'all' | 'about' | 'branding' | 'website' | 'marketing';
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  entries?:
+    | {
+        entryId: string;
+        question: string;
+        category: 'about' | 'branding' | 'website' | 'marketing';
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        /**
+         * Slug for Read full answer, for example defense-tech. Leave empty to hide the link.
+         */
+        detailSlug?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-detail".
+ */
+export interface FaqDetail {
+  id: number;
+  /**
+   * Matches the address, for example defense-tech.
+   */
+  slug?: string | null;
+  breadcrumbCurrent?: string | null;
+  question?: string | null;
+  lead?: string | null;
+  /**
+   * Each section is a heading, its paragraph, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        anchor: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers-page".
+ */
+export interface CareersPage {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleAfter?: string | null;
+  intro?: string | null;
+  /**
+   * The wide image under the heading. Leave empty to keep the black block.
+   */
+  heroImage?: (number | null) | Media;
+  benefitsBefore?: string | null;
+  benefitsAccent?: string | null;
+  benefitsAfter?: string | null;
+  studioImage?: (number | null) | Media;
+  benefits?:
+    | {
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  lifeBefore?: string | null;
+  lifeAccent?: string | null;
+  lifeAfter?: string | null;
+  lifeDek?: string | null;
+  /**
+   * Leave empty to keep the gray placeholders.
+   */
+  lifeSlides?:
+    | {
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  teamBefore?: string | null;
+  teamAccent?: string | null;
+  teamAfter?: string | null;
+  quotes?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        role?: string | null;
+        quote: string;
+        body?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  rolesBefore?: string | null;
+  rolesAccent?: string | null;
+  rolesAfter?: string | null;
+  rolesBody?: string | null;
+  rolesButton?: string | null;
+  formBefore?: string | null;
+  formAccent?: string | null;
+  formAfter?: string | null;
+  formDek?: string | null;
+  interests?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "work-page".
+ */
+export interface WorkPage {
+  id: number;
+  breadcrumbCurrent?: string | null;
+  heading?: string | null;
+  /**
+   * Include All first. Chip counts are not used here.
+   */
+  filters?:
+    | {
+        filterId: 'all' | 'fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry';
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        service?: string | null;
+        /**
+         * Which filter this project appears under. All always shows every project.
+         */
+        category?: ('fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry') | null;
+        /**
+         * Where the card goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-footer_select".
  */
 export interface SiteFooterSelect<T extends boolean = true> {
@@ -1937,6 +2544,514 @@ export interface ManufacturingIndustrySelect<T extends boolean = true> {
         date?: T;
         readTime?: T;
         title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ahmedabad-location_select".
+ */
+export interface AhmedabadLocationSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  calloutBefore?: T;
+  calloutAccent?: T;
+  calloutAfter?: T;
+  calloutBody?: T;
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              title?: T;
+              paragraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        pointers?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedAfter?: T;
+  relatedBlogs?:
+    | T
+    | {
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-index_select".
+ */
+export interface BlogIndexSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  titleBefore?: T;
+  titleAccent?: T;
+  titleAfter?: T;
+  intro?: T;
+  heroImage?: T;
+  featuredBefore?: T;
+  featuredAccent?: T;
+  featuredAfter?: T;
+  featuredPosts?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        date?: T;
+        category?: T;
+        href?: T;
+        badge?: T;
+        badgeIcon?: T;
+        id?: T;
+      };
+  listingBefore?: T;
+  listingAccent?: T;
+  listingAfter?: T;
+  categories?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  posts?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        date?: T;
+        category?: T;
+        href?: T;
+        badge?: T;
+        badgeIcon?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-article_select".
+ */
+export interface BlogArticleSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  titleBefore?: T;
+  titleAccent?: T;
+  titleMiddle?: T;
+  titleLine?: T;
+  intro?: T;
+  heroImage?: T;
+  bylineName?: T;
+  bylineDate?: T;
+  bylineAvatar?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        blocks?:
+          | T
+          | {
+              paragraphs?:
+                | T
+                | {
+                    items?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              rich?:
+                | T
+                | {
+                    parts?:
+                      | T
+                      | {
+                          text?: T;
+                          strong?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              subhead?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              arrows?:
+                | T
+                | {
+                    items?:
+                      | T
+                      | {
+                          lead?: T;
+                          rest?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    items?:
+                      | T
+                      | {
+                          label?: T;
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              image?:
+                | T
+                | {
+                    image?: T;
+                    src?: T;
+                    alt?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              gallery?:
+                | T
+                | {
+                    alt?: T;
+                    images?:
+                      | T
+                      | {
+                          image?: T;
+                          src?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              quote?:
+                | T
+                | {
+                    quote?: T;
+                    name?: T;
+                    role?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              note?:
+                | T
+                | {
+                    kicker?: T;
+                    body?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              links?:
+                | T
+                | {
+                    kicker?: T;
+                    items?:
+                      | T
+                      | {
+                          label?: T;
+                          href?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  authorImage?: T;
+  authorName?: T;
+  authorRole?: T;
+  authorBio?: T;
+  topicsBefore?: T;
+  topicsAccent?: T;
+  topicsAfter?: T;
+  topics?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  titleBefore?: T;
+  titleAccent?: T;
+  titleAfter?: T;
+  offices?:
+    | T
+    | {
+        city?: T;
+        image?: T;
+        imageSrc?: T;
+        timeZone?: T;
+        tint?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  formBefore?: T;
+  formAccent?: T;
+  formAfter?: T;
+  formBody?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-page_select".
+ */
+export interface FaqPageSelect<T extends boolean = true> {
+  titleBefore?: T;
+  titleAccent?: T;
+  titleAfter?: T;
+  categories?:
+    | T
+    | {
+        categoryId?: T;
+        label?: T;
+        id?: T;
+      };
+  entries?:
+    | T
+    | {
+        entryId?: T;
+        question?: T;
+        category?: T;
+        answer?: T;
+        detailSlug?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-detail_select".
+ */
+export interface FaqDetailSelect<T extends boolean = true> {
+  slug?: T;
+  breadcrumbCurrent?: T;
+  question?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers-page_select".
+ */
+export interface CareersPageSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  titleBefore?: T;
+  titleAccent?: T;
+  titleAfter?: T;
+  intro?: T;
+  heroImage?: T;
+  benefitsBefore?: T;
+  benefitsAccent?: T;
+  benefitsAfter?: T;
+  studioImage?: T;
+  benefits?:
+    | T
+    | {
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  lifeBefore?: T;
+  lifeAccent?: T;
+  lifeAfter?: T;
+  lifeDek?: T;
+  lifeSlides?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  teamBefore?: T;
+  teamAccent?: T;
+  teamAfter?: T;
+  quotes?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        quote?: T;
+        body?: T;
+        id?: T;
+      };
+  rolesBefore?: T;
+  rolesAccent?: T;
+  rolesAfter?: T;
+  rolesBody?: T;
+  rolesButton?: T;
+  formBefore?: T;
+  formAccent?: T;
+  formAfter?: T;
+  formDek?: T;
+  interests?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "work-page_select".
+ */
+export interface WorkPageSelect<T extends boolean = true> {
+  breadcrumbCurrent?: T;
+  heading?: T;
+  filters?:
+    | T
+    | {
+        filterId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        service?: T;
+        category?: T;
         href?: T;
         id?: T;
       };

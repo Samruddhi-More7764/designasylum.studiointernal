@@ -13,36 +13,50 @@ import {
 
 type FilterId = "all" | FaqCategory;
 
-export function FaqExplorer() {
+export function FaqExplorer({
+  titleBefore = "Frequently ",
+  titleAccent = "Asked",
+  titleAfter = " questions!",
+  categories = faqCategories,
+  entries = faqEntries,
+}: {
+  titleBefore?: string;
+  titleAccent?: string;
+  titleAfter?: string;
+  categories?: typeof faqCategories;
+  entries?: typeof faqEntries;
+} = {}) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
-  const [openId, setOpenId] = useState<string | null>(faqEntries[0]?.id ?? null);
+  const [openId, setOpenId] = useState<string | null>(entries[0]?.id ?? null);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return faqEntries.filter((entry) => {
+    return entries.filter((entry) => {
       if (filter !== "all" && entry.category !== filter) return false;
       if (!needle) return true;
       return `${entry.question} ${entry.answer ?? ""}`.toLowerCase().includes(needle);
     });
-  }, [filter, query]);
+  }, [entries, filter, query]);
 
   const counts = useMemo(() => {
     const tally: Record<FilterId, number> = {
-      all: faqEntries.length,
+      all: entries.length,
       about: 0,
       branding: 0,
       website: 0,
       marketing: 0,
     };
-    for (const entry of faqEntries) tally[entry.category] += 1;
+    for (const entry of entries) tally[entry.category] += 1;
     return tally;
-  }, []);
+  }, [entries]);
 
   return (
     <div className="bg-white px-4 pt-10 pb-[120px] lg:px-10 lg:pt-20 lg:pb-[200px]">
       <h1 className="mx-auto max-w-[1136px] text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[56px]">
-        Frequently <Accent className="text-[32px] tracking-[-2.09px] lg:text-[56px]">Asked</Accent> questions!
+        {titleBefore}
+        <Accent className="text-[32px] tracking-[-2.09px] lg:text-[56px]">{titleAccent}</Accent>
+        {titleAfter}
       </h1>
 
       <div className="mx-auto mt-8 grid w-full max-w-[1280px] grid-cols-1 gap-8 lg:mt-10 lg:grid-cols-[229px_minmax(0,1008px)] lg:justify-center lg:gap-x-12">
@@ -50,7 +64,7 @@ export function FaqExplorer() {
           aria-label="FAQ categories"
           className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-0 lg:overflow-visible lg:pt-[88px]"
         >
-          {faqCategories.map((category) => {
+          {categories.map((category) => {
             const active = filter === category.id;
             return (
               <button

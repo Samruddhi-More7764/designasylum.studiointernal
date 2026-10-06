@@ -4,6 +4,7 @@ import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { WorkGrid } from "@/components/work/WorkGrid";
 import { getFooter } from "@/cms/content";
+import { getWorkPage } from "@/cms/workPage";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage() {
-  const footer = await getFooter();
+  const [page, footer] = await Promise.all([getWorkPage(), getFooter()]);
 
   return (
     <>
@@ -22,13 +23,13 @@ export default async function WorkPage() {
         <section className="bg-white px-4 pt-10 pb-[120px] lg:px-[60px] lg:pt-20 lg:pb-[200px]">
           <div className="mx-auto flex w-full max-w-[1350px] flex-col items-center gap-8 text-center lg:gap-20">
             <div className="flex flex-col items-center gap-6 lg:gap-8">
-              <Breadcrumbs items={[{ label: "Home", href: "/" }]} current="Work" />
+              <Breadcrumbs items={[{ label: "Home", href: "/" }]} current={page.breadcrumbCurrent} />
               <h1 className="max-w-[570px] font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-black lg:text-[44px] lg:leading-none lg:tracking-[-2.09px]">
-                Worked with companies from a diverse set of industries
+                {page.heading}
               </h1>
             </div>
             <div className="w-full text-left lg:text-center">
-              <WorkGrid />
+              <WorkGrid filters={page.filters} projects={page.projects} />
             </div>
           </div>
         </section>

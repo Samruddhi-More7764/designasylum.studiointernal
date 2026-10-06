@@ -4,15 +4,21 @@ import { useState } from "react";
 import Image from "next/image";
 import { workFilters, workProjects, type WorkFilterId } from "@/data/workPage";
 
-export function WorkGrid() {
+export function WorkGrid({
+  filters = workFilters,
+  projects = workProjects.map((project) => ({ ...project, href: "#" })),
+}: {
+  filters?: readonly { id: WorkFilterId; label: string }[];
+  projects?: (typeof workProjects[number] & { href: string })[];
+} = {}) {
   const [filter, setFilter] = useState<WorkFilterId>("all");
-  const projects =
-    filter === "all" ? workProjects : workProjects.filter((project) => project.category === filter);
+  const visible =
+    filter === "all" ? projects : projects.filter((project) => project.category === filter);
 
   return (
     <div>
       <div className="flex gap-0 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] lg:flex-wrap lg:justify-center lg:overflow-visible [&::-webkit-scrollbar]:hidden">
-        {workFilters.map((item) => {
+        {filters.map((item) => {
           const active = item.id === filter;
           return (
             <button
@@ -31,9 +37,9 @@ export function WorkGrid() {
       </div>
 
       <ul className="mt-8 grid grid-cols-1 gap-8 lg:mt-12 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-[46px]">
-        {projects.map((project) => (
+        {visible.map((project) => (
           <li key={project.id}>
-            <a href="#" className="group block">
+            <a href={project.href || "#"} className="group block">
               <div className="relative aspect-[358/201] w-full overflow-hidden lg:aspect-[663/373]">
                 <Image
                   src={project.image}

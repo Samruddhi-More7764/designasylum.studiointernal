@@ -4,24 +4,32 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Accent } from "@/components/ui/SectionHeading";
 import { BlogCard } from "@/components/blog/BlogCard";
-import {
-  blogCategories,
-  blogPosts,
-  type BlogCategory,
-} from "@/data/blogIndexPage";
+import { blogCategories, blogPosts } from "@/data/blogIndexPage";
 
-export function BlogListing() {
-  const [category, setCategory] = useState<BlogCategory>("All");
-  const posts =
-    category === "All"
-      ? blogPosts
-      : blogPosts.filter((post) => post.category === category);
+export function BlogListing({
+  headingBefore = "Looking for something ",
+  headingAccent = "specific",
+  headingAfter = "?",
+  categories = blogCategories,
+  posts = blogPosts,
+}: {
+  headingBefore?: string;
+  headingAccent?: string;
+  headingAfter?: string;
+  categories?: readonly string[];
+  posts?: typeof blogPosts;
+} = {}) {
+  const [category, setCategory] = useState("All");
+  const visible =
+    category === "All" ? posts : posts.filter((post) => post.category === category);
 
   return (
     <section className="bg-white px-4 pt-[120px] pb-[120px] lg:px-[60px] lg:pt-[200px] lg:pb-[200px]">
       <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center">
         <h2 className="text-center font-figtree text-[32px] leading-none font-normal tracking-[-2px] text-black lg:text-[44px] lg:tracking-[-2.09px]">
-          Looking for something <Accent>specific</Accent>?
+          {headingBefore}
+          <Accent>{headingAccent}</Accent>
+          {headingAfter}
         </h2>
 
         <div
@@ -29,7 +37,7 @@ export function BlogListing() {
           aria-label="Blog categories"
           className="mt-8 flex items-center justify-center lg:mt-12"
         >
-          {blogCategories.map((item) => {
+          {categories.map((item) => {
             const selected = item === category;
             return (
               <button
@@ -48,9 +56,9 @@ export function BlogListing() {
           })}
         </div>
 
-        {posts.length > 0 ? (
+        {visible.length > 0 ? (
           <div className="mt-5 grid w-full grid-cols-1 gap-8 lg:mt-12 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12">
-            {posts.map((post) => (
+            {visible.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
           </div>

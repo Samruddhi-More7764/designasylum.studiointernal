@@ -11,7 +11,19 @@ import { submitContactLead } from "@/lib/submitContactLead";
 const inputClasses =
   "h-12 w-full rounded-lg bg-input-bg px-4 font-satoshi text-base font-normal text-black placeholder:text-black/50 outline-none";
 
-export function CareersApplicationForm() {
+export function CareersApplicationForm({
+  titleBefore = careersForm.titleBefore,
+  titleAccent = careersForm.titleAccent,
+  titleAfter = careersForm.titleAfter,
+  dek = careersForm.dek,
+  interests = careersForm.interests,
+}: {
+  titleBefore?: string;
+  titleAccent?: string;
+  titleAfter?: string;
+  dek?: string;
+  interests?: string[];
+} = {}) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [count, setCount] = useState(0);
@@ -84,12 +96,12 @@ export function CareersApplicationForm() {
       <div className="mx-auto grid w-full max-w-[1362px] grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,688px)] lg:gap-x-16">
         <div className="flex flex-col gap-6 lg:max-w-[420px] lg:pt-1">
           <h2 className="max-w-[368px] font-figtree text-[32px] leading-[1.2] font-normal tracking-[-1px] text-[#05201F] lg:text-[44px] lg:tracking-[-2px]">
-            {careersForm.titleBefore}
-            <Accent className="text-[32px] tracking-[-2.09px] lg:text-[44px]">{careersForm.titleAccent}</Accent>
-            {careersForm.titleAfter}
+            {titleBefore}
+            <Accent className="text-[32px] tracking-[-2.09px] lg:text-[44px]">{titleAccent}</Accent>
+            {titleAfter}
           </h2>
           <p className="max-w-[420px] font-satoshi text-[16px] leading-[1.3] font-normal tracking-[-0.1px] text-black lg:text-[20px] lg:leading-[25.9px]">
-            {careersForm.dek}
+            {dek}
           </p>
         </div>
 
@@ -126,7 +138,7 @@ export function CareersApplicationForm() {
                 <option value="" disabled>
                   - Select -
                 </option>
-                {careersForm.interests.map((interest) => (
+                {interests.map((interest) => (
                   <option key={interest} value={interest}>
                     {interest}
                   </option>

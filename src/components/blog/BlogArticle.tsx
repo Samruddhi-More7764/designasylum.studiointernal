@@ -176,7 +176,33 @@ function BlockView({ block }: { block: ArticleBlock }) {
   }
 }
 
-export function BlogArticle() {
+export function BlogArticle({
+  breadcrumbCurrent = "Sevenloop Brand Website Redesign",
+  titleBefore = "Sevenloop ",
+  titleAccent = "Rebrand",
+  titleMiddle = " & Webflow Site: ",
+  titleLine = "A 5-Month Case Study",
+  intro = "How Sevenloop went from B2B product company to enterprise-ready brand in 5 months — repositioning, identity, Webflow build, and the conversations it opened.",
+  heroImage = null,
+  bylineName = "Tanmaya Rao",
+  bylineDate = "Sept 28, 2026",
+  bylineAvatar = "/assets/images/blog/avatar.png",
+  lead = sevenloopLead,
+  sections = sevenloopSections,
+}: {
+  breadcrumbCurrent?: string;
+  titleBefore?: string;
+  titleAccent?: string;
+  titleMiddle?: string;
+  titleLine?: string;
+  intro?: string;
+  heroImage?: string | null;
+  bylineName?: string;
+  bylineDate?: string;
+  bylineAvatar?: string;
+  lead?: string;
+  sections?: typeof sevenloopSections;
+} = {}) {
   return (
     <>
       <header className="bg-white px-4 pt-10 lg:pt-20">
@@ -186,38 +212,46 @@ export function BlogArticle() {
               { label: "Home", href: "/" },
               { label: "Blogs", href: "/blogs" },
             ]}
-            current="Sevenloop Brand Website Redesign"
+            current={breadcrumbCurrent}
           />
           <h1 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[56px]">
-            Sevenloop <Accent className="text-[32px] tracking-[-2.09px] normal-case lg:text-[56px]">Rebrand</Accent>
-            {" & Webflow Site: "}
-            <span className="block">A 5-Month Case Study</span>
+            {titleBefore}
+            <Accent className="text-[32px] tracking-[-2.09px] normal-case lg:text-[56px]">{titleAccent}</Accent>
+            {titleMiddle}
+            <span className="block">{titleLine}</span>
           </h1>
           <p className="max-w-[842px] font-satoshi text-[12px] leading-[1.2] tracking-[-0.5px] text-black uppercase lg:text-[14px]">
-            How Sevenloop went from B2B product company to enterprise-ready brand in 5 months — repositioning, identity, Webflow build, and the conversations it opened.
+            {intro}
           </p>
           <p className="flex items-center gap-1 font-satoshi text-[14px] leading-[1.2] tracking-[-0.5px] text-black capitalize">
-            <Image src="/assets/images/blog/avatar.png" alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
-            Tanmaya Rao
-            <span className="text-black/50">• Sept 28, 2026</span>
+            <Image src={bylineAvatar} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
+            {bylineName}
+            <span className="text-black/50">• {bylineDate}</span>
           </p>
         </div>
-        <div
-          aria-hidden="true"
-          className="mx-auto mt-8 h-[220px] w-full max-w-[1150px] rounded-[8.6px] bg-black sm:h-[420px] lg:mt-8 lg:h-[647px]"
-        />
+        <div className="relative mx-auto mt-8 h-[220px] w-full max-w-[1150px] overflow-hidden rounded-[8.6px] bg-black sm:h-[420px] lg:mt-8 lg:h-[647px]">
+          {heroImage ? (
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 1150px, 100vw"
+              className="object-cover"
+            />
+          ) : null}
+        </div>
       </header>
 
       <section className="bg-white px-5 pt-16 sm:px-8 lg:px-[60px] lg:pt-20">
         <div className="mx-auto flex w-full max-w-[1350px] flex-col gap-10 lg:flex-row lg:items-start lg:gap-[72px]">
           <StickyTableOfContents
-            items={sevenloopSections.map((section) => ({ id: section.id, label: section.label }))}
+            items={sections.map((section) => ({ id: section.id, label: section.label }))}
           />
           <div className="flex min-w-0 flex-1 flex-col gap-16 lg:max-w-[932px] lg:gap-20">
             <p className="font-figtree text-[22px] leading-[1.2] font-normal tracking-[-1px] text-[#05201F] sm:text-[28px] lg:text-[32px] lg:tracking-[-2.09px]">
-              {sevenloopLead}
+              {lead}
             </p>
-            {sevenloopSections.map((section) => (
+            {sections.map((section) => (
               <article key={section.id} id={section.id} className="flex scroll-mt-[100px] flex-col gap-6">
                 <h2 className={headingClass}>
                   {section.before}
@@ -236,15 +270,27 @@ export function BlogArticle() {
   );
 }
 
-export function ArticleTopics() {
+export function ArticleTopics({
+  before = "Solutions ",
+  accent = "we ",
+  after = "offer",
+  topics = sevenloopTopics,
+}: {
+  before?: string;
+  accent?: string;
+  after?: string;
+  topics?: readonly string[];
+} = {}) {
   return (
     <section className="bg-white px-5 pt-16 pb-4 sm:px-8 lg:px-[60px] lg:pt-[120px] lg:pb-10">
       <div className="mx-auto flex w-full max-w-[881px] flex-col items-center gap-10 lg:gap-16">
         <h2 className="text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-[#05201F] lg:text-[44px] lg:leading-[62.6px]">
-          Solutions <Accent>we </Accent>offer
+          {before}
+          <Accent>{accent}</Accent>
+          {after}
         </h2>
         <ul className="flex flex-wrap items-center justify-center gap-[11px]">
-          {sevenloopTopics.map((topic, index) => (
+          {topics.map((topic, index) => (
             <li
               key={topic}
               className="inline-flex items-center gap-2 rounded-xl border border-black/30 px-3"
@@ -263,12 +309,22 @@ export function ArticleTopics() {
   );
 }
 
-export function ArticleAuthor() {
+export function ArticleAuthor({
+  image = "/assets/images/blog/author.png",
+  name = "Athira Krishnan",
+  role = "Lead Designer | Content Strategist",
+  bio = "Articulate with a clear thought process, she excels in content writing, driving design in B2B SaaS and B2C websites.",
+}: {
+  image?: string;
+  name?: string;
+  role?: string;
+  bio?: string;
+} = {}) {
   return (
     <section className="bg-white px-5 pb-8 sm:px-8 lg:px-[60px]">
       <div className="mx-auto flex w-full max-w-[1081px] flex-col items-start gap-6 rounded-2xl bg-[#D5D5D533] p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
         <Image
-          src="/assets/images/blog/author.png"
+          src={image}
           alt=""
           width={250}
           height={250}
@@ -277,14 +333,14 @@ export function ArticleAuthor() {
         <div className="flex flex-col gap-4 lg:h-[226px] lg:justify-between">
           <div>
             <p className="font-figtree text-[28px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[44px]">
-              Athira Krishnan
+              {name}
             </p>
             <p className="mt-1 font-satoshi text-[14px] leading-[1.2] tracking-[-0.5px] text-black uppercase lg:text-[20px]">
-              Lead Designer | Content Strategist
+              {role}
             </p>
           </div>
           <p className="max-w-[767px] font-figtree text-[18px] leading-[1.2] font-normal tracking-[-0.5px] text-black lg:text-[24px]">
-            Articulate with a clear thought process, she excels in content writing, driving design in B2B SaaS and B2C websites.
+            {bio}
           </p>
         </div>
       </div>
