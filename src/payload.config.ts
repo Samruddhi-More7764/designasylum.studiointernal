@@ -6,6 +6,7 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
+import { ensureSchema } from "./cms/ensureSchema";
 import { postgresConnectionString } from "./cms/postgres";
 import { Users } from "./collections/Users";
 import { Media } from "./collections/Media";
@@ -40,6 +41,9 @@ const dirname = path.dirname(filename);
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
 export default buildConfig({
+  onInit: async (payload) => {
+    await ensureSchema(payload);
+  },
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
   admin: {
     user: Users.slug,
