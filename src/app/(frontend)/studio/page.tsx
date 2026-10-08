@@ -47,13 +47,13 @@ export default async function StudioPage() {
               {page.headingAfter}
             </h1>
           </div>
-          <img src={page.heroImage} alt="" className="h-[220px] w-full object-cover sm:h-[420px] lg:h-[831px]" />
+          <img src={page.heroImage} alt="" className="aspect-[390/220] h-auto w-full object-cover lg:aspect-auto lg:h-[831px]" />
         </section>
 
         <section className="px-4 py-16 lg:px-8 lg:py-[120px]">
           <div className="mx-auto grid w-full max-w-[1406px] grid-cols-1 gap-4 lg:grid-cols-2">
             <StudioPortrait src={page.portrait} isVideo={page.portraitIsVideo} />
-            <div className="relative flex min-h-[420px] flex-col items-center justify-center rounded-3xl bg-[#f2f2f3] px-6 py-16 text-center lg:h-[832px] lg:px-10">
+            <div className="relative flex aspect-[358/414] min-h-0 flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#f2f2f3] px-6 py-6 text-center lg:aspect-auto lg:h-[832px] lg:px-10 lg:py-16">
               <div className="flex max-w-[518px] flex-wrap justify-center gap-3">
                 {page.chips.map((chip) => (
                   <span
@@ -93,7 +93,7 @@ export default async function StudioPage() {
                   <img
                     src={project.image}
                     alt=""
-                    className="h-[220px] w-full object-cover lg:h-[279px] lg:w-[496px] lg:shrink-0"
+                    className="aspect-[358/201] h-auto w-full object-cover lg:aspect-auto lg:h-[279px] lg:w-[496px] lg:shrink-0"
                   />
                   <div className="flex flex-1 flex-col gap-6 lg:h-[279px] lg:flex-row lg:items-start lg:justify-between">
                     <p className="font-figtree text-[32px] leading-none font-normal tracking-[-1.5px] text-black lg:text-[38px] lg:leading-[45px]">
@@ -146,7 +146,7 @@ export default async function StudioPage() {
                   {group.cards.map((caption, index) => (
                     <li
                       key={caption}
-                      className="flex min-h-[420px] flex-col justify-between rounded-[32px] border border-black/30 bg-white p-4 lg:h-[447px]"
+                      className="flex flex-col justify-between rounded-[32px] border border-black/30 bg-white p-4 lg:h-[447px]"
                     >
                       <FitIllustration index={index} tone={group.tone} />
                       <p className="px-1 pt-4 font-satoshi text-[18px] leading-[26px] tracking-[-0.5px] text-black lg:text-[20px]">
@@ -167,17 +167,28 @@ export default async function StudioPage() {
               <span className="font-playfair italic">{page.teamAccent}</span>
             </h2>
             <ul className="flex flex-wrap items-center justify-center gap-3">
-              {page.people.map((person) => (
-                <li
-                  key={person.name}
-                  className="flex items-center gap-2 rounded-xl border border-black/30 px-3 py-1"
-                >
-                  <img src={person.image} alt="" className="size-6 rounded object-cover" />
-                  <span className="font-figtree text-[18px] leading-[40px] tracking-[-0.8px] text-black lg:text-[20px] lg:leading-[45px] lg:tracking-[-1.5px]">
-                    {person.name}
-                  </span>
-                </li>
-              ))}
+              {page.people.map((person) => {
+                const chip = (
+                  <>
+                    <img src={person.image} alt="" className="size-6 rounded object-cover" />
+                    <span className="font-figtree text-[18px] leading-[40px] tracking-[-0.8px] text-black lg:text-[20px] lg:leading-[45px] lg:tracking-[-1.5px]">
+                      {person.name}
+                    </span>
+                  </>
+                );
+                const chipClass = "flex items-center gap-2 rounded-xl border border-black/30 px-3 py-1";
+                return (
+                  <li key={person.name}>
+                    {person.href ? (
+                      <a href={person.href} className={chipClass}>
+                        {chip}
+                      </a>
+                    ) : (
+                      <div className={chipClass}>{chip}</div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </section>

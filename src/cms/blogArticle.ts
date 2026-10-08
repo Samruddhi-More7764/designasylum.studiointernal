@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { teamPersonHeroHref } from "@/data/teamPage";
 import { getPayloadClient } from "@/cms/getPayload";
 import { storedImage } from "@/cms/storedImage";
 import { relatedBlogs, relatedBlogsHeading } from "@/data/brandingAgencyPage";
@@ -50,6 +51,7 @@ export type BlogArticleContent = {
   authorName: string;
   authorRole: string;
   authorBio: string;
+  authorHref: string;
   topicsBefore: string;
   topicsAccent: string;
   topicsAfter: string;
@@ -183,6 +185,7 @@ const fallback: BlogArticleContent = {
   authorRole: "Lead Designer | Content Strategist",
   authorBio:
     "Articulate with a clear thought process, she excels in content writing, driving design in B2B SaaS and B2C websites.",
+  authorHref: "",
   topicsBefore: "Solutions ",
   topicsAccent: "we ",
   topicsAfter: "offer",
@@ -225,6 +228,8 @@ export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
       authorName?: string | null;
       authorRole?: string | null;
       authorBio?: string | null;
+      authorLink?: string | null;
+      authorUrl?: string | null;
       topicsBefore?: string | null;
       topicsAccent?: string | null;
       topicsAfter?: string | null;
@@ -297,6 +302,12 @@ export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
       authorName: text(doc.authorName, fallback.authorName),
       authorRole: text(doc.authorRole, fallback.authorRole),
       authorBio: text(doc.authorBio, fallback.authorBio),
+      authorHref:
+        doc.authorLink === "team"
+          ? teamPersonHeroHref
+          : doc.authorLink === "url"
+            ? doc.authorUrl?.trim() || ""
+            : "",
       topicsBefore: text(doc.topicsBefore, fallback.topicsBefore),
       topicsAccent: text(doc.topicsAccent, fallback.topicsAccent),
       topicsAfter: text(doc.topicsAfter, fallback.topicsAfter),

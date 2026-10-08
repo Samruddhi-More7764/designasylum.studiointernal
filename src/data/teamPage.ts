@@ -13,6 +13,7 @@ const designedPerson = {
 };
 
 export const teamPersonHref = "/team/tanmaya-rao";
+export const teamPersonHeroHref = `${teamPersonHref}#hero`;
 
 export const teamLeadership = {
   heading: "Leadership",

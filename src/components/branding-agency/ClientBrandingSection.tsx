@@ -86,7 +86,7 @@ export function ClientBrandingSection({
               key={`${active}-${project.key}`}
               className="flex w-full flex-col gap-4"
             >
-              <div className="relative aspect-[663/373] w-full overflow-hidden bg-[#f4f4f4]">
+              <div className="relative aspect-[358/201] w-full overflow-hidden bg-[#f4f4f4] lg:aspect-[663/373]">
                 <Image
                   src={project.image}
                   alt=""

@@ -37,7 +37,7 @@ export function FitIllustration({ index, tone }: { index: number; tone: "right" 
       : "bg-gradient-to-b from-[rgba(254,91,41,0.12)] to-transparent";
 
   return (
-    <div className={`flex h-[280px] items-center justify-center rounded-2xl lg:h-[313px] ${wash}`}>
+    <div className={`flex aspect-[332/256] h-auto w-full items-center justify-center rounded-2xl lg:aspect-auto lg:h-[313px] ${wash}`}>
       {index === 0 && tone === "right" ? (
         <Panel>
           <div className="flex h-9 items-center gap-2 border-b border-black/10">

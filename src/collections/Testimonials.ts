@@ -37,7 +37,14 @@ export const Testimonials: CollectionConfig = {
           "Optional. Shown under the name. Example: Co-founder, i3systems.",
       },
     },
-    { name: "quote", type: "textarea" },
+    {
+      name: "quote",
+      type: "textarea",
+      maxLength: 120,
+      admin: {
+        description: "120 characters maximum.",
+      },
+    },
     {
       name: "width",
       type: "number",

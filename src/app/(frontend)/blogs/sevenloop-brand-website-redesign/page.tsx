@@ -43,6 +43,7 @@ export default async function SevenloopArticlePage() {
           name={page.authorName}
           role={page.authorRole}
           bio={page.authorBio}
+          href={page.authorHref}
         />
         <ArticleTopics
           before={page.topicsBefore}

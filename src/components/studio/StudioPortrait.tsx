@@ -7,7 +7,7 @@ export function StudioPortrait({ src, isVideo }: { src: string; isVideo: boolean
   const [playing, setPlaying] = useState(false);
 
   return (
-    <div className="relative flex min-h-[420px] items-center justify-center overflow-hidden rounded-3xl lg:h-[832px]">
+    <div className="relative flex aspect-[358/428] w-full items-center justify-center overflow-hidden rounded-3xl lg:aspect-auto lg:h-[832px]">
       {isVideo ? (
         <video
           ref={videoRef}

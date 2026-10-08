@@ -110,7 +110,7 @@ function BlockView({ block }: { block: ArticleBlock }) {
       );
     case "image":
       return (
-        <div className="relative h-[220px] w-full overflow-hidden rounded-xl sm:h-[360px] lg:h-[515px]">
+        <div className="relative aspect-[358/201] w-full overflow-hidden rounded-xl sm:aspect-auto sm:h-[360px] lg:h-[515px]">
           <Image src={block.src} alt={block.alt} fill sizes="(min-width: 1024px) 932px, 100vw" className="object-cover" />
         </div>
       );
@@ -118,7 +118,7 @@ function BlockView({ block }: { block: ArticleBlock }) {
       return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {block.srcs.map((src) => (
-            <div key={src} className="relative h-[195px] overflow-hidden rounded-xl">
+            <div key={src} className="relative aspect-[358/232] overflow-hidden rounded-xl sm:aspect-auto sm:h-[195px]">
               <Image src={src} alt={block.alt} fill sizes="300px" className="object-cover" />
             </div>
           ))}
@@ -229,7 +229,7 @@ export function BlogArticle({
             <span className="text-black/50">• {bylineDate}</span>
           </p>
         </div>
-        <div className="relative mx-auto mt-8 h-[220px] w-full max-w-[1150px] overflow-hidden rounded-[8.6px] bg-black sm:h-[420px] lg:mt-8 lg:h-[647px]">
+        <div className="relative mx-auto mt-8 aspect-[358/201] w-full max-w-[1150px] overflow-hidden rounded-[8.6px] bg-black sm:aspect-auto sm:h-[420px] lg:mt-8 lg:h-[647px]">
           {heroImage ? (
             <Image
               src={heroImage}
@@ -314,11 +314,13 @@ export function ArticleAuthor({
   name = "Athira Krishnan",
   role = "Lead Designer | Content Strategist",
   bio = "Articulate with a clear thought process, she excels in content writing, driving design in B2B SaaS and B2C websites.",
+  href = "",
 }: {
   image?: string;
   name?: string;
   role?: string;
   bio?: string;
+  href?: string;
 } = {}) {
   return (
     <section className="bg-white px-5 pb-8 sm:px-8 lg:px-[60px]">
@@ -333,7 +335,13 @@ export function ArticleAuthor({
         <div className="flex flex-col gap-4 lg:h-[226px] lg:justify-between">
           <div>
             <p className="font-figtree text-[28px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[44px]">
-              {name}
+              {href ? (
+                <a href={href} className="hover:underline">
+                  {name}
+                </a>
+              ) : (
+                name
+              )}
             </p>
             <p className="mt-1 font-satoshi text-[14px] leading-[1.2] tracking-[-0.5px] text-black uppercase lg:text-[20px]">
               {role}

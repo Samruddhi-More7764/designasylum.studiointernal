@@ -12,7 +12,6 @@ import {
 } from "../data/brandingAgencyPage";
 import { blogCategories, blogPosts, featuredPosts, type BlogPost } from "../data/blogIndexPage";
 import { marqueeRow1, marqueeRow2 } from "../data/clients";
-import { contactOffices } from "../data/contactPage";
 import { faqCategories, faqEntries } from "../data/faqPage";
 import { faqDetails } from "../data/faqDetailPage";
 import { FOOTER_COLUMNS } from "../data/footer";
@@ -381,27 +380,6 @@ export function pageEntries(): PageEntry[] {
           title: post.title,
           href: post.href,
         })),
-      },
-    },
-    {
-      slug: "contact-page",
-      data: {
-        breadcrumbCurrent: "Contact us",
-        titleBefore: "Get in ",
-        titleAccent: "Touch",
-        titleAfter: "!",
-        offices: contactOffices.map((office) => ({
-          city: office.city,
-          imageSrc: office.image,
-          timeZone: office.timeZone,
-          tint: Boolean(office.tint),
-          links: office.links,
-        })),
-        formBefore: "Let's talk about ",
-        formAccent: "your ",
-        formAfter: "brand",
-        formBody:
-          "Tell us what you're building. We reply within a day, usually with questions, sometimes with opinions.",
       },
     },
     {

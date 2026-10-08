@@ -53,7 +53,7 @@ export function LifeOutside({
           (src, index) => (
             <li
               key={src || index}
-              className="relative h-[335px] w-[326px] shrink-0 snap-start overflow-hidden rounded-[11px] bg-[#d9d9d9] lg:h-[377px] lg:w-[366px] lg:rounded-xl"
+              className="relative aspect-[326/335] w-[min(326px,82vw)] shrink-0 snap-start overflow-hidden rounded-[11px] bg-[#d9d9d9] lg:aspect-auto lg:h-[377px] lg:w-[366px] lg:rounded-xl"
             >
               {src ? (
                 <Image src={src} alt="" fill sizes="366px" className="object-cover" />

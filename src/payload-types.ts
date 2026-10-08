@@ -694,6 +694,9 @@ export interface Testimonial {
    * Optional. Shown under the name. Example: Co-founder, i3systems.
    */
   designation?: string | null;
+  /**
+   * 120 characters maximum.
+   */
   quote?: string | null;
   /**
    * On-screen card width. Prefills to the homepage size (290).
@@ -2032,6 +2035,14 @@ export interface BlogArticle {
   authorName?: string | null;
   authorRole?: string | null;
   authorBio?: string | null;
+  /**
+   * Open a custom URL, or the team person page.
+   */
+  authorLink?: ('none' | 'url' | 'team') | null;
+  /**
+   * A path such as /contact, or a full https URL.
+   */
+  authorUrl?: string | null;
   topicsBefore?: string | null;
   topicsAccent?: string | null;
   topicsAfter?: string | null;
@@ -2358,6 +2369,10 @@ export interface StudioPage {
     | {
         image?: (number | null) | Media;
         name: string;
+        /**
+         * Optional. Use /team/tanmaya-rao#hero to open the team person page at the hero.
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3122,6 +3137,8 @@ export interface BlogArticleSelect<T extends boolean = true> {
   authorName?: T;
   authorRole?: T;
   authorBio?: T;
+  authorLink?: T;
+  authorUrl?: T;
   topicsBefore?: T;
   topicsAccent?: T;
   topicsAfter?: T;
@@ -3401,6 +3418,7 @@ export interface StudioPageSelect<T extends boolean = true> {
     | {
         image?: T;
         name?: T;
+        href?: T;
         id?: T;
       };
   updatedAt?: T;

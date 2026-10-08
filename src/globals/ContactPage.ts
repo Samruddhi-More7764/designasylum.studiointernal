@@ -8,13 +8,13 @@ const image: Field = {
 };
 
 /**
- * The contact page at /contact.
- * Empty fields fall back to the designed page copy.
- * The form fields and submit button stay in code.
+ * Kept so the contact tables stay in the database.
+ * The public page is not edited here.
  */
 export const ContactPage: GlobalConfig = {
   slug: "contact-page",
   label: "Contact",
+  admin: { hidden: true },
   access: { read: () => true },
   fields: [
     {

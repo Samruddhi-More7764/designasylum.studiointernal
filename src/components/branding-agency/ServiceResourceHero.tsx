@@ -53,16 +53,17 @@ export function ServiceResourceHero({
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[1470px] px-5 pb-12 sm:px-8 sm:pb-16 lg:px-[60px] lg:pb-20">
-        <Image
-          src={imageSrc}
-          alt={title}
-          width={1150}
-          height={647}
-          priority
-          sizes="(min-width: 1024px) 1150px, 100vw"
-          className="mx-auto h-auto w-full max-w-[1150px] rounded-[8.63px] object-cover"
-        />
+      <div className="mx-auto w-full max-w-[1470px] px-4 pb-12 sm:px-8 sm:pb-16 lg:px-[60px] lg:pb-20">
+        <div className="relative mx-auto aspect-[358/201] w-full max-w-[1150px] overflow-hidden rounded-[8.63px] lg:aspect-[1150/647]">
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            priority
+            sizes="(min-width: 1024px) 1150px, 100vw"
+            className="object-cover"
+          />
+        </div>
       </div>
     </header>
   );

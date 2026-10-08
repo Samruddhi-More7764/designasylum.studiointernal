@@ -92,7 +92,7 @@ export default async function TeamPersonPage() {
     <>
       <NavBar />
       <main data-nav="light" className="bg-white pt-28">
-        <section className="px-4 pt-6 pb-[120px] lg:px-[60px] lg:pt-16 lg:pb-[200px]">
+        <section id="hero" className="scroll-mt-28 px-4 pt-6 pb-[120px] lg:px-[60px] lg:pt-16 lg:pb-[200px]">
           <div className="mx-auto flex w-full max-w-[1350px] flex-col items-center">
             <Breadcrumbs
               items={[
@@ -149,7 +149,7 @@ export default async function TeamPersonPage() {
                 {page.logos.map((logo, index) => (
                   <li
                     key={`${logo}-${index}`}
-                    className="flex h-[98px] items-center justify-center rounded-xl border border-black/15 px-3 lg:h-[140px] lg:w-[200px]"
+                    className="flex aspect-[10/7] h-auto w-full items-center justify-center rounded-xl border border-black/15 px-3 lg:aspect-auto lg:h-[140px] lg:w-[200px]"
                   >
                     <img src={logo} alt="" className="max-h-[70px] w-full object-contain lg:max-h-[101px]" />
                   </li>
@@ -170,7 +170,7 @@ export default async function TeamPersonPage() {
                       <img
                         src={project.image}
                         alt=""
-                        className="h-[201px] w-full object-cover lg:h-[279px] lg:w-[496px] lg:shrink-0"
+                        className="aspect-[358/201] h-auto w-full object-cover lg:aspect-auto lg:h-[279px] lg:w-[496px] lg:shrink-0"
                       />
                       <div className="flex flex-1 flex-col gap-4 lg:h-[279px] lg:flex-row lg:items-start lg:justify-between lg:gap-6">
                         <p className="font-figtree text-[24px] leading-none font-normal tracking-[-1.5px] text-black lg:text-[38px] lg:leading-[45px]">

@@ -202,6 +202,29 @@ export const BlogArticleGlobal: GlobalConfig = {
             { name: "authorName", type: "text" },
             { name: "authorRole", label: "Role", type: "text" },
             { name: "authorBio", label: "Bio", type: "textarea" },
+            {
+              name: "authorLink",
+              label: "Link",
+              type: "select",
+              defaultValue: "none",
+              options: [
+                { label: "No link", value: "none" },
+                { label: "Custom URL", value: "url" },
+                { label: "Team person page", value: "team" },
+              ],
+              admin: {
+                description: "Open a custom URL, or the team person page.",
+              },
+            },
+            {
+              name: "authorUrl",
+              label: "URL",
+              type: "text",
+              admin: {
+                description: "A path such as /contact, or a full https URL.",
+                condition: (data) => data?.authorLink === "url",
+              },
+            },
           ],
         },
         {

@@ -38,7 +38,7 @@ export default async function BlogIndexPage() {
               {page.intro}
             </p>
           </div>
-          <div className="relative mx-auto mt-8 h-[201px] w-full max-w-[1438px] overflow-hidden rounded-[4px] bg-black lg:mt-8 lg:h-[421px] lg:rounded-[8.6px]">
+          <div className="relative mx-auto mt-8 aspect-[358/201] w-full max-w-[1438px] overflow-hidden rounded-[4px] bg-black lg:mt-8 lg:aspect-auto lg:h-[421px] lg:rounded-[8.6px]">
             {page.heroImage ? (
               <Image
                 src={page.heroImage}

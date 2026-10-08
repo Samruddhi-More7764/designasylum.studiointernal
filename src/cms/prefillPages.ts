@@ -14,8 +14,10 @@ type QueryClient = {
 };
 
 /**
- * Writes the public page copy into CMS globals that are still empty.
- * A field that already has text or list items is left alone.
+ * Writes the public page copy into a CMS global only when that global has
+ * no saved fields yet. A document the client has saved is never updated:
+ * a global write replaces the stored row, so a partial fill could rewrite
+ * lists and uploads that were left out of the patch.
  */
 export async function prefillPageEntries(payload: Payload): Promise<void> {
   if (process.env.NEXT_PHASE === "phase-production-build") return;
@@ -54,11 +56,10 @@ async function fillEmptyEntries(payload: Payload): Promise<void> {
       depth: 0,
       overrideAccess: true,
     })) as unknown as Record<string, unknown>;
-    const data = emptyFields(current, entry.data);
-    if (!Object.keys(data).length) continue;
+    if (hasSavedContent(current, entry.data)) continue;
     await payload.updateGlobal({
       slug: entry.slug as "site-footer",
-      data,
+      data: entry.data,
     } as Parameters<typeof payload.updateGlobal>[0]);
     filled.push(entry.slug);
   }
@@ -77,17 +78,14 @@ async function fillEmptyEntries(payload: Payload): Promise<void> {
   }
 }
 
-function emptyFields(
+function hasSavedContent(
   current: Record<string, unknown>,
   designed: Record<string, unknown>,
-): Record<string, unknown> {
-  const patch: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(designed)) {
-    if (value === undefined) continue;
-    if (!isEmpty(current[key])) continue;
-    patch[key] = value;
-  }
-  return patch;
+): boolean {
+  return Object.entries(designed).some(([key, value]) => {
+    if (value === undefined) return false;
+    return !isEmpty(current[key]);
+  });
 }
 
 function isEmpty(value: unknown): boolean {

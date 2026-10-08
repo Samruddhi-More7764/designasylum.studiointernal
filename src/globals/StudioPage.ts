@@ -1,4 +1,5 @@
 import type { Field, GlobalConfig } from "payload";
+import { teamPersonHeroHref } from "@/data/teamPage";
 
 function imageField(name = "image", label?: string, description?: string): Field {
   return {
@@ -130,6 +131,14 @@ export const StudioPage: GlobalConfig = {
               fields: [
                 imageField(),
                 { name: "name", type: "text", required: true },
+                {
+                  name: "href",
+                  label: "URL",
+                  type: "text",
+                  admin: {
+                    description: `Optional. Use ${teamPersonHeroHref} to open the team person page at the hero.`,
+                  },
+                },
               ],
             },
           ],

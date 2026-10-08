@@ -66,7 +66,7 @@ export default async function WhyDesignAsylumPage() {
               {page.intro}
             </p>
           </div>
-          <div className="relative mx-auto mt-10 h-[220px] w-full max-w-[1470px] overflow-hidden bg-black lg:mt-16 lg:h-[831px]">
+          <div className="relative mx-auto mt-10 aspect-[389/220] w-full max-w-[1470px] overflow-hidden bg-black lg:mt-16 lg:aspect-auto lg:h-[831px]">
             {page.heroImage ? (
               <Image src={page.heroImage} alt="" fill sizes="1470px" className="object-cover" />
             ) : null}

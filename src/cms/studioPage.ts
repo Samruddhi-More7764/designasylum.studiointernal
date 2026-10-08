@@ -14,7 +14,7 @@ import {
 
 export type StudioChip = { label: string; value: string };
 export type StudioProject = { id: string; name: string; body: string; image: string; href: string };
-export type StudioPerson = { name: string; image: string };
+export type StudioPerson = { name: string; image: string; href: string };
 
 export type StudioContent = {
   breadcrumbCurrent: string;
@@ -74,7 +74,7 @@ const fallback: StudioContent = {
   missCards: [...studioMiss.cards],
   teamBefore: studioTeam.before,
   teamAccent: studioTeam.accent,
-  people: studioTeam.people.map((person) => ({ ...person })),
+  people: studioTeam.people.map((person) => ({ ...person, href: "" })),
 };
 
 export const getStudioPage = cache(async (): Promise<StudioContent> => {
@@ -109,7 +109,7 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
       missCards?: Array<{ caption?: string | null } | null> | null;
       teamBefore?: string | null;
       teamAccent?: string | null;
-      people?: Array<{ image?: unknown; name?: string | null } | null> | null;
+      people?: Array<{ image?: unknown; name?: string | null; href?: string | null } | null> | null;
     };
 
     const chips = (doc.chips || [])
@@ -150,6 +150,7 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
         return {
           name,
           image: storedImage(row?.image, designed?.image || studioTeam.people[0].image),
+          href: row?.href?.trim() || "",
         };
       })
       .filter((row): row is StudioPerson => Boolean(row));

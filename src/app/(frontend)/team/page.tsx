@@ -38,7 +38,7 @@ function PersonCard({ member }: { member: TeamMember }) {
           <img
             src={member.image}
             alt=""
-            className="absolute top-[-4.52%] left-0 h-[150%] w-full max-w-none"
+            className="absolute inset-0 size-full object-cover"
           />
         </div>
         <div className="flex flex-col gap-3 lg:gap-4">

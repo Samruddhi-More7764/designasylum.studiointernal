@@ -53,7 +53,7 @@ export function PersonStack({ images }: { images: Array<string | null> }) {
         <img src="/assets/images/team/chevron-left.svg" alt="" width={16} height={16} />
       </button>
       <div
-        className="relative h-[420px] w-[320px] touch-pan-y lg:h-[462px] lg:w-[360px]"
+        className="relative h-[476px] w-[324px] max-w-full touch-pan-y lg:h-[462px] lg:w-[360px]"
         onPointerDown={(event) => {
           startX.current = event.clientX;
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -87,7 +87,7 @@ export function PersonStack({ images }: { images: Array<string | null> }) {
           return (
             <div
               key={index}
-              className="absolute top-0 left-0 h-[386px] w-[280px] overflow-hidden rounded-[20px] transition-transform duration-500 ease-out lg:h-[439px] lg:w-[319px]"
+              className="absolute top-0 left-0 aspect-[290/396] h-auto w-[290px] max-w-full overflow-hidden rounded-[20px] transition-transform duration-500 ease-out lg:aspect-auto lg:h-[439px] lg:w-[319px]"
               style={{
                 zIndex: pose.z,
                 backgroundColor: pose.tone,
