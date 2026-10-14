@@ -336,23 +336,41 @@ function optionalStudyHref(clientSlug: string, relation: unknown): string | null
   return studySlug ? caseStudyPath(clientSlug, studySlug) : null;
 }
 
-export function logosToLayouts(logos: ClientLogo[]) {
-  if (logos.length < 4) {
-    return {
-      logos,
-      marqueeRow1: logos,
-      marqueeRow2: logos.length ? [...logos].reverse().concat(logos[0]) : [],
-      clientsGridRows: logos.length ? [logos, logos] : [],
-    };
-  }
-
+function logoCell(logo: ClientLogo): ClientLogo {
   return {
-    logos,
-    marqueeRow1: logos.slice(0, 4),
-    marqueeRow2: [logos[3], logos[2], logos[1], logos[0], logos[0]],
+    name: logo.name,
+    image: logo.image,
+    width: logo.width,
+    height: logo.height,
+  };
+}
+
+const HERO_ROW1 = 4;
+const HERO_ROW2 = 5;
+const GRID_ROW = 4;
+
+/**
+ * Designed cells stay in place. Each saved logo replaces one cell, in order:
+ * hero row 1, hero row 2, then the 8-in-10 grid. A logo is never copied into
+ * another cell. Cells with no saved logo keep the static artwork.
+ */
+export function logosToLayouts(logos: ClientLogo[]) {
+  const slots = [...fallbackMarquee1, ...fallbackMarquee2, ...fallbackGridRows.flat()].map(
+    logoCell,
+  );
+
+  logos.forEach((logo, index) => {
+    if (index < slots.length) slots[index] = logoCell(logo);
+  });
+
+  const gridStart = HERO_ROW1 + HERO_ROW2;
+  return {
+    logos: logos.map(logoCell),
+    marqueeRow1: slots.slice(0, HERO_ROW1),
+    marqueeRow2: slots.slice(HERO_ROW1, gridStart),
     clientsGridRows: [
-      logos.slice(0, 4),
-      [logos[3], logos[2], logos[0], logos[1]],
+      slots.slice(gridStart, gridStart + GRID_ROW),
+      slots.slice(gridStart + GRID_ROW, gridStart + GRID_ROW * 2),
     ],
   };
 }

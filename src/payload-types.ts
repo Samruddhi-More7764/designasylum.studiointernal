@@ -645,6 +645,7 @@ export interface ClientLogo {
   id: number;
   name: string;
   image: number | Media;
+  section?: ('hero' | 'clients') | null;
   width: number;
   height: number;
   order: number;
@@ -945,6 +946,7 @@ export interface PainPointsSelect<T extends boolean = true> {
 export interface ClientLogosSelect<T extends boolean = true> {
   name?: T;
   image?: T;
+  section?: T;
   width?: T;
   height?: T;
   order?: T;

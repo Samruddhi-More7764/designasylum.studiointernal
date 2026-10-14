@@ -54,7 +54,7 @@ function LogoRow({ logos }: { logos: ClientLogo[] }) {
   return (
     <div className="hidden justify-center gap-6 lg:flex">
       {logos.map((logo, i) => (
-        <LogoCard key={`${logo.name}-${i}`} logo={logo} />
+        <LogoCard key={`${logo.name}-${i}-${logo.image}`} logo={logo} />
       ))}
     </div>
   );
@@ -92,7 +92,6 @@ export async function LogoMarquee({
             : "relative z-10 mt-0 bg-transparent px-5 pb-12 sm:px-6 sm:pb-16 lg:-mt-[calc(116/1470*100%)] lg:px-0 lg:pb-20"
       }
     >
-      {/* Mobile 2-col grid — 9 cards; last card sits in the right column */}
       <div
         className={`mx-auto grid w-full grid-cols-2 lg:hidden ${
           service ? "max-w-[292px] gap-3" : "max-w-[358px] gap-3 sm:gap-4"
@@ -100,14 +99,13 @@ export async function LogoMarquee({
       >
         {mobileLogos.map((logo, i) => (
           <LogoCard
-            key={`m-${logo.name}-${i}`}
+            key={`m-${logo.name}-${i}-${logo.image}`}
             logo={logo}
             className={i === mobileLogos.length - 1 ? "col-start-2" : ""}
           />
         ))}
       </div>
 
-      {/* Desktop rows — unchanged */}
       <div className="mx-auto hidden h-[304px] w-full max-w-[1130px] flex-col gap-6 lg:flex">
         <LogoRow logos={marqueeRow1} />
         <LogoRow logos={marqueeRow2} />

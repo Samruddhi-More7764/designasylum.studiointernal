@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { CtaHoverLabel } from "@/components/ui/CtaHoverLabel";
@@ -174,8 +174,44 @@ const BAR_SURFACE: Record<NavMode, string> = {
  */
 export function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const menuOpenRef = useRef(false);
+  menuOpenRef.current = menuOpen;
   const mode = useNavMode();
   const tone = mode === "light" ? "light" : "dark";
+  const barHidden = hidden && !menuOpen;
+
+  useEffect(() => {
+    let last = window.scrollY;
+    let travel = 0;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - last;
+      last = y;
+
+      // Stay on screen at the top and while the mobile menu is open.
+      // The menu is position:fixed inside this header, so translating the
+      // header would drag the open menu off screen with it.
+      if (menuOpenRef.current || y <= 8) {
+        travel = 0;
+        setHidden(false);
+        return;
+      }
+
+      if (delta === 0) return;
+      // A direction change starts a new gesture. Trackpad and smooth-scroll
+      // frames are often only a few pixels, so they have to add up.
+      if ((travel > 0 && delta < 0) || (travel < 0 && delta > 0)) travel = 0;
+      travel += delta;
+
+      if (travel > 24) setHidden(true);
+      else if (travel < -24) setHidden(false);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -204,7 +240,12 @@ export function NavBar() {
   }, []);
 
   return (
-    <header data-nav-bar className="fixed inset-x-0 top-0 z-50 mt-5 w-full px-4">
+    <header
+      data-nav-bar
+      className={`fixed inset-x-0 top-0 z-50 mt-5 w-full px-4 transition-transform duration-300 ease-out ${
+        barHidden ? "pointer-events-none -translate-y-[calc(100%+1.25rem)]" : "translate-y-0"
+      }`}
+    >
       <div
         className={`relative mx-auto flex h-16 max-w-[1270px] items-center justify-between gap-4 rounded-[12px] border px-4 transition-[background-color,border-color,backdrop-filter] duration-300 sm:px-6 lg:gap-6 ${BAR_SURFACE[mode]}`}
       >

@@ -13,6 +13,15 @@ export const ClientLogos: CollectionConfig = {
       relationTo: "media",
       required: true,
     },
+    {
+      name: "section",
+      type: "select",
+      options: [
+        { label: "Logo strip under the hero", value: "hero" },
+        { label: "8 in 10 clients", value: "clients" },
+      ],
+      admin: { hidden: true },
+    },
     { name: "width", type: "number", required: true, defaultValue: 192 },
     { name: "height", type: "number", required: true, defaultValue: 49 },
     { name: "order", type: "number", required: true, defaultValue: 0 },
