@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { FitIllustration } from "@/components/studio/StudioFit";
 import { StudioPortrait } from "@/components/studio/StudioPortrait";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getStudioPage } from "@/cms/studioPage";
 import { studioOffer } from "@/data/studioPage";
@@ -42,37 +43,39 @@ export default async function StudioPage() {
           <div className="mx-auto flex w-full max-w-[1438px] flex-col items-center gap-4 px-4 pt-10 pb-8 text-center lg:px-8 lg:pt-20">
             <Breadcrumbs items={[{ label: "Home", href: "/" }]} current={page.breadcrumbCurrent} />
             <h1 className="max-w-[1042px] font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black lg:text-[44px]">
-              {page.headingBefore}
-              <span className="font-playfair italic">{` ${page.headingAccent}`}</span>
-              {page.headingAfter}
+              <SplitHeading
+                before={page.headingBefore}
+                accent={page.headingAccent}
+                after={page.headingAfter}
+              />
             </h1>
           </div>
           <img src={page.heroImage} alt="" className="aspect-[390/220] h-auto w-full object-cover lg:aspect-auto lg:h-[831px]" />
         </section>
 
         <section className="px-4 py-16 lg:px-8 lg:py-[120px]">
-          <div className="mx-auto grid w-full max-w-[1406px] grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="mx-auto grid w-full max-w-[1406px] grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
             <StudioPortrait src={page.portrait} isVideo={page.portraitIsVideo} />
-            <div className="relative flex aspect-[358/414] min-h-0 flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#f2f2f3] px-6 py-6 text-center lg:aspect-auto lg:h-[832px] lg:px-10 lg:py-16">
-              <div className="flex max-w-[518px] flex-wrap justify-center gap-3">
+            <div className="relative flex min-h-0 flex-col items-center justify-center gap-8 rounded-2xl bg-[#f2f2f3] px-4 py-6 text-center lg:h-[832px] lg:justify-center lg:gap-0 lg:overflow-hidden lg:rounded-3xl lg:px-10 lg:py-0">
+              <div className="flex w-full flex-wrap justify-center gap-3 lg:absolute lg:top-[46px] lg:left-1/2 lg:w-[518px] lg:-translate-x-1/2">
                 {page.chips.map((chip) => (
                   <span
                     key={`${chip.label}-${chip.value}`}
-                    className="rounded-xl border border-black/30 px-3 font-figtree text-[16px] leading-[40px] tracking-[-0.8px] text-black/70 lg:text-[20px] lg:leading-[45px] lg:tracking-[-1.5px]"
+                    className="inline-flex h-8 items-center rounded-lg border border-black/30 px-3 font-figtree text-[16px] leading-none tracking-[-0.8px] text-black/70 lg:h-auto lg:rounded-xl lg:text-[20px] lg:leading-[45px] lg:tracking-[-1.5px]"
                   >
                     {chip.label}
                     {chip.value ? <span className="text-black">{`  ${chip.value}`}</span> : null}
                   </span>
                 ))}
               </div>
-              <p className="mt-8 max-w-[489px] font-figtree text-[28px] leading-[1.2] font-normal tracking-[-1px] text-black lg:text-[38px] lg:leading-[45px] lg:tracking-[-1.5px]">
+              <p className="max-w-[304px] font-figtree text-[24px] leading-[1.2] font-normal tracking-[-0.78px] text-black lg:max-w-[489px] lg:text-[38px] lg:leading-[45px] lg:tracking-[-1.5px]">
                 {page.quote}
               </p>
-              <div className="mt-10 flex flex-col items-center gap-1 lg:absolute lg:bottom-12">
-                <p className="font-figtree text-[24px] leading-[1.2] font-normal tracking-[-1.5px] text-black">
+              <div className="flex flex-col items-center gap-1 lg:absolute lg:bottom-12">
+                <p className="font-figtree text-[20px] leading-[1.2] font-normal tracking-[-1.5px] text-black lg:text-[24px]">
                   {page.quoteName}
                 </p>
-                <p className="flex items-center gap-2 font-satoshi text-[20px] leading-[1.2] text-black/80">
+                <p className="flex items-center gap-1 font-figtree text-[16px] leading-[1.2] tracking-[-1.5px] text-black/70 lg:gap-2 lg:font-satoshi lg:text-[20px] lg:tracking-normal lg:text-black/80">
                   <img src="/assets/images/studio/masify.svg" alt="" className="size-6" />
                   {page.quoteRole}
                 </p>
@@ -83,8 +86,7 @@ export default async function StudioPage() {
 
         <section className="px-4 pb-8 lg:px-[60px]">
           <h2 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-1px] text-[#05201f] lg:text-[44px] lg:leading-[63px] lg:tracking-[-2px]">
-            {page.projectsBefore}
-            <span className="font-playfair italic">{page.projectsAccent}</span>
+            <SplitHeading before={page.projectsBefore} accent={page.projectsAccent} />
           </h2>
           <ul className="mt-8">
             {page.projects.map((project) => (
@@ -138,9 +140,7 @@ export default async function StudioPage() {
             ].map((group) => (
               <div key={group.tone} className="flex flex-col items-center gap-10 lg:gap-16">
                 <h2 className="text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-1px] text-[#05201f] lg:text-[44px] lg:leading-[63px] lg:tracking-[-2px]">
-                  {group.before}
-                  <span className="font-playfair italic">{group.accent}</span>
-                  {group.after}
+                  <SplitHeading before={group.before} accent={group.accent} after={group.after} />
                 </h2>
                 <ul className="grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
                   {group.cards.map((caption, index) => (
@@ -163,8 +163,7 @@ export default async function StudioPage() {
         <section className="px-4 pb-16 lg:px-8 lg:pb-[160px]">
           <div className="mx-auto flex w-full max-w-[881px] flex-col items-center gap-10 text-center lg:gap-16">
             <h2 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-1px] text-[#05201f] lg:text-[44px] lg:leading-[63px] lg:tracking-[-2px]">
-              {page.teamBefore}
-              <span className="font-playfair italic">{page.teamAccent}</span>
+              <SplitHeading before={page.teamBefore} accent={page.teamAccent} />
             </h2>
             <ul className="flex flex-wrap items-center justify-center gap-3">
               {page.people.map((person) => {

@@ -5,6 +5,7 @@ import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { PersonStack } from "@/components/team/PersonStack";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getTeamPerson, type PersonChip } from "@/cms/teamPerson";
 import { teamPersonCta } from "@/data/teamPersonPage";
@@ -56,9 +57,7 @@ function Heading({
 }) {
   return (
     <h2 className="text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-[#05201f] lg:text-[44px] lg:leading-[62.596px]">
-      {before ? <span>{before} </span> : null}
-      <span className="font-playfair italic">{accent}</span>
-      {after ? <span>{` ${after}`}</span> : null}
+      <SplitHeading before={before} accent={accent} after={after} />
     </h2>
   );
 }
@@ -206,9 +205,9 @@ export default async function TeamPersonPage() {
                   <li key={post.id} className="border-b border-black/10">
                     <a
                       href={post.href || "#"}
-                      className="flex items-center justify-between gap-6 py-6"
+                      className="flex items-center justify-between gap-4 py-4 lg:gap-6 lg:py-6"
                     >
-                      <span className="font-figtree text-[18px] leading-8 font-normal tracking-[-1px] text-black lg:text-[24px]">
+                      <span className="max-w-[305px] font-figtree text-[20px] leading-[1.2] font-normal tracking-[-1px] text-black lg:max-w-none lg:text-[24px] lg:leading-8">
                         {post.title}
                       </span>
                       <img

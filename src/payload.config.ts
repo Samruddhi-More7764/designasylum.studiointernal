@@ -108,9 +108,9 @@ export default buildConfig({
         media: true,
       },
       token: blobToken,
-      // Server-side put() — avoids browser CORS to vercel.com/api/blob.
-      // Vercel limits this path to 4.5MB; typical CMS images are fine.
-      clientUploads: false,
+      // Browser uploads straight to Blob. The token route stays same-origin,
+      // so a file over Vercel's 4.5MB function limit can still be saved.
+      clientUploads: true,
     }),
   ],
 });

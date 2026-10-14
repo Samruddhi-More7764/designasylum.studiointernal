@@ -9,7 +9,7 @@ import { ClientBrandingSection } from "@/components/branding-agency/ClientBrandi
 import { LocationCallout } from "@/components/branding-agency/LocationCallout";
 import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { FAQ } from "@/components/sections/14-FAQ";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getAhmedabadLocation } from "@/cms/ahmedabadLocation";
 import {
@@ -39,6 +39,7 @@ export default async function AhmedabadLocationPage() {
           crumbs={ahmedabadBreadcrumbs}
           current={page.breadcrumbCurrent}
           imageSrc={page.heroImage}
+          showActions={false}
         />
         <ClientBrandingSection
           flushTop
@@ -79,8 +80,8 @@ export default async function AhmedabadLocationPage() {
           variant="location"
           heading={
             <>
-              Ready to <span className="font-playfair italic">transform </span>
-              your Ahmedabad brand?
+              Ready to <span className="font-playfair italic px-[0.08em]">transform</span> your
+              Ahmedabad brand?
             </>
           }
           body={ahmedabadCta.body}
@@ -91,9 +92,7 @@ export default async function AhmedabadLocationPage() {
         <RelatedBlogs
           heading={
             <>
-              {page.relatedBefore}
-              <Accent>{page.relatedAccent}</Accent>
-              {page.relatedAfter}
+              <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} after={page.relatedAfter} />
             </>
           }
           posts={page.relatedBlogs}

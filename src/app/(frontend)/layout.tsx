@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree, Playfair_Display } from "next/font/google";
+import { Doto, Figtree, Playfair_Display } from "next/font/google";
 import {
   GoogleTagManager,
   GoogleTagManagerNoscript,
@@ -23,6 +23,13 @@ const playfairDisplay = Playfair_Display({
   style: ["normal", "italic"],
 });
 
+// Contact office clocks. Figma uses Doto Black for the digits.
+const doto = Doto({
+  variable: "--font-doto",
+  subsets: ["latin"],
+  weight: "900",
+});
+
 export const metadata: Metadata = {
   title: "Design Asylum",
   description: "Design Asylum landing page — built from Figma design specs.",
@@ -40,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${figtree.variable} ${playfairDisplay.variable} h-full scroll-smooth antialiased`}
+      className={`${figtree.variable} ${playfairDisplay.variable} ${doto.variable} h-full scroll-smooth antialiased`}
     >
       <GoogleTagManager />
       <head>

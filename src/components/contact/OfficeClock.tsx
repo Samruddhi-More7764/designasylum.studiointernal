@@ -22,8 +22,10 @@ function readClock(timeZone: string) {
 
 function Digit({ value }: { value: string }) {
   return (
-    <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[6px] bg-black/20 font-figtree text-[16px] font-black tracking-[1px] text-white">
-      {value}
+    <span className="relative flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-[6px] font-doto text-[20px] leading-5 font-black tracking-[1px] text-white/90">
+      <span className="absolute inset-x-0 top-0 h-[16px] bg-black/20" aria-hidden="true" />
+      <span className="absolute inset-x-0 bottom-0 h-[16px] bg-black/20" aria-hidden="true" />
+      <span className="relative">{value}</span>
     </span>
   );
 }
@@ -40,7 +42,7 @@ export function OfficeClock({ timeZone }: { timeZone: string }) {
   }, [timeZone]);
 
   return (
-    <div className="absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 lg:hidden">
+    <div className="absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-[11px] lg:hidden">
       <Digit value={clock.hour} />
       <Digit value={clock.minute} />
       <span className="font-figtree text-[14px] leading-5 tracking-[-0.14px] text-white uppercase">

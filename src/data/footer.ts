@@ -21,6 +21,7 @@ const FOOTER_HREFS: Record<string, string> = {
   Blogs: "/blogs",
   Careers: "/why-design-asylum",
   Contact: "/contact",
+  Studio: "/studio",
   FAQs: "/faq",
   Manufacturing: "/industries/manufacturing",
   "Brand Systems": "/blogs/branding-agency-in-pune",

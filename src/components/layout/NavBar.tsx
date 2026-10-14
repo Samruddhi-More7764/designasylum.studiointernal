@@ -7,9 +7,9 @@ import { CtaHoverLabel } from "@/components/ui/CtaHoverLabel";
 import { LiveClock } from "@/components/ui/LiveClock";
 import { PillButton } from "@/components/ui/PillButton";
 
-// Homepage: logo + WORKS · CLIENTS · THINKING on the left;
-// TEAM · STUDIO sit next to BOOK A CALL on the right.
-const LEFT_NAV_LINKS = ["Works", "Clients", "Thinking"];
+// Homepage: logo + WORKS · CLIENTS on the left.
+// Clocks sit in the middle. TEAM · STUDIO sit next to BOOK A CALL.
+const LEFT_NAV_LINKS = ["Works", "Clients"];
 const RIGHT_NAV_LINKS = ["Team", "Studio"];
 const ALL_NAV_LINKS = [...LEFT_NAV_LINKS, ...RIGHT_NAV_LINKS];
 const NAV_HREFS: Record<string, string> = {
@@ -206,7 +206,7 @@ export function NavBar() {
   return (
     <header data-nav-bar className="fixed inset-x-0 top-0 z-50 mt-5 w-full px-4">
       <div
-        className={`mx-auto flex h-16 max-w-[1270px] items-center justify-between gap-4 rounded-[12px] border px-4 transition-[background-color,border-color,backdrop-filter] duration-300 sm:px-6 lg:gap-6 ${BAR_SURFACE[mode]}`}
+        className={`relative mx-auto flex h-16 max-w-[1270px] items-center justify-between gap-4 rounded-[12px] border px-4 transition-[background-color,border-color,backdrop-filter] duration-300 sm:px-6 lg:gap-6 ${BAR_SURFACE[mode]}`}
       >
         <div className="flex items-center gap-3 lg:gap-10">
           <button
@@ -238,12 +238,14 @@ export function NavBar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4 lg:gap-8">
-          <div className="hidden items-center gap-8 xl:flex">
+        <div className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 xl:flex">
+          <div className="pointer-events-auto flex items-center gap-8">
             <LiveClock label="India" timeZone="Asia/Kolkata" tone={tone} />
             <LiveClock label="New Jersey, USA" timeZone="America/New_York" tone={tone} />
           </div>
+        </div>
 
+        <div className="flex items-center gap-4 lg:gap-8">
           <nav className="hidden items-center gap-8 lg:flex">
             {RIGHT_NAV_LINKS.map((link) => (
               <NavLink key={link} tone={tone}>
@@ -255,7 +257,7 @@ export function NavBar() {
           <PillButton
             variant={tone === "light" ? "dark" : "invert"}
             size="xs"
-            href="/#talk"
+            href="/contact#contact-form"
             className={`shrink-0 ${tone === "light" ? "!border-black" : ""}`}
           >
             Book a call

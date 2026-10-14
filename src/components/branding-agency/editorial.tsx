@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import type { PointerEntry } from "@/data/brandingAgencyPage";
 
 const headingClass =
@@ -22,9 +23,12 @@ export function EditorialHeading({
 }) {
   return (
     <h2 className={headingClass}>
-      {before}
-      {accent ? <span className={accentClass}>{accent}</span> : null}
-      {after}
+      <SplitHeading
+        before={before}
+        accent={accent}
+        after={after}
+        accentClassName={accentClass}
+      />
     </h2>
   );
 }

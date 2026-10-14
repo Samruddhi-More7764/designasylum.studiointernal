@@ -585,6 +585,12 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
         height: Number(doc.height) || 320,
       });
     }
+    // The second card often has no stored quote. Show the third card's
+    // caption under it so the row is complete, without writing that quote back.
+    const sharedCaption = mapped[2]?.quote || fallbackTestimonials[2]?.quote;
+    if (mapped[1] && !mapped[1].quote && sharedCaption) {
+      mapped[1] = { ...mapped[1], quote: sharedCaption };
+    }
     return mapped.length ? mapped : fallbackTestimonials;
   } catch (error) {
     console.warn("[cms] testimonials fallback", error);

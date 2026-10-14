@@ -74,5 +74,5 @@ export const studioOffer = {
   heading: "Want a no-brainer offer?",
   offer: "See the offer",
   intro: "Book an intro",
-  introHref: "/#talk",
+  introHref: "/contact#contact-form",
 };

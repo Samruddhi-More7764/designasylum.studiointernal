@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { StickyTableOfContents } from "@/components/branding-agency/StickyTableOfContents";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import {
   sevenloopLead,
   sevenloopSections,
@@ -215,9 +215,12 @@ export function BlogArticle({
             current={breadcrumbCurrent}
           />
           <h1 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[56px]">
-            {titleBefore}
-            <Accent className="text-[32px] tracking-[-2.09px] normal-case lg:text-[56px]">{titleAccent}</Accent>
-            {titleMiddle}
+            <SplitHeading
+              before={titleBefore}
+              accent={titleAccent}
+              after={titleMiddle}
+              accentClassName="text-[32px] tracking-[-2.09px] normal-case lg:text-[56px]"
+            />
             <span className="block">{titleLine}</span>
           </h1>
           <p className="max-w-[842px] font-satoshi text-[12px] leading-[1.2] tracking-[-0.5px] text-black uppercase lg:text-[14px]">
@@ -254,9 +257,7 @@ export function BlogArticle({
             {sections.map((section) => (
               <article key={section.id} id={section.id} className="flex scroll-mt-[100px] flex-col gap-6">
                 <h2 className={headingClass}>
-                  {section.before}
-                  {section.accent ? <Accent>{section.accent}</Accent> : null}
-                  {section.after}
+                  <SplitHeading before={section.before} accent={section.accent ?? ""} after={section.after} />
                 </h2>
                 {section.blocks.map((block, index) => (
                   <BlockView key={`${section.id}-${index}`} block={block} />
@@ -285,9 +286,7 @@ export function ArticleTopics({
     <section className="bg-white px-5 pt-16 pb-4 sm:px-8 lg:px-[60px] lg:pt-[120px] lg:pb-10">
       <div className="mx-auto flex w-full max-w-[881px] flex-col items-center gap-10 lg:gap-16">
         <h2 className="text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-[#05201F] lg:text-[44px] lg:leading-[62.6px]">
-          {before}
-          <Accent>{accent}</Accent>
-          {after}
+          <SplitHeading before={before} accent={accent} after={after} />
         </h2>
         <ul className="flex flex-wrap items-center justify-center gap-[11px]">
           {topics.map((topic, index) => (

@@ -10,7 +10,7 @@ import { BrandingExperts } from "@/components/branding-agency/BrandingExperts";
 import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { IndustryPager } from "@/components/branding-agency/IndustryPager";
 import { FAQ } from "@/components/sections/14-FAQ";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getManufacturingIndustry } from "@/cms/manufacturingIndustry";
 import {
@@ -42,6 +42,7 @@ export default async function ManufacturingIndustryPage() {
           crumbs={manufacturingBreadcrumbs}
           current={page.breadcrumbCurrent}
           imageSrc={page.heroImage}
+          showActions={false}
         />
         <BrandingAgencyArticle
           lead={page.lead}
@@ -80,8 +81,7 @@ export default async function ManufacturingIndustryPage() {
         <RelatedBlogs
           heading={
             <>
-              {page.relatedBefore}
-              <Accent>{page.relatedAccent}</Accent>
+              <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
             </>
           }
           posts={page.relatedBlogs}

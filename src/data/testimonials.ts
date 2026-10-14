@@ -1,7 +1,5 @@
-// Video testimonials — Frame 2095588036.png. The person name/role overlay
-// and play/pause icons are baked into the cropped thumbnails (no separate
-// assets exist in the Figma file). The center card is taller and has no
-// quote box beneath it in the design.
+// Testimonials. Stills are the photo only. A video shows play and pause; a photo shows expand.
+// Every card uses that same frame, with the quote caption underneath.
 export interface Testimonial {
   image: string;
   alt: string;
@@ -27,6 +25,8 @@ export const testimonials: Testimonial[] = [
     image: "/assets/images/testimonial-2.png",
     alt: "Dr. Mallesh B.",
     designation: "Co-founder, i3systems",
+    quote:
+      "\u201cIt was a genuinely successful branding project, and, more to the point, fun to work with the team.\u201d",
     width: 320,
     height: 320,
   },

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
+import { activeSnapIndex, scrollToSnap, ScrollDots } from "@/components/ui/ScrollDots";
 import Image from "next/image";
 import { lifeOutside } from "@/data/whyDesignAsylumPage";
 
@@ -20,6 +21,8 @@ export function LifeOutside({
   slides?: string[];
 } = {}) {
   const scroller = useRef<HTMLUListElement>(null);
+  const [active, setActive] = useState(0);
+  const frames = slides.length ? slides : Array.from({ length: lifeOutside.slides }, () => "");
 
   function scrollByCard(direction: number) {
     const node = scroller.current;
@@ -36,9 +39,12 @@ export function LifeOutside({
     <section className="bg-white px-5 pt-16 sm:px-8 lg:px-[60px] lg:pt-[120px]">
       <div className="mx-auto flex w-full max-w-[1350px] flex-col items-center gap-3 text-center lg:gap-8">
         <h2 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-[#05201F] lg:text-[44px] lg:leading-none lg:tracking-[-2.09px]">
-          {titleBefore}
-          <Accent className="text-[32px] tracking-[-2.09px] lg:text-[44px]">{titleAccent}</Accent>
-          {titleAfter}
+          <SplitHeading
+            before={titleBefore}
+            accent={titleAccent}
+            after={titleAfter}
+            accentClassName="text-[32px] tracking-[-2.09px] lg:text-[44px]"
+          />
         </h2>
         <p className="max-w-[578px] font-satoshi text-[16px] leading-[1.2] font-normal tracking-[-0.1px] text-black/80 lg:text-[20px]">
           {dek}
@@ -47,9 +53,12 @@ export function LifeOutside({
 
       <ul
         ref={scroller}
+        onScroll={() => {
+          if (scroller.current) setActive(activeSnapIndex(scroller.current));
+        }}
         className="mx-auto mt-8 flex w-full max-w-[1350px] snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] lg:mt-12 lg:justify-center lg:gap-4 lg:overflow-x-auto [&::-webkit-scrollbar]:hidden"
       >
-        {(slides.length ? slides : Array.from({ length: lifeOutside.slides }, () => "")).map(
+        {frames.map(
           (src, index) => (
             <li
               key={src || index}
@@ -62,6 +71,15 @@ export function LifeOutside({
           ),
         )}
       </ul>
+
+      <ScrollDots
+        count={frames.length}
+        active={active}
+        onSelect={(index) => {
+          if (scroller.current) scrollToSnap(scroller.current, index);
+        }}
+        className="mt-4 lg:hidden"
+      />
 
       <div className="mt-6 hidden items-center justify-center gap-3 lg:flex">
         <button

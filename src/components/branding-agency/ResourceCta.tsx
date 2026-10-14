@@ -39,7 +39,7 @@ function CtaArtwork() {
 const defaultHeading = (
   <>
     Design your{" "}
-    <span className="font-playfair font-medium italic">right to win.</span>
+    <span className="font-playfair font-medium italic px-[0.08em]">right to win.</span>
   </>
 );
 

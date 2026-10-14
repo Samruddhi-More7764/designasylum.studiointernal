@@ -75,7 +75,7 @@ export function Hero() {
           ready to invest.
         </p>
 
-        <PillButton variant="light" size="sm" href="/#talk">
+        <PillButton variant="light" size="sm" href="/contact#contact-form">
           Get started
         </PillButton>
       </div>

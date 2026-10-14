@@ -6,7 +6,7 @@ import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { ArticleAuthor, ArticleTopics, BlogArticle } from "@/components/blog/BlogArticle";
 import { getBlogArticle } from "@/cms/blogArticle";
 import { getFooter } from "@/cms/content";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 
 export const dynamic = "force-dynamic";
 
@@ -54,8 +54,7 @@ export default async function SevenloopArticlePage() {
         <RelatedBlogs
           heading={
             <>
-              {page.relatedBefore}
-              <Accent>{page.relatedAccent}</Accent>
+              <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
             </>
           }
           posts={page.relatedBlogs}

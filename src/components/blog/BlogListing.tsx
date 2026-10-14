@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { blogCategories, blogPosts } from "@/data/blogIndexPage";
 
@@ -27,9 +27,7 @@ export function BlogListing({
     <section className="bg-white px-4 pt-[120px] pb-[120px] lg:px-[60px] lg:pt-[200px] lg:pb-[200px]">
       <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center">
         <h2 className="text-center font-figtree text-[32px] leading-none font-normal tracking-[-2px] text-black lg:text-[44px] lg:tracking-[-2.09px]">
-          {headingBefore}
-          <Accent>{headingAccent}</Accent>
-          {headingAfter}
+          <SplitHeading before={headingBefore} accent={headingAccent} after={headingAfter} />
         </h2>
 
         <div

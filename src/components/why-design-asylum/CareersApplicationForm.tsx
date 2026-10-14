@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "rea
 import { ChevronDown, X } from "lucide-react";
 import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
 import { PillButton } from "@/components/ui/PillButton";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { careersForm } from "@/data/whyDesignAsylumPage";
 import { submitContactLead } from "@/lib/submitContactLead";
 
@@ -71,19 +71,32 @@ function formatSize(bytes: number) {
 
 function fieldErrors(data: FormData, cv: CvUpload): FieldErrors {
   const errors: FieldErrors = {};
-  if (!validName(String(data.get("fullName") ?? ""))) errors.fullName = "Please enter a valid name";
-  if (!validEmail(String(data.get("workEmail") ?? ""))) {
-    errors.workEmail = "Please enter a valid email address";
-  }
-  if (!validMobile(String(data.get("mobileNumber") ?? ""))) {
-    errors.mobileNumber = "Please enter a valid mobile number";
-  }
+  const name = String(data.get("fullName") ?? "");
+  if (!name.trim()) errors.fullName = "Please enter your full name";
+  else if (!validName(name)) errors.fullName = "Please enter a valid name";
+
+  const email = String(data.get("workEmail") ?? "");
+  if (!email.trim()) errors.workEmail = "Please enter your email address";
+  else if (!validEmail(email)) errors.workEmail = "Please enter a valid email address";
+
+  const mobile = String(data.get("mobileNumber") ?? "");
+  if (!mobile.trim()) errors.mobileNumber = "Please enter your mobile number";
+  else if (!validMobile(mobile)) errors.mobileNumber = "Please enter a valid mobile number";
+
   if (!String(data.get("interest") ?? "").trim()) {
     errors.interest = "Please select your area of interest";
   }
-  if (!validWebsite(String(data.get("portfolio") ?? ""))) errors.portfolio = "Invalid website URL";
-  if (cv.status !== "done") errors.cv = "Please upload your CV to continue";
+
+  const portfolio = String(data.get("portfolio") ?? "");
+  if (!portfolio.trim()) errors.portfolio = "Please enter your portfolio or website";
+  else if (!validWebsite(portfolio)) errors.portfolio = "Please enter a valid website";
+
+  if (cv.status !== "done") errors.cv = "Please upload your CV";
   return errors;
+}
+
+function controlClass(invalid: boolean) {
+  return `${inputClasses} border ${invalid ? "border-[#cc1010]" : "border-transparent"}`;
 }
 
 function FieldError({ id, message }: { id: string; message?: string }) {
@@ -220,9 +233,12 @@ export function CareersApplicationForm({
       <div className="mx-auto grid w-full max-w-[1362px] grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,688px)] lg:gap-x-16">
         <div className="flex flex-col gap-6 lg:max-w-[420px] lg:pt-1">
           <h2 className="max-w-[368px] font-figtree text-[32px] leading-[1.2] font-normal tracking-[-1px] text-[#05201F] lg:text-[44px] lg:tracking-[-2px]">
-            {titleBefore}
-            <Accent className="text-[32px] tracking-[-2.09px] lg:text-[44px]">{titleAccent}</Accent>
-            {titleAfter}
+            <SplitHeading
+              before={titleBefore}
+              accent={titleAccent}
+              after={titleAfter}
+              accentClassName="text-[32px] tracking-[-2.09px] lg:text-[44px]"
+            />
           </h2>
           <p className="max-w-[420px] font-satoshi text-[16px] leading-[1.3] font-normal tracking-[-0.1px] text-black lg:text-[20px] lg:leading-[25.9px]">
             {dek}
@@ -240,7 +256,7 @@ export function CareersApplicationForm({
               aria-invalid={Boolean(errors.fullName)}
               aria-describedby={errors.fullName ? "career-name-error" : undefined}
               onChange={() => clearField("fullName")}
-              className={inputClasses}
+              className={controlClass(Boolean(errors.fullName))}
             />
             <FieldError id="career-name-error" message={errors.fullName} />
           </label>
@@ -255,14 +271,16 @@ export function CareersApplicationForm({
               aria-invalid={Boolean(errors.workEmail)}
               aria-describedby={errors.workEmail ? "career-email-error" : undefined}
               onChange={() => clearField("workEmail")}
-              className={inputClasses}
+              className={controlClass(Boolean(errors.workEmail))}
             />
             <FieldError id="career-email-error" message={errors.workEmail} />
           </label>
 
           <div className="flex flex-col gap-2.5">
             <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">Mobile Number*</span>
-            <CountryCodeSelect triggerClassName="flex h-12 w-[68px] shrink-0 items-center justify-center gap-0.5 rounded-lg bg-input-bg px-2 font-satoshi text-base text-black">
+            <CountryCodeSelect
+              triggerClassName={`flex h-12 w-[68px] shrink-0 items-center justify-center gap-0.5 rounded-lg border bg-input-bg px-2 font-satoshi text-base text-black ${errors.mobileNumber ? "border-[#cc1010]" : "border-transparent"}`}
+            >
               <input
                 name="mobileNumber"
                 type="tel"
@@ -272,7 +290,7 @@ export function CareersApplicationForm({
                 aria-invalid={Boolean(errors.mobileNumber)}
                 aria-describedby={errors.mobileNumber ? "career-mobile-error" : undefined}
                 onChange={() => clearField("mobileNumber")}
-                className={`${inputClasses} min-w-0 flex-1`}
+                className={`${controlClass(Boolean(errors.mobileNumber))} min-w-0 flex-1`}
               />
             </CountryCodeSelect>
             <FieldError id="career-mobile-error" message={errors.mobileNumber} />
@@ -287,7 +305,7 @@ export function CareersApplicationForm({
                 aria-invalid={Boolean(errors.interest)}
                 aria-describedby={errors.interest ? "career-interest-error" : undefined}
                 onChange={() => clearField("interest")}
-                className={`${inputClasses} appearance-none pr-10`}
+                className={`${controlClass(Boolean(errors.interest))} appearance-none pr-10`}
               >
                 <option value="" disabled>
                   - Select -
@@ -313,7 +331,7 @@ export function CareersApplicationForm({
               aria-invalid={Boolean(errors.portfolio)}
               aria-describedby={errors.portfolio ? "career-portfolio-error" : undefined}
               onChange={() => clearField("portfolio")}
-              className={inputClasses}
+              className={controlClass(Boolean(errors.portfolio))}
             />
             <FieldError id="career-portfolio-error" message={errors.portfolio} />
           </label>
@@ -324,7 +342,7 @@ export function CareersApplicationForm({
               <label
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={onDrop}
-                className="flex h-[188px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg bg-input-bg px-6 text-center lg:h-[221px]"
+                className={`flex h-[188px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border bg-input-bg px-6 text-center lg:h-[221px] ${errors.cv ? "border-[#cc1010]" : "border-transparent"}`}
               >
                 <img
                   src="/assets/images/why-design-asylum/upload-cv-mobile.svg"

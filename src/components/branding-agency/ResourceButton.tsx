@@ -31,11 +31,11 @@ export function ResourceButton({
       href={href}
       className={[
         "group inline-flex w-full items-center justify-center gap-2 rounded-pill border border-black px-4 text-center",
-        "font-satoshi text-[14px] font-medium uppercase leading-4 tracking-[-0.5px]",
+        "font-satoshi font-medium uppercase leading-4 tracking-[-0.5px]",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#05201F]",
         size === "lg"
-          ? "h-auto min-h-[56px] px-[19.84px] py-3 whitespace-normal sm:h-[56px] sm:whitespace-nowrap"
-          : "h-[50px] whitespace-nowrap",
+          ? "h-[50px] whitespace-nowrap px-4 text-[13px] sm:h-[56px] sm:px-[19.84px] sm:text-[14px]"
+          : "h-[50px] whitespace-nowrap text-[13px] sm:text-[14px]",
         solid ? "bg-black text-white" : "bg-transparent text-black",
         className,
       ].join(" ")}

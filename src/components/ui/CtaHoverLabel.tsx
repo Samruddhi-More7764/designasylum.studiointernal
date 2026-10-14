@@ -11,13 +11,15 @@ export const ctaArrowClass =
 export function CtaHoverLabel({ children }: { children: ReactNode }) {
   return (
     <span className="relative inline-block overflow-hidden align-bottom">
-      <span className="invisible" aria-hidden="true">
+      <span className="invisible whitespace-nowrap" aria-hidden="true">
         {children}
       </span>
       <span className="absolute inset-0 overflow-hidden">
         <span className="flex flex-col transition-transform duration-300 ease-out group-hover:-translate-y-1/2">
-          <span>{children}</span>
-          <span aria-hidden="true">{children}</span>
+          <span className="whitespace-nowrap">{children}</span>
+          <span className="whitespace-nowrap" aria-hidden="true">
+            {children}
+          </span>
         </span>
       </span>
     </span>

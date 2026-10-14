@@ -2,7 +2,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { contactOffices, type ContactOffice } from "@/data/contactPage";
 import { OfficeClock } from "@/components/contact/OfficeClock";
 
@@ -24,9 +24,12 @@ export function ContactOffices({
       <div className="mx-auto flex w-full max-w-[1136px] flex-col items-center gap-4 text-center">
         <Breadcrumbs items={[{ label: "Home", href: "/" }]} current={breadcrumbCurrent} />
         <h1 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[56px]">
-          {titleBefore}
-          <Accent className="text-[32px] tracking-[-2.09px] lg:text-[56px]">{titleAccent}</Accent>
-          {titleAfter}
+          <SplitHeading
+            before={titleBefore}
+            accent={titleAccent}
+            after={titleAfter}
+            accentClassName="text-[32px] tracking-[-2.09px] lg:text-[56px]"
+          />
         </h1>
       </div>
 
@@ -55,12 +58,14 @@ export function ContactOffices({
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-x-2 gap-y-2.5">
+            <div
+              className={`flex items-center gap-2 ${office.links.length > 2 ? "flex-wrap" : "flex-nowrap"}`}
+            >
               {office.links.map((link) => (
                 <a
                   key={link.href + link.label}
                   href={link.href}
-                  className="group inline-flex items-center gap-2 rounded-full border border-black px-4 py-2.5 font-satoshi text-[12px] leading-4 font-medium text-black lg:px-[17px] lg:py-[17px] lg:text-[14px]"
+                  className="group inline-flex h-[42px] shrink-0 items-center gap-2 rounded-full border border-black px-3 font-satoshi text-[12px] leading-4 font-medium whitespace-nowrap text-black lg:h-auto lg:px-[17px] lg:py-[17px] lg:text-[14px]"
                 >
                   <CtaHoverLabel>{link.label}</CtaHoverLabel>
                   <ArrowUpRight className={`size-3 ${ctaArrowClass}`} aria-hidden="true" />

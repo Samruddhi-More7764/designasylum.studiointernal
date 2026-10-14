@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ResourceButton } from "@/components/branding-agency/ResourceButton";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import {
   brandingExperts,
   brandingExpertsHeading,
@@ -18,8 +18,7 @@ export function BrandingExperts({
       <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center gap-8 lg:gap-10">
         <div className="flex max-w-[640px] flex-col items-center gap-3 text-center">
           <h2 className="font-figtree text-[28px] font-normal leading-[1.2] tracking-[-1px] text-[#05201F] sm:text-[36px] lg:text-[44px] lg:tracking-[-2.09px]">
-            {heading.before}
-            <Accent>{heading.accent}</Accent>
+            <SplitHeading before={heading.before} accent={heading.accent} />
           </h2>
           <p className="font-satoshi text-[15px] leading-snug tracking-[-0.5px] text-black/78 sm:text-[18px] lg:text-[20px]">
             {heading.subheading}

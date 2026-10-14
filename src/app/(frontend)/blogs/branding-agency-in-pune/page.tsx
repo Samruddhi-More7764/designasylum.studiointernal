@@ -9,7 +9,7 @@ import { ClientBrandingSection } from "@/components/branding-agency/ClientBrandi
 import { BrandingExperts } from "@/components/branding-agency/BrandingExperts";
 import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { FAQ } from "@/components/sections/14-FAQ";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getBrandingStrategy } from "@/cms/brandingStrategy";
 
@@ -54,7 +54,7 @@ export default async function BrandingAgencyPage() {
           tabs={page.clientTabs}
           projects={page.projects}
         />
-        <FAQ items={page.faqs} heading="FAQs" />
+        <FAQ items={page.faqs} heading="FAQs" showCta={false} />
         <BrandingExperts
           heading={{
             before: page.expertsBefore,
@@ -66,8 +66,7 @@ export default async function BrandingAgencyPage() {
         <RelatedBlogs
           heading={
             <>
-              {page.relatedBefore}
-              <Accent>{page.relatedAccent}</Accent>
+              <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
             </>
           }
           posts={page.relatedBlogs}

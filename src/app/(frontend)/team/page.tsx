@@ -4,6 +4,7 @@ import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getTeamPage, type TeamMember } from "@/cms/teamPage";
 import { teamCta } from "@/data/teamPage";
@@ -90,8 +91,7 @@ export default async function TeamPage() {
 
             <div className="mt-[120px] flex w-full flex-col items-center gap-8 lg:mt-[200px] lg:gap-20">
               <h2 className="text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2.0865px] text-[#05201f] lg:text-[44px] lg:leading-[62.596px]">
-                <span className="font-playfair italic">{page.teamAccent}</span>
-                {` ${page.teamAfter}`}
+                <SplitHeading accent={page.teamAccent} after={page.teamAfter} />
               </h2>
               <ul className="grid w-full grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-8">
                 {page.members.map((member) => (

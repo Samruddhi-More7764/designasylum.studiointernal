@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { relatedBlogs, relatedBlogsHeading } from "@/data/brandingAgencyPage";
 
 export function RelatedBlogs({
@@ -17,8 +17,7 @@ export function RelatedBlogs({
         <h2 className="text-center font-figtree text-[28px] font-normal leading-[1.2] tracking-[-1px] text-[#05201F] sm:text-[36px] lg:text-[44px] lg:tracking-[-2.09px]">
           {heading ?? (
             <>
-              {relatedBlogsHeading.before}
-              <Accent>{relatedBlogsHeading.accent}</Accent>
+              <SplitHeading before={relatedBlogsHeading.before} accent={relatedBlogsHeading.accent} />
             </>
           )}
         </h2>

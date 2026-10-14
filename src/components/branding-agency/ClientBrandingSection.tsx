@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import { ResourceButton } from "@/components/branding-agency/ResourceButton";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { brandingProjects, clientBrandingTabs } from "@/data/brandingAgencyPage";
 
 export function ClientBrandingSection({
@@ -39,9 +39,7 @@ export function ClientBrandingSection({
         <h2 className="text-center font-figtree text-[28px] font-normal leading-none tracking-[-1px] text-[#05201F] sm:text-[36px] lg:text-[44px] lg:tracking-[-2.09px]">
           {heading ?? (
             <>
-              {headingBefore}
-              <Accent>{headingAccent}</Accent>
-              {headingAfter}
+              <SplitHeading before={headingBefore} accent={headingAccent} after={headingAfter} />
             </>
           )}
         </h2>
@@ -49,7 +47,7 @@ export function ClientBrandingSection({
         <div
           role="tablist"
           aria-label="Client branding filters"
-          className="flex h-10 w-full items-end justify-between lg:mx-auto lg:max-w-[421px] lg:justify-center lg:gap-5"
+          className="mx-auto flex h-10 w-fit max-w-full items-end justify-center overflow-x-auto lg:max-w-[421px] lg:gap-5"
         >
           {tabs.map((tab) => {
             const selected = tab.id === active;
@@ -63,7 +61,7 @@ export function ClientBrandingSection({
                 aria-controls="client-branding-panel"
                 onClick={() => setActive(tab.id)}
                 className={[
-                  "shrink-0 border-b-2 pb-2 font-satoshi text-[14px] font-medium uppercase leading-4 tracking-[-0.5px] whitespace-nowrap",
+                  "shrink-0 border-b-2 px-2 pb-2 font-satoshi text-[12px] font-medium uppercase leading-4 tracking-[-0.5px] whitespace-nowrap lg:px-0 lg:text-[14px]",
                   selected
                     ? "border-footer-orange text-black"
                     : "border-transparent text-black/45",

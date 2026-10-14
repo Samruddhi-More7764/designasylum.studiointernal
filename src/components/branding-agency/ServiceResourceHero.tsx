@@ -14,6 +14,7 @@ export function ServiceResourceHero({
   imageSrc = "/assets/images/branding-agency/hero-media.png",
   primaryLabel = "Book a strategy call",
   secondaryLabel = "See our work",
+  showActions = true,
 }: {
   title?: string;
   intro?: string;
@@ -22,6 +23,7 @@ export function ServiceResourceHero({
   imageSrc?: string;
   primaryLabel?: string;
   secondaryLabel?: string;
+  showActions?: boolean;
 } = {}) {
   return (
     <header className="bg-white">
@@ -36,21 +38,16 @@ export function ServiceResourceHero({
           {intro}
         </p>
 
-        <div className="mt-6 flex w-full max-w-[320px] flex-col items-stretch gap-[11px] sm:mt-8 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
-          <ResourceButton
-            href="/#talk"
-            className="sm:w-[210px]"
-          >
-            {primaryLabel}
-          </ResourceButton>
-          <ResourceButton
-            href="/"
-            tone="outline"
-            className="sm:w-[156px]"
-          >
-            {secondaryLabel}
-          </ResourceButton>
-        </div>
+        {showActions ? (
+          <div className="mt-6 flex w-full max-w-[360px] flex-col items-stretch gap-[11px] sm:mt-8 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
+            <ResourceButton href="/contact#contact-form" className="sm:w-[210px]">
+              {primaryLabel}
+            </ResourceButton>
+            <ResourceButton href="/" tone="outline" className="sm:w-[156px]">
+              {secondaryLabel}
+            </ResourceButton>
+          </div>
+        ) : null}
       </div>
 
       <div className="mx-auto w-full max-w-[1470px] px-4 pb-12 sm:px-8 sm:pb-16 lg:px-[60px] lg:pb-20">

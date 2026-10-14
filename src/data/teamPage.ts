@@ -36,9 +36,9 @@ export const teamGroup = {
   ],
 };
 
-/** Stays in code. Book an intro opens the homepage talk form. */
+/** Stays in code. Book an intro opens the contact-page form. */
 export const teamCta = {
   heading: "This is who you’d be working with.",
   button: "Book an intro",
-  href: "/#talk",
+  href: "/contact#contact-form",
 };

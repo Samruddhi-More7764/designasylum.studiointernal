@@ -5,7 +5,7 @@ import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogListing } from "@/components/blog/BlogListing";
-import { Accent } from "@/components/ui/SectionHeading";
+import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getBlogIndex } from "@/cms/blogIndex";
 import { getFooter } from "@/cms/content";
 
@@ -28,11 +28,12 @@ export default async function BlogIndexPage() {
           <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center gap-2 text-center lg:gap-4">
             <Breadcrumbs items={[{ label: "Home", href: "/" }]} current={page.breadcrumbCurrent} />
             <h1 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-black capitalize lg:text-[56px] lg:tracking-[-0.5px]">
-              {page.titleBefore}
-              <Accent className="text-[32px] tracking-[-2.09px] normal-case lg:text-[56px]">
-                {page.titleAccent}
-              </Accent>
-              {page.titleAfter}
+              <SplitHeading
+                before={page.titleBefore}
+                accent={page.titleAccent}
+                after={page.titleAfter}
+                accentClassName="text-[32px] tracking-[-2.09px] normal-case lg:text-[56px]"
+              />
             </h1>
             <p className="max-w-[484px] font-satoshi text-[12px] leading-[1.2] font-normal tracking-[-0.5px] text-black uppercase lg:text-[14px]">
               {page.intro}
@@ -54,9 +55,11 @@ export default async function BlogIndexPage() {
         <section className="bg-white px-4 pt-[120px]">
           <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center gap-8 lg:gap-16">
             <h2 className="text-center font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-[#05201F] lg:text-[44px] lg:leading-[62.6px] lg:tracking-[-2.09px]">
-              {page.featuredBefore}
-              <Accent>{page.featuredAccent}</Accent>
-              {page.featuredAfter}
+              <SplitHeading
+                before={page.featuredBefore}
+                accent={page.featuredAccent}
+                after={page.featuredAfter}
+              />
             </h2>
             <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-6">
               {page.featuredPosts.map((post) => (

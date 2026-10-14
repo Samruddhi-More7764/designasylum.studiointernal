@@ -49,6 +49,7 @@
      loaded via Fontshare (not on Google Fonts — see layout.tsx comment). */
   --font-figtree: var(--font-figtree);
   --font-playfair: var(--font-playfair);
+  --font-doto: var(--font-doto);
   --font-satoshi: "Satoshi", ui-sans-serif, system-ui, sans-serif;
 
   /* Colors */
