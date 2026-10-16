@@ -43,7 +43,7 @@ export function FAQ({
             <PillButton
               variant="dark"
               size="sm"
-              href="/#talk"
+              href="/contact"
               className="h-[44px] w-full max-w-[327px] !px-[19.84px]"
             >
               Book a brand strategy session

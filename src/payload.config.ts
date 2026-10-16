@@ -31,6 +31,7 @@ import { ContactPage } from "./globals/ContactPage";
 import { FaqPage } from "./globals/FaqPage";
 import { FaqDetail } from "./globals/FaqDetail";
 import { CareersPage } from "./globals/CareersPage";
+import { OpenRolesPage } from "./globals/OpenRolesPage";
 import { WorkPage } from "./globals/WorkPage";
 import { ClientsIndex } from "./globals/ClientsIndex";
 import { StudioPage } from "./globals/StudioPage";
@@ -81,6 +82,7 @@ export default buildConfig({
     FaqPage,
     FaqDetail,
     CareersPage,
+    OpenRolesPage,
     WorkPage,
     ClientsIndex,
     StudioPage,

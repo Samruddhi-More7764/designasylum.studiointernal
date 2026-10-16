@@ -80,9 +80,12 @@ export default async function TeamPage() {
               <h2 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2.0865px] text-[#05201f] lg:text-[44px] lg:leading-[62.596px]">
                 {page.leadershipHeading}
               </h2>
-              <ul className="grid w-full grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-8">
+              <ul className="flex w-full flex-col gap-8 lg:flex-row lg:flex-wrap lg:justify-center lg:gap-x-6 lg:gap-y-8">
                 {page.leadership.map((member) => (
-                  <li key={member.id}>
+                  <li
+                    key={member.id}
+                    className="w-full lg:w-[calc((100%-3rem)/3)] lg:shrink-0"
+                  >
                     <PersonCard member={member} />
                   </li>
                 ))}

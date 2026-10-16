@@ -196,14 +196,7 @@ export default async function StudioPage() {
           <h2 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2px] text-black lg:text-[60px] lg:leading-[72px] lg:tracking-[-3px]">
             {studioOffer.heading}
           </h2>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="#"
-              className="group inline-flex items-center gap-2 rounded-pill border border-black px-[17px] py-[17px] font-satoshi text-[14px] leading-4 font-medium text-black uppercase"
-            >
-              <CtaHoverLabel>{studioOffer.offer}</CtaHoverLabel>
-              <Arrow src="/assets/images/branding-agency/arrow-up-right-black.png" />
-            </a>
+          <div className="mt-8 flex items-center justify-center">
             <a
               href={studioOffer.introHref}
               className="group inline-flex items-center gap-2 rounded-pill border border-white bg-black px-[17px] py-[17px] font-satoshi text-[14px] leading-4 font-medium text-white uppercase"

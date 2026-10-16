@@ -62,6 +62,11 @@ export function resolveMediaUrl(value: unknown): string | null {
       return toNextImageSrc(trimmed);
     }
 
+    if (filename) {
+      const blobUrl = publicBlobUrl(filename);
+      if (blobUrl) return blobUrl;
+    }
+
     // Replaced file but the upload URL is unavailable — fall back rather than
     // render nothing.
     if (sourcePath?.startsWith("/")) return toNextImageSrc(sourcePath);
@@ -110,9 +115,27 @@ function payloadMediaFilename(url: string): string | null {
 }
 
 /**
+ * Strip any existing percent-encoding from a filename (e.g. %20 or %2520)
+ * so that subsequent encoding never double-encodes into %2520.
+ */
+function cleanBlobFilename(filename: string): string {
+  let name = filename.trim();
+  try {
+    while (/%[0-9a-fA-F]{2}/.test(name)) {
+      const decoded = decodeURIComponent(name);
+      if (decoded === name) break;
+      name = decoded;
+    }
+  } catch {
+    // Keep name if decodeURIComponent fails
+  }
+  return name;
+}
+
+/**
  * Public URL for a Blob object uploaded under `filename`.
  * Matches `@payloadcms/storage-vercel-blob` (store id parsed from the token,
- * filename passed through encodeURIComponent).
+ * filename segments passed through encodeURIComponent without double-encoding).
  */
 function publicBlobUrl(filename: string): string | null {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
@@ -124,14 +147,27 @@ function publicBlobUrl(filename: string): string | null {
   const base =
     process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
     `https://${storeId}.public.blob.vercel-storage.com`;
-  return `${base.replace(/\/$/, "")}/${encodeURIComponent(filename)}`;
+  const raw = cleanBlobFilename(filename);
+  const encoded = raw
+    .split("/")
+    .map((seg) => encodeURIComponent(seg))
+    .join("/");
+  return `${base.replace(/\/$/, "")}/${encoded}`;
 }
 
 function toNextImageSrc(url: string): string {
-  if (url.startsWith("/")) return url;
+  if (url.startsWith("/")) {
+    return url.replace(/%25([0-9a-fA-F]{2})/g, "%$1");
+  }
 
   try {
-    const parsed = new URL(url);
+    let cleanUrl = url.trim();
+    // Normalize any double-encoded percent signs (%2520 -> %20)
+    while (/%25[0-9a-fA-F]{2}/.test(cleanUrl)) {
+      cleanUrl = cleanUrl.replace(/%25([0-9a-fA-F]{2})/g, "%$1");
+    }
+
+    const parsed = new URL(cleanUrl);
     const configured = process.env.NEXT_PUBLIC_SERVER_URL;
     const sameOrigin =
       parsed.hostname === "localhost" ||
@@ -139,9 +175,15 @@ function toNextImageSrc(url: string): string {
       (configured ? parsed.origin === new URL(configured).origin : false);
 
     if (sameOrigin) return `${parsed.pathname}${parsed.search}`;
-    return url;
+    return parsed.href;
   } catch {
-    return url;
+    // new URL() throws on URLs that contain unencoded characters (e.g. spaces).
+    // Try a single encodeURI pass to produce a valid URL before giving up.
+    try {
+      return new URL(encodeURI(url)).href;
+    } catch {
+      return url;
+    }
   }
 }
 

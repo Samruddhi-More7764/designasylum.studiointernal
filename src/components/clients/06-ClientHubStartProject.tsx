@@ -35,7 +35,7 @@ export function ClientHubStartProject({
           communicate with clarity, personality, and a point of view, making
           the right people want to remember & associate.
         </h2>
-        <PillButton variant="dark" size="sm" className="min-w-[200px]">
+        <PillButton variant="dark" size="sm" className="min-w-[200px]" href="/contact">
           Start a Project
         </PillButton>
       </div>

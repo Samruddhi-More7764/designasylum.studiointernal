@@ -124,15 +124,28 @@ type CmsSide = {
 } | null | undefined;
 
 function still(
-  value: CmsSide,
+  value: CmsSide | unknown,
   fallback: { src: string; alt: string } | null,
 ): { src: string; alt: string } | null {
-  const src = safeMediaUrl(value?.image) || null;
+  if (!value) return fallback;
+  const directImage =
+    typeof value === "object" && value !== null && "image" in value
+      ? (value as { image?: unknown }).image
+      : undefined;
+  const src =
+    safeMediaUrl(directImage) ||
+    safeMediaUrl(value) ||
+    null;
   if (!src) return fallback;
-  return {
-    src,
-    alt: value?.alt?.trim() || resolveMediaAlt(value?.image) || fallback?.alt || "",
-  };
+  const alt =
+    (typeof value === "object" && value !== null && "alt" in value
+      ? (value as { alt?: string | null }).alt?.trim()
+      : null) ||
+    resolveMediaAlt(directImage) ||
+    resolveMediaAlt(value) ||
+    fallback?.alt ||
+    "";
+  return { src, alt };
 }
 
 function mapGallery(
@@ -681,7 +694,8 @@ export const getFooter = cache(async (): Promise<FooterContent> => {
       const key = FOOTER_LISTS[column.title as keyof typeof FOOTER_LISTS];
       if (!key) return column;
       const links = footerList(global[key]);
-      return links ? { ...column, links } : column;
+      const resolvedLinks = links ?? column.links;
+      return { ...column, links: resolvedLinks };
     });
     return { columns, aiLinks: fallback.aiLinks };
   } catch (error) {
@@ -941,6 +955,13 @@ export const getClientHub = cache(
   },
 );
 
+/** Saved case studies still point this button at home. Send those to the clients index. */
+function viewAllHref(value: string | null | undefined, fallback: string) {
+  const href = value?.trim();
+  if (!href || href === "/" || href === "#") return fallback;
+  return href;
+}
+
 export type CaseStudyPageContent = {
   clientSlug: string;
   studySlug: string;
@@ -1053,7 +1074,7 @@ export const getCaseStudyPage = cache(
         gallery: mapGallery(g.gallery, fallbackCaseStudyPage.gallery),
         viewAll: {
           label: g.viewAll?.label || fallbackCaseStudyPage.viewAll.label,
-          href: g.viewAll?.href || fallbackCaseStudyPage.viewAll.href,
+          href: viewAllHref(g.viewAll?.href, fallbackCaseStudyPage.viewAll.href),
         },
       };
     } catch (error) {

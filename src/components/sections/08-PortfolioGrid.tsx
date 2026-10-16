@@ -94,7 +94,7 @@ export async function PortfolioGrid() {
             variant="dark"
             size="lg"
             className="shrink-0"
-            href="/clients/sevenloop"
+            href="/work"
           >
             See more work
           </PillButton>

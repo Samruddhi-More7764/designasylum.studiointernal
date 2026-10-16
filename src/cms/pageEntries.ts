@@ -52,6 +52,7 @@ import {
   teamPersonServices,
   teamPersonSolutions,
 } from "../data/teamPersonPage";
+import { jobCategories, jobDetailHeadings, jobRoles, openRolesHeading } from "../data/openRolesPage";
 import { workFilters, workProjects } from "../data/workPage";
 import {
   careersForm,
@@ -450,6 +451,38 @@ export function pageEntries(): PageEntry[] {
         formAfter: careersForm.titleAfter,
         formDek: careersForm.dek,
         interests: careersForm.interests.map((label) => ({ label })),
+      },
+    },
+    {
+      slug: "open-roles-page",
+      data: {
+        titleBefore: openRolesHeading.before,
+        titleAccent: openRolesHeading.accent,
+        titleAfter: openRolesHeading.after,
+        dutiesHeading: jobDetailHeadings.duties,
+        lookingHeading: jobDetailHeadings.looking,
+        categories: jobCategories.map((category) => ({
+          categoryId: category.id,
+          label: category.label,
+        })),
+        roles: jobRoles.map((role) => ({
+          title: role.title,
+          slug: role.slug,
+          breadcrumb: role.breadcrumb,
+          summary: role.summary,
+          category: role.category,
+          location: role.location,
+          employment: role.employment,
+          experience: role.experience,
+          applyLabel: role.applyLabel,
+          detailLocation: role.detailLocation,
+          detailExperience: role.detailExperience,
+          detailType: role.detailType,
+          responsibilities: role.responsibilities.map((text) => ({ text })),
+          requirements: role.requirements.map((text) => ({ text })),
+          applyNowLabel: role.applyNowLabel,
+          applyNowHref: role.applyNowHref,
+        })),
       },
     },
     {

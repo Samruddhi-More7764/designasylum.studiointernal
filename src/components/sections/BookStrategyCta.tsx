@@ -10,7 +10,7 @@ export function BookStrategyCta() {
       <PillButton
         variant="dark"
         size="lg"
-        href="/#talk"
+        href="/contact"
         className="w-full max-w-[318px] min-w-0 sm:min-w-[318px]"
       >
         Book a brand strategy session

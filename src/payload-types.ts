@@ -118,6 +118,7 @@ export interface Config {
     'faq-page': FaqPage;
     'faq-detail': FaqDetail;
     'careers-page': CareersPage;
+    'open-roles-page': OpenRolesPage;
     'work-page': WorkPage;
     'clients-index': ClientsIndex;
     'studio-page': StudioPage;
@@ -135,6 +136,7 @@ export interface Config {
     'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
     'faq-detail': FaqDetailSelect<false> | FaqDetailSelect<true>;
     'careers-page': CareersPageSelect<false> | CareersPageSelect<true>;
+    'open-roles-page': OpenRolesPageSelect<false> | OpenRolesPageSelect<true>;
     'work-page': WorkPageSelect<false> | WorkPageSelect<true>;
     'clients-index': ClientsIndexSelect<false> | ClientsIndexSelect<true>;
     'studio-page': StudioPageSelect<false> | StudioPageSelect<true>;
@@ -2243,6 +2245,67 @@ export interface CareersPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-roles-page".
+ */
+export interface OpenRolesPage {
+  id: number;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleAfter?: string | null;
+  /**
+   * Include All roles first. Counts are added from the roles list.
+   */
+  categories?:
+    | {
+        categoryId: 'all' | 'ui-ux' | 'brand' | 'web' | 'video' | 'content' | 'project' | 'marketing';
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  dutiesHeading?: string | null;
+  lookingHeading?: string | null;
+  roles?:
+    | {
+        title: string;
+        /**
+         * URL for this role, after /open-roles/. Apply on the list opens this page.
+         */
+        slug?: string | null;
+        breadcrumb?: string | null;
+        summary: string;
+        category: 'ui-ux' | 'brand' | 'web' | 'video' | 'content' | 'project' | 'marketing';
+        location?: string | null;
+        employment?: string | null;
+        experience?: string | null;
+        applyLabel?: string | null;
+        detailLocation?: string | null;
+        detailExperience?: string | null;
+        detailType?: string | null;
+        responsibilities?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        requirements?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        applyNowLabel?: string | null;
+        /**
+         * Where Apply now goes. Defaults to the careers form.
+         */
+        applyNowHref?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "work-page".
  */
 export interface WorkPage {
@@ -3308,6 +3371,58 @@ export interface CareersPageSelect<T extends boolean = true> {
         role?: T;
         quote?: T;
         body?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-roles-page_select".
+ */
+export interface OpenRolesPageSelect<T extends boolean = true> {
+  titleBefore?: T;
+  titleAccent?: T;
+  titleAfter?: T;
+  categories?:
+    | T
+    | {
+        categoryId?: T;
+        label?: T;
+        id?: T;
+      };
+  dutiesHeading?: T;
+  lookingHeading?: T;
+  roles?:
+    | T
+    | {
+        title?: T;
+        slug?: T;
+        breadcrumb?: T;
+        summary?: T;
+        category?: T;
+        location?: T;
+        employment?: T;
+        experience?: T;
+        applyLabel?: T;
+        detailLocation?: T;
+        detailExperience?: T;
+        detailType?: T;
+        responsibilities?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        requirements?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        applyNowLabel?: T;
+        applyNowHref?: T;
         id?: T;
       };
   updatedAt?: T;

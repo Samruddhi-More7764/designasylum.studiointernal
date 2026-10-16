@@ -66,8 +66,7 @@ export const sevenloopCaseStudyGallery: CaseStudyMediaFrame[] = [
 ];
 
 // Sevenloop case study — "View all clients" CTA below the gallery.
-// No dedicated clients-index page exists yet, so this links back home.
 export const sevenloopCaseStudyViewAllClients = {
   label: "View All Clients",
-  href: "/",
+  href: "/clients",
 };

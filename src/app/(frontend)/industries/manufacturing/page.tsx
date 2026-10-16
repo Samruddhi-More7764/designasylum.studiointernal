@@ -61,7 +61,7 @@ export default async function ManufacturingIndustryPage() {
         ) : (
           <LogoMarquee placement="service" />
         )}
-        <ResourceCta id={RIGHT_TO_WIN_ID} />
+        <ResourceCta id={RIGHT_TO_WIN_ID} buttonHref="/contact" />
         <ClientBrandingSection
           headingBefore={page.clientsBefore}
           headingAccent={page.clientsAccent}

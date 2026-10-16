@@ -69,12 +69,18 @@ export function Footer({
               <ul className="flex flex-col gap-[9px]">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href || footerLinkHref(link.label)}
-                      className="font-satoshi text-[16px] leading-[21px] font-medium tracking-[-0.4px] text-black/70 capitalize transition-opacity hover:opacity-70"
-                    >
-                      {link.label}
-                    </a>
+                    {link.href !== null ? (
+                      <a
+                        href={link.href || footerLinkHref(link.label)}
+                        className="font-satoshi text-[16px] leading-[21px] font-medium tracking-[-0.4px] text-black/70 capitalize transition-opacity hover:opacity-70"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <span className="font-satoshi text-[16px] leading-[21px] font-medium tracking-[-0.4px] text-black/70 capitalize">
+                        {link.label}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

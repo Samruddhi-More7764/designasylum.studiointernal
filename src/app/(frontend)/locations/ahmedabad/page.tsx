@@ -86,6 +86,7 @@ export default async function AhmedabadLocationPage() {
           }
           body={ahmedabadCta.body}
           buttonLabel={ahmedabadCta.button}
+          buttonHref={ahmedabadCta.href}
           buttonClassName="!h-11 !min-h-11 !w-[214px] lg:!h-14 lg:!min-h-14 lg:!w-[243px]"
         />
         <FAQ items={page.faqs} heading="FAQs" showCta={false} />

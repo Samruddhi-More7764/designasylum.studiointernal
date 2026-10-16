@@ -161,6 +161,7 @@ export const ahmedabadToc: TocItem[] = [
 export const ahmedabadCta = {
   body: "Book a 30-minute diagnosis call — no pitch, just a clear read on where your brand stands.",
   button: "Talk to a design expert",
+  href: "/contact",
 };
 
 export const ahmedabadFaqItems: FaqItem[] = [

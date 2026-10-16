@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
@@ -204,8 +205,8 @@ export default async function WhyDesignAsylumPage() {
                   {page.rolesBody}
                 </p>
               </div>
-              <a
-                href="#apply"
+              <Link
+                href="/open-roles"
                 className="group inline-flex h-14 w-[189px] items-center justify-center gap-2 rounded-pill border border-black bg-black px-5 font-satoshi text-[14px] font-medium leading-4 tracking-[-0.5px] text-white uppercase"
               >
                 <CtaHoverLabel>{page.rolesButton}</CtaHoverLabel>
@@ -218,7 +219,7 @@ export default async function WhyDesignAsylumPage() {
                   aria-hidden="true"
                   className={`h-[9px] w-[9px] ${ctaArrowClass}`}
                 />
-              </a>
+              </Link>
             </div>
           </div>
         </section>

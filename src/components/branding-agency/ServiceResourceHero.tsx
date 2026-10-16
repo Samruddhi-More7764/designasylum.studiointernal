@@ -14,6 +14,7 @@ export function ServiceResourceHero({
   imageSrc = "/assets/images/branding-agency/hero-media.png",
   primaryLabel = "Book a strategy call",
   secondaryLabel = "See our work",
+  secondaryHref = "/work",
   showActions = true,
 }: {
   title?: string;
@@ -23,6 +24,7 @@ export function ServiceResourceHero({
   imageSrc?: string;
   primaryLabel?: string;
   secondaryLabel?: string;
+  secondaryHref?: string;
   showActions?: boolean;
 } = {}) {
   return (
@@ -43,7 +45,7 @@ export function ServiceResourceHero({
             <ResourceButton href="/contact#contact-form" className="sm:w-[210px]">
               {primaryLabel}
             </ResourceButton>
-            <ResourceButton href="/" tone="outline" className="sm:w-[156px]">
+            <ResourceButton href={secondaryHref} tone="outline" className="sm:w-[156px]">
               {secondaryLabel}
             </ResourceButton>
           </div>

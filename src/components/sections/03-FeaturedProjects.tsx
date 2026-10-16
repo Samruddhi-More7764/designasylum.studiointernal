@@ -90,7 +90,7 @@ export async function FeaturedProjects() {
         <PillButton
           variant="dark"
           size="sm"
-          href="/clients/sevenloop"
+          href="/work"
           className="w-[196.19px] !px-4 font-satoshi text-[14px] font-medium leading-4 tracking-normal"
         >
           See more work

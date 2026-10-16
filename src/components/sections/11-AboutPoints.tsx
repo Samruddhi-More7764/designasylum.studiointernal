@@ -87,7 +87,7 @@ export function AboutPoints() {
 
         <PillButton
           variant="invert"
-          href="/#talk"
+          href="/contact"
           className="mt-12 h-12 w-full max-w-[318px] self-start !border-white !bg-white !text-black"
         >
           Book a brand strategy session
@@ -119,7 +119,7 @@ export function AboutPoints() {
       <div className="pointer-events-none absolute inset-0 z-10 hidden lg:block">
         <PillButton
           variant="light"
-          href="/#talk"
+          href="/contact"
           className="pointer-events-auto absolute top-[calc(803/913*100%)] left-[calc(1068/1470*100%)] h-[calc(50/913*100%)] w-[calc(318.19/1470*100%)] min-w-[220px] !border-black !bg-white !text-black"
         >
           Book a brand strategy session

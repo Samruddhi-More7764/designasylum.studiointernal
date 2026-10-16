@@ -5,7 +5,8 @@
 // dedicated "Follow Us" column (social icons move into that same block).
 export interface FooterLink {
   label: string;
-  href: string;
+  /** null = render as plain text (no anchor) */
+  href: string | null;
 }
 
 export interface FooterColumn {
@@ -35,6 +36,11 @@ function footerLink(label: string): FooterLink {
   return { label, href: footerLinkHref(label) };
 }
 
+/** A footer entry rendered as plain non-clickable text (href=null). */
+function footerText(label: string): FooterLink {
+  return { label, href: null };
+}
+
 export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Sales",
@@ -55,13 +61,13 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Company",
     links: [
-      "Studio",
-      "Why Design Asylum",
-      "Recent Updates",
-      "Our Terms",
-      "FAQs",
-      "The No Brainer Offer",
-    ].map(footerLink),
+      footerText("Why Design Asylum"),
+      footerLink("Studio"),
+      footerLink("Recent Updates"),
+      footerLink("Our Terms"),
+      footerLink("FAQs"),
+      footerLink("The No Brainer Offer"),
+    ],
   },
   {
     title: "Solutions",

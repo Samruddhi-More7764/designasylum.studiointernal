@@ -37,7 +37,16 @@ export function CmsMediaFill({
     );
   }
 
-  if (!poster) return null;
+  if (!poster || typeof poster !== "string" || !poster.trim()) return null;
+  const cleanPoster = poster.trim();
+  if (!cleanPoster.startsWith("/")) {
+    try {
+      const parsed = new URL(cleanPoster);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    } catch {
+      return null;
+    }
+  }
 
   if (isGifSrc(poster)) {
     return (

@@ -213,7 +213,7 @@ export const caseStudyFields: Field[] = [
         name: "href",
         type: "text",
         required: true,
-        defaultValue: "/",
+        defaultValue: "/clients",
       },
     ],
   },

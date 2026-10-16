@@ -56,6 +56,7 @@ export function ResourceCta({
   heading = defaultHeading,
   body = defaultBody,
   buttonLabel = "Book a strategy call with Design Asylum",
+  buttonHref = "/contact",
   buttonClassName = "!h-11 !min-h-11 !w-[327px] lg:!h-14 lg:!min-h-14 lg:!w-[384px]",
 }: {
   id?: string;
@@ -64,6 +65,7 @@ export function ResourceCta({
   heading?: ReactNode;
   body?: string;
   buttonLabel?: string;
+  buttonHref?: string;
   buttonClassName?: string;
 } = {}) {
   const location = variant === "location";
@@ -156,7 +158,7 @@ export function ResourceCta({
             </p>
           </div>
 
-          <ResourceButton href="/#talk" size="lg" className={buttonClassName}>
+          <ResourceButton href={buttonHref} size="lg" className={buttonClassName}>
             {buttonLabel}
           </ResourceButton>
         </div>
