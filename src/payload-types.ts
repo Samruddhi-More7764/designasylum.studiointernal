@@ -486,6 +486,115 @@ export interface Client {
         }[]
       | null;
   };
+  /**
+   * Select where this client appears across the website. Saving automatically syncs with the individual sections.
+   */
+  placements?: {
+    featuredProject?: {
+      enabled?: boolean | null;
+      /**
+       * Highlight figure, e.g. “10x”, “300%”, “#1”.
+       */
+      metric?: string | null;
+      /**
+       * Description of the metric, e.g. “Conversion rate increase”.
+       */
+      metricLabel?: string | null;
+      /**
+       * 1-2 sentences explaining what was built or achieved.
+       */
+      description?: string | null;
+      /**
+       * Landscape hero visual for the card.
+       */
+      image?: (number | null) | Media;
+      alt?: string | null;
+      /**
+       * Lower numbers appear first.
+       */
+      order?: number | null;
+    };
+    portfolioItem?: {
+      enabled?: boolean | null;
+      /**
+       * e.g. “UI/UX & Web”, “Branding”, “Packaging”.
+       */
+      category?: string | null;
+      image?: (number | null) | Media;
+      alt?: string | null;
+      /**
+       * Lower numbers appear first.
+       */
+      order?: number | null;
+    };
+    painPoint?: {
+      enabled?: boolean | null;
+      /**
+       * e.g. “B2B Website Redesign”, “E-Commerce Conversion”.
+       */
+      tag?: string | null;
+      /**
+       * What problem was the client facing before Design Asylum?
+       */
+      quote?: string | null;
+      /**
+       * How Design Asylum solved this challenge.
+       */
+      resolution?: string | null;
+      /**
+       * Lower numbers appear first.
+       */
+      order?: number | null;
+    };
+    homepageCaseStudy?: {
+      enabled?: boolean | null;
+      /**
+       * Select which study this homepage item points to. Defaults to the client’s featured study.
+       */
+      caseStudy?: (number | null) | CaseStudy;
+      /**
+       * Numbered prefix displayed next to the project name in the homepage list (e.g. “01”, “02”).
+       */
+      number?: string | null;
+      /**
+       * Brief summary shown on the right side of the row.
+       */
+      description?: string | null;
+      /**
+       * Pill tags displayed under the summary, e.g. 'BRANDING', 'DEVELOPMENT'. Click 'Add Tag' to add tags, or the trash icon to remove.
+       */
+      tags?:
+        | {
+            label: string;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Lower numbers appear first.
+       */
+      order?: number | null;
+    };
+    clientsPage?: {
+      enabled?: boolean | null;
+      /**
+       * e.g. “Brand Identity, Web Design”.
+       */
+      service?: string | null;
+      image?: (number | null) | Media;
+    };
+    workPage?: {
+      enabled?: boolean | null;
+      /**
+       * e.g. “B2B Website Redesign”.
+       */
+      service?: string | null;
+      /**
+       * Which industry tab this project appears under.
+       */
+      category?: ('fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry') | null;
+      image?: (number | null) | Media;
+    };
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -660,9 +769,15 @@ export interface ClientLogo {
  */
 export interface HomepageCaseStudy {
   id: number;
+  /**
+   * Numbered prefix displayed next to the project name in the homepage list (e.g. “01”, “02”).
+   */
   number: string;
   name: string;
   description: string;
+  /**
+   * Pill tags displayed under the summary, e.g. 'BRANDING', 'DEVELOPMENT'. Click 'Add Tag' to add tags, or the trash icon to remove.
+   */
   tags: {
     label: string;
     id?: string | null;
@@ -1154,6 +1269,69 @@ export interface ClientsSelect<T extends boolean = true> {
                     id?: T;
                   };
               id?: T;
+            };
+      };
+  placements?:
+    | T
+    | {
+        featuredProject?:
+          | T
+          | {
+              enabled?: T;
+              metric?: T;
+              metricLabel?: T;
+              description?: T;
+              image?: T;
+              alt?: T;
+              order?: T;
+            };
+        portfolioItem?:
+          | T
+          | {
+              enabled?: T;
+              category?: T;
+              image?: T;
+              alt?: T;
+              order?: T;
+            };
+        painPoint?:
+          | T
+          | {
+              enabled?: T;
+              tag?: T;
+              quote?: T;
+              resolution?: T;
+              order?: T;
+            };
+        homepageCaseStudy?:
+          | T
+          | {
+              enabled?: T;
+              caseStudy?: T;
+              number?: T;
+              description?: T;
+              tags?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              order?: T;
+            };
+        clientsPage?:
+          | T
+          | {
+              enabled?: T;
+              service?: T;
+              image?: T;
+            };
+        workPage?:
+          | T
+          | {
+              enabled?: T;
+              service?: T;
+              category?: T;
+              image?: T;
             };
       };
   updatedAt?: T;

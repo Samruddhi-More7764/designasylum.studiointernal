@@ -1,5 +1,9 @@
 import type { CollectionConfig } from "payload";
 import { homepageClientLink } from "../fields/homepageClientLink";
+import {
+  syncPortfolioItemToClient,
+  syncPortfolioItemDeleteToClient,
+} from "../cms/hooks/syncClientPlacements";
 
 export const PortfolioItems: CollectionConfig = {
   slug: "portfolio-items",
@@ -9,6 +13,10 @@ export const PortfolioItems: CollectionConfig = {
     defaultColumns: ["name", "category", "client", "order"],
   },
   access: { read: () => true },
+  hooks: {
+    afterChange: [syncPortfolioItemToClient],
+    afterDelete: [syncPortfolioItemDeleteToClient],
+  },
   fields: [
     { name: "name", type: "text", required: true },
     { name: "category", type: "text", required: true },
