@@ -69,11 +69,26 @@ export async function GET(request: Request, { params }: Props) {
   }
 
   // 2. Resolve to Vercel Blob CDN if token is available
-  const blobUrl = publicBlobUrl(filename);
+  let blobUrl = publicBlobUrl(filename);
   if (blobUrl) {
-    console.log(`[media-route] redirecting to blob CDN: ${blobUrl.slice(0, 80)}`);
+    console.log(`[media-route] resolving blob CDN: ${blobUrl.slice(0, 80)}`);
     try {
-      const blobRes = await fetch(blobUrl);
+      let blobRes = await fetch(blobUrl);
+
+      // If the file returned 404 and has a Payload de-duplication suffix like image-1.png or image-6.png,
+      // try the base filename (image.png) in Blob storage.
+      if (!blobRes.ok && /-\d+\.[^.]+$/.test(filename)) {
+        const baseFilename = filename.replace(/-\d+(\.[^.]+)$/, "$1");
+        const fallbackUrl = publicBlobUrl(baseFilename);
+        if (fallbackUrl) {
+          const fallbackRes = await fetch(fallbackUrl);
+          if (fallbackRes.ok && fallbackRes.body) {
+            blobUrl = fallbackUrl;
+            blobRes = fallbackRes;
+          }
+        }
+      }
+
       if (blobRes.ok && blobRes.body) {
         const headers = new Headers();
         headers.set(

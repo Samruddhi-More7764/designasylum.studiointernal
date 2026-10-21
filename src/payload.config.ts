@@ -164,7 +164,7 @@ export default buildConfig({
         },
       },
       token: blobToken,
-      addRandomSuffix: false,
+      addRandomSuffix: true,
       // Browser uploads straight to Blob. The token route stays same-origin,
       // so a file over Vercel's 4.5MB function limit can still be saved.
       clientUploads: true,
