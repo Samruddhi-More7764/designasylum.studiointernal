@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { InViewVideo } from "@/components/ui/InViewVideo";
 import { isGifSrc, isVideoSrc } from "@/cms/media";
@@ -30,21 +30,24 @@ export function CmsMediaFill({
     (video && isVideoSrc(video) ? video : null) ||
     (image && isVideoSrc(image) ? image : null);
   const poster = image && !isVideoSrc(image) ? image : undefined;
-  const [currentSrc, setCurrentSrc] = useState<string | null>(poster || null);
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [poster, videoSrc]);
 
   if (videoSrc) {
     return (
       <InViewVideo
         src={videoSrc}
-        poster={currentSrc || poster}
+        poster={poster}
         label={alt}
         className="absolute inset-0 h-full w-full"
       />
     );
   }
 
-  const effectiveSrc = hasError ? DEFAULT_FALLBACK : (currentSrc || poster);
+  const effectiveSrc = hasError ? DEFAULT_FALLBACK : (poster || null);
   if (!effectiveSrc || typeof effectiveSrc !== "string" || !effectiveSrc.trim()) return null;
   const cleanPoster = effectiveSrc.trim();
   if (!cleanPoster.startsWith("/")) {
@@ -52,7 +55,12 @@ export function CmsMediaFill({
       const parsed = new URL(cleanPoster);
       if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
     } catch {
-      return null;
+      try {
+        const parsed = new URL(encodeURI(cleanPoster));
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+      } catch {
+        return null;
+      }
     }
   }
 
@@ -67,7 +75,6 @@ export function CmsMediaFill({
         onError={() => {
           if (!hasError) {
             setHasError(true);
-            setCurrentSrc(DEFAULT_FALLBACK);
           }
         }}
       />
@@ -85,7 +92,6 @@ export function CmsMediaFill({
       onError={() => {
         if (!hasError) {
           setHasError(true);
-          setCurrentSrc(DEFAULT_FALLBACK);
         }
       }}
     />

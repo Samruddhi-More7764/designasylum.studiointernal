@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { cache } from "react";
 import { getPayloadClient } from "@/cms/getPayload";
-import { isVideoMedia, isVideoSrc, resolveMediaAlt, resolveMediaUrl } from "@/cms/media";
+import { isVideoMedia, isVideoSrc, publicBlobUrl, resolveMediaAlt, resolveMediaUrl } from "@/cms/media";
 import type { ClientHubNavItem } from "@/cms/types";
 import {
   featuredProjects as fallbackProjects,
@@ -95,9 +95,19 @@ function safeMediaUrl(value: unknown): string | null {
   const onDisk = path.basename(filename);
   if (onDisk && existsSync(path.join(mediaDir, onDisk))) return src;
 
+  // If Blob storage is configured, attempt resolution to public Blob CDN
+  const blobUrl = publicBlobUrl(filename);
+  if (blobUrl) return blobUrl;
+
   if (value && typeof value === "object" && "sourcePath" in value) {
     const sourcePath = (value as { sourcePath?: string | null }).sourcePath?.trim();
     if (sourcePath?.startsWith("/")) return sourcePath;
+  }
+
+  // On Vercel / serverless production, trust the resolved media source so editor
+  // uploads are rendered rather than discarded.
+  if (process.env.VERCEL || process.env.NODE_ENV === "production" || process.env.BLOB_READ_WRITE_TOKEN) {
+    return src;
   }
 
   return null;

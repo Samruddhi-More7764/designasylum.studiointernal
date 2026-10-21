@@ -21,6 +21,13 @@ export function resolveMediaUrl(value: unknown): string | null {
   if (typeof value === "string") {
     const trimmed = value.trim();
     if (!trimmed) return null;
+    if (trimmed.includes("/api/media/file/") || trimmed.startsWith("/api/media/file/")) {
+      const uploadedName = payloadMediaFilename(trimmed);
+      if (uploadedName) {
+        const blobUrl = publicBlobUrl(uploadedName);
+        if (blobUrl) return blobUrl;
+      }
+    }
     if (trimmed.startsWith("/") || trimmed.startsWith("http")) {
       return toNextImageSrc(trimmed);
     }
@@ -54,11 +61,22 @@ export function resolveMediaUrl(value: unknown): string | null {
     const url = "url" in value ? (value as { url?: string | null }).url : null;
     const trimmed = url?.trim();
     if (trimmed) {
-      if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      const isPayloadFile =
+        trimmed.includes("/api/media/file/") ||
+        trimmed.startsWith("/api/media/file/");
+
+      if (isPayloadFile) {
+        const uploadedName = filename || payloadMediaFilename(trimmed);
+        if (uploadedName) {
+          const blobUrl = publicBlobUrl(uploadedName);
+          if (blobUrl) return blobUrl;
+        }
+      } else if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
         return toNextImageSrc(trimmed);
       }
+
       const uploadedName = filename || payloadMediaFilename(trimmed);
-      if (uploadedName && payloadMediaFilename(trimmed)) {
+      if (uploadedName) {
         const blobUrl = publicBlobUrl(uploadedName);
         if (blobUrl) return blobUrl;
       }
@@ -140,7 +158,7 @@ function cleanBlobFilename(filename: string): string {
  * Matches `@payloadcms/storage-vercel-blob` (store id parsed from the token,
  * filename segments passed through encodeURIComponent without double-encoding).
  */
-function publicBlobUrl(filename: string): string | null {
+export function publicBlobUrl(filename: string): string | null {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) return null;
   const storeId = token
