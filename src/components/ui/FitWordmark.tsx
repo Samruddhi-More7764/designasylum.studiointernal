@@ -10,7 +10,7 @@ import { DesignAsylumWordmark } from "@/components/ui/DesignAsylumWordmark";
  * Shared by the Homepage/Client Hub footer and the Case Study footer.
  * The `text` prop is retained for call-site compatibility but unused.
  */
-export function FitWordmark(_props: { text?: string }) {
+export function FitWordmark({}: { text?: string } = {}) {
   return (
     <div className="mt-20 flex w-full justify-center lg:block">
       {/* Mobile artboard: 351.8 × 43.91. Desktop fills the 1402px frame. */}

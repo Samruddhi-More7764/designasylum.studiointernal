@@ -18,7 +18,7 @@ import {
   ahmedabadCta,
 } from "@/data/ahmedabadLocationPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Best Web Design & Branding Agency in Ahmedabad",

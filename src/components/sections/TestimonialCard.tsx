@@ -139,7 +139,7 @@ export function TestimonialCard({ item }: { item: Testimonial }) {
             src={item.video}
             poster={item.image || undefined}
             playsInline
-            preload="metadata"
+            preload="none"
             aria-label={item.alt}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}

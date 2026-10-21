@@ -30,8 +30,11 @@ export function PersistQuoteLogo() {
   const dataRef = useRef(data);
   const setDataRef = useRef(setData);
   const pending = useRef<string | null>(null);
-  dataRef.current = data;
-  setDataRef.current = setData;
+
+  useEffect(() => {
+    dataRef.current = data;
+    setDataRef.current = setData;
+  }, [data, setData]);
 
   useEffect(() => {
     if (id == null || currentId === savedId) return;

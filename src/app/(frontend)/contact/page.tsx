@@ -6,7 +6,7 @@ import { ContactOffices } from "@/components/contact/ContactOffices";
 import { getContactPage } from "@/cms/contactPage";
 import { getFooter } from "@/cms/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Get in Touch",

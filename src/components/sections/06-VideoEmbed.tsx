@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Full-width video — Homepage / Rectangle 3 (1470 × 831).
  *
- * Plays muted while the section is on screen; pauses only when it fully
- * leaves. Does NOT rewind on re-entry (avoids cutting playback short when
- * IntersectionObserver flickers during scroll).
+ * Defers loading the 30MB video stream until scrolled within 250px of the section.
+ * Plays muted while the section is on screen; pauses when it leaves.
  *
  * Source: public/assets/videos/main.mp4 (Channel One film).
  * Poster: public/assets/images/video-poster.png.
@@ -15,6 +15,7 @@ import { useEffect, useRef } from "react";
 export function VideoEmbed() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -22,11 +23,11 @@ export function VideoEmbed() {
     if (!section || !video) return;
 
     video.muted = true;
-    void video.play().catch(() => {});
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          setShouldLoad(true);
           if (video.paused) {
             void video.play().catch(() => {});
           }
@@ -34,7 +35,7 @@ export function VideoEmbed() {
           video.pause();
         }
       },
-      { threshold: [0, 0.01, 0.25] },
+      { rootMargin: "250px", threshold: [0, 0.01, 0.25] },
     );
 
     observer.observe(section);
@@ -45,18 +46,27 @@ export function VideoEmbed() {
     <section
       ref={sectionRef}
       data-nav="dark"
-      className="relative aspect-[1470/831] w-full bg-black"
+      className="relative aspect-[1470/831] w-full overflow-hidden bg-black"
     >
+      {!shouldLoad ? (
+        <Image
+          src="/assets/images/video-poster.png"
+          alt=""
+          fill
+          sizes="(max-width: 1470px) 100vw, 1470px"
+          className="object-cover"
+        />
+      ) : null}
+
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
-        src="/assets/videos/main.mp4"
+        src={shouldLoad ? "/assets/videos/main.mp4" : undefined}
         poster="/assets/images/video-poster.png"
         muted
-        autoPlay
         playsInline
         loop
-        preload="auto"
+        preload="none"
         aria-label="Channel One film"
       />
     </section>

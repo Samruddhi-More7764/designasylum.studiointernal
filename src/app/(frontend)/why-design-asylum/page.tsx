@@ -12,7 +12,7 @@ import { LifeOutside } from "@/components/why-design-asylum/LifeOutside";
 import { getCareersPage } from "@/cms/careersPage";
 import { getFooter } from "@/cms/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Why Design Asylum",

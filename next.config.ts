@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
     root: projectRoot,
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: "http",
@@ -33,6 +35,18 @@ const nextConfig: NextConfig = {
         protocol: "http",
         hostname: "127.0.0.1",
         pathname: "/api/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.vercel.app",
+      },
+      {
+        protocol: "https",
+        hostname: "designasylum.studio",
+      },
+      {
+        protocol: "https",
+        hostname: "*.designasylum.studio",
       },
       {
         protocol: "https",
@@ -51,6 +65,9 @@ const nextConfig: NextConfig = {
         hostname: "blob.vercel-storage.com",
       },
     ],
+  },
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
 };
 

@@ -21,6 +21,7 @@ import { Testimonials } from "./collections/Testimonials";
 import { FaqItems } from "./collections/FaqItems";
 import { Clients } from "./collections/Clients";
 import { CaseStudies } from "./collections/CaseStudies";
+import { TeamMembers } from "./collections/TeamMembers";
 import { SiteFooter } from "./globals/SiteFooter";
 import { BrandingStrategy } from "./globals/BrandingStrategy";
 import { ManufacturingIndustry } from "./globals/ManufacturingIndustry";
@@ -36,11 +37,60 @@ import { WorkPage } from "./globals/WorkPage";
 import { ClientsIndex } from "./globals/ClientsIndex";
 import { StudioPage } from "./globals/StudioPage";
 import { TeamPage } from "./globals/TeamPage";
-import { TeamPerson } from "./globals/TeamPerson";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+
+import type { CollectionConfig, GlobalConfig } from "payload";
+import { revalidateMarketingPages } from "./cms/revalidate";
+
+function withRevalidation(collection: CollectionConfig): CollectionConfig {
+  return {
+    ...collection,
+    hooks: {
+      ...collection.hooks,
+      afterChange: [
+        ...(collection.hooks?.afterChange || []),
+        ({ doc }) => {
+          const slug =
+            doc && typeof doc === "object" && "slug" in doc && typeof doc.slug === "string"
+              ? doc.slug
+              : undefined;
+          revalidateMarketingPages(slug);
+          return doc;
+        },
+      ],
+      afterDelete: [
+        ...(collection.hooks?.afterDelete || []),
+        ({ doc }) => {
+          const slug =
+            doc && typeof doc === "object" && "slug" in doc && typeof doc.slug === "string"
+              ? doc.slug
+              : undefined;
+          revalidateMarketingPages(slug);
+          return doc;
+        },
+      ],
+    },
+  };
+}
+
+function withGlobalRevalidation(global: GlobalConfig): GlobalConfig {
+  return {
+    ...global,
+    hooks: {
+      ...global.hooks,
+      afterChange: [
+        ...(global.hooks?.afterChange || []),
+        ({ doc }) => {
+          revalidateMarketingPages();
+          return doc;
+        },
+      ],
+    },
+  };
+}
 
 export default buildConfig({
   onInit: async (payload) => {
@@ -59,17 +109,18 @@ export default buildConfig({
   },
   collections: [
     Users,
-    Media,
-    Services,
-    FeaturedProjects,
-    PortfolioItems,
-    PainPoints,
-    ClientLogos,
-    HomepageCaseStudies,
-    Testimonials,
-    FaqItems,
-    Clients,
-    CaseStudies,
+    withRevalidation(Media),
+    withRevalidation(Services),
+    withRevalidation(FeaturedProjects),
+    withRevalidation(PortfolioItems),
+    withRevalidation(PainPoints),
+    withRevalidation(ClientLogos),
+    withRevalidation(HomepageCaseStudies),
+    withRevalidation(Testimonials),
+    withRevalidation(FaqItems),
+    withRevalidation(Clients),
+    withRevalidation(CaseStudies),
+    withRevalidation(TeamMembers),
   ],
   globals: [
     SiteFooter,
@@ -87,8 +138,7 @@ export default buildConfig({
     ClientsIndex,
     StudioPage,
     TeamPage,
-    TeamPerson,
-  ],
+  ].map(withGlobalRevalidation),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",
   typescript: {
@@ -97,6 +147,8 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: postgresConnectionString(),
+      connectionTimeoutMillis: 30000,
+      idleTimeoutMillis: 30000,
     },
     // First Neon / local boot can push schema. Set PAYLOAD_PUSH=false once
     // you switch to `npm run migrate`.
@@ -107,9 +159,12 @@ export default buildConfig({
     vercelBlobStorage({
       enabled: Boolean(blobToken),
       collections: {
-        media: true,
+        media: {
+          disablePayloadAccessControl: true,
+        },
       },
       token: blobToken,
+      addRandomSuffix: false,
       // Browser uploads straight to Blob. The token route stays same-origin,
       // so a file over Vercel's 4.5MB function limit can still be saved.
       clientUploads: true,

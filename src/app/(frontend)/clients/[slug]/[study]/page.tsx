@@ -8,7 +8,7 @@ import { ClientHubStartProject } from "@/components/clients/06-ClientHubStartPro
 import { Footer } from "@/components/sections/15-Footer";
 import { getCaseStudyPage, getFooter } from "@/cms/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 type Props = { params: Promise<{ slug: string; study: string }> };
 

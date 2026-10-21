@@ -6,7 +6,7 @@ import { WorkGrid } from "@/components/work/WorkGrid";
 import { getFooter } from "@/cms/content";
 import { getWorkPage } from "@/cms/workPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Work",

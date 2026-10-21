@@ -9,7 +9,7 @@ import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getBlogIndex } from "@/cms/blogIndex";
 import { getFooter } from "@/cms/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Things worth thinking about.",

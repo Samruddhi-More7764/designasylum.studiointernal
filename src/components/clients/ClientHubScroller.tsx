@@ -47,6 +47,10 @@ export function ClientHubScroller({
       }
 
       let current = ids[0];
+      const hashId = window.location.hash.slice(1);
+      if (ids.includes(hashId)) {
+        current = hashId;
+      }
       for (const id of ids) {
         const el = document.getElementById(id);
         if (!el) continue;
@@ -61,11 +65,6 @@ export function ClientHubScroller({
     }
 
     updateActive();
-
-    const hashId = window.location.hash.slice(1);
-    if (ids.includes(hashId)) {
-      setActive(hashId);
-    }
 
     window.addEventListener("scroll", updateActive, { passive: true });
     window.addEventListener("resize", updateActive);

@@ -5,7 +5,7 @@ import { FaqExplorer } from "@/components/faq/FaqExplorer";
 import { getFaqPage } from "@/cms/faqPage";
 import { getFooter } from "@/cms/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions",

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { InViewVideo } from "@/components/ui/InViewVideo";
 import { isGifSrc, isVideoSrc } from "@/cms/media";
@@ -9,6 +12,8 @@ type CmsMediaFillProps = {
   sizes: string;
   priority?: boolean;
 };
+
+const DEFAULT_FALLBACK = "/assets/images/client-hub/case-study-hero.jpg";
 
 /**
  * Renders a video with a still poster, or a still image. Never passes an
@@ -25,20 +30,23 @@ export function CmsMediaFill({
     (video && isVideoSrc(video) ? video : null) ||
     (image && isVideoSrc(image) ? image : null);
   const poster = image && !isVideoSrc(image) ? image : undefined;
+  const [currentSrc, setCurrentSrc] = useState<string | null>(poster || null);
+  const [hasError, setHasError] = useState(false);
 
   if (videoSrc) {
     return (
       <InViewVideo
         src={videoSrc}
-        poster={poster}
+        poster={currentSrc || poster}
         label={alt}
         className="absolute inset-0 h-full w-full"
       />
     );
   }
 
-  if (!poster || typeof poster !== "string" || !poster.trim()) return null;
-  const cleanPoster = poster.trim();
+  const effectiveSrc = hasError ? DEFAULT_FALLBACK : (currentSrc || poster);
+  if (!effectiveSrc || typeof effectiveSrc !== "string" || !effectiveSrc.trim()) return null;
+  const cleanPoster = effectiveSrc.trim();
   if (!cleanPoster.startsWith("/")) {
     try {
       const parsed = new URL(cleanPoster);
@@ -48,26 +56,38 @@ export function CmsMediaFill({
     }
   }
 
-  if (isGifSrc(poster)) {
+  if (isGifSrc(cleanPoster)) {
     return (
       // next/image freezes an animated GIF on the first frame.
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={poster}
+        src={cleanPoster}
         alt={alt}
         className="absolute inset-0 h-full w-full object-cover"
+        onError={() => {
+          if (!hasError) {
+            setHasError(true);
+            setCurrentSrc(DEFAULT_FALLBACK);
+          }
+        }}
       />
     );
   }
 
   return (
     <Image
-      src={poster}
+      src={cleanPoster}
       alt={alt}
       fill
       priority={priority}
       className="object-cover"
       sizes={sizes}
+      onError={() => {
+        if (!hasError) {
+          setHasError(true);
+          setCurrentSrc(DEFAULT_FALLBACK);
+        }
+      }}
     />
   );
 }

@@ -15,15 +15,24 @@ function imageField(): Field {
 
 function memberFields(): Field[] {
   return [
+    {
+      name: "member",
+      label: "Linked Team Member Profile",
+      type: "relationship",
+      relationTo: "team-members",
+      admin: {
+        description: "Select a profile to automatically link Read more to /team/[slug].",
+      },
+    },
     imageField(),
     { name: "name", type: "text", required: true },
     { name: "role", type: "text" },
     {
       name: "href",
-      label: "Read more URL",
+      label: "Custom Read more URL",
       type: "text",
       admin: {
-        description: "Where Read more goes. Leave empty until that page exists.",
+        description: "Optional override. If a Linked Team Member is selected above, this can be left empty.",
       },
     },
   ];

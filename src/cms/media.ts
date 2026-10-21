@@ -54,6 +54,9 @@ export function resolveMediaUrl(value: unknown): string | null {
     const url = "url" in value ? (value as { url?: string | null }).url : null;
     const trimmed = url?.trim();
     if (trimmed) {
+      if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+        return toNextImageSrc(trimmed);
+      }
       const uploadedName = filename || payloadMediaFilename(trimmed);
       if (uploadedName && payloadMediaFilename(trimmed)) {
         const blobUrl = publicBlobUrl(uploadedName);

@@ -50,12 +50,35 @@ const fallback: TeamPageContent = {
   })),
 };
 
+type LinkedMember = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  role?: string;
+  photoOne?: unknown;
+};
+
 type MemberRow = {
+  member?: LinkedMember | string | null;
   image?: unknown;
   name?: string | null;
   role?: string | null;
   href?: string | null;
 } | null;
+
+function resolveMemberHref(
+  row: MemberRow,
+  designedHref: string,
+): string {
+  const custom = row?.href?.trim();
+  if (custom) return custom;
+
+  if (row?.member && typeof row.member === "object" && row.member.slug) {
+    return `/team/${row.member.slug}`;
+  }
+
+  return designedHref || "#";
+}
 
 function members(
   rows: MemberRow[] | null | undefined,
@@ -64,15 +87,22 @@ function members(
 ): TeamMember[] {
   const next = (rows || [])
     .map((row, index) => {
-      const name = row?.name?.trim() || "";
+      const linked =
+        row?.member && typeof row.member === "object" ? row.member : null;
+      const name = row?.name?.trim() || linked?.name?.trim() || "";
       if (!name) return null;
       const designedMember = designed[index];
+      const role = row?.role?.trim() || linked?.role?.trim() || designedMember?.role || "";
+      const imageUpload = row?.image || linked?.photoOne;
+      const image = storedImage(imageUpload, designedMember?.image || teamPortrait);
+      const href = resolveMemberHref(row, designedMember?.href || "#");
+
       return {
         id: `${prefix}-${index}`,
         name,
-        role: row?.role?.trim() || designedMember?.role || "",
-        image: storedImage(row?.image, designedMember?.image || teamPortrait),
-        href: row?.href?.trim() || designedMember?.href || "#",
+        role,
+        image,
+        href,
       };
     })
     .filter((row): row is TeamMember => Boolean(row));
@@ -87,7 +117,7 @@ export const getTeamPage = cache(async (): Promise<TeamPageContent> => {
   try {
     const doc = (await payload.findGlobal({
       slug: "team-page" as "site-footer",
-      depth: 1,
+      depth: 2,
     })) as unknown as {
       breadcrumbCurrent?: string | null;
       heading?: string | null;

@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ChevronDown } from "lucide-react";
 import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { FormSubmissionToast } from "@/components/ui/FormSubmissionToast";
 import { PillButton } from "@/components/ui/PillButton";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { submitContactLead } from "@/lib/submitContactLead";
+
+const COMPANY_TYPE_OPTIONS = [
+  { label: "Startup", value: "startup" },
+  { label: "Enterprise", value: "enterprise" },
+  { label: "Agency", value: "agency" },
+];
 
 const inputClasses =
   "h-12 w-full rounded-lg bg-input-bg px-4 font-satoshi text-base font-normal text-black placeholder:text-black/50 outline-none";
@@ -79,6 +86,7 @@ export function ContactInquiryForm({
 } = {}) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [companyType, setCompanyType] = useState("");
   const [count, setCount] = useState(0);
   const [errors, setErrors] = useState<FieldErrors>({});
 
@@ -123,6 +131,7 @@ export function ContactInquiryForm({
       }
 
       form.reset();
+      setCompanyType("");
       setCount(0);
       setErrors({});
       setStatus("success");
@@ -199,31 +208,24 @@ export function ContactInquiryForm({
             <FieldError id="contact-mobile-error" message={errors.mobileNumber} />
           </div>
 
-          <label className="flex flex-col gap-2.5">
-            <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">Company Type*</span>
-            <span className="relative">
-              <select
-                name="companyType"
-                defaultValue=""
-                aria-invalid={Boolean(errors.companyType)}
-                aria-describedby={errors.companyType ? "contact-company-error" : undefined}
-                onChange={() => clearField("companyType")}
-                className={`${controlClass(Boolean(errors.companyType))} appearance-none pr-10`}
-              >
-                <option value="" disabled>
-                  - Select -
-                </option>
-                <option value="startup">Startup</option>
-                <option value="enterprise">Enterprise</option>
-                <option value="agency">Agency</option>
-              </select>
-              <ChevronDown
-                className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-black"
-                aria-hidden="true"
-              />
+          <div className="flex flex-col gap-2.5">
+            <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">
+              Company Type*
             </span>
+            <CustomSelect
+              name="companyType"
+              value={companyType}
+              onChange={(val) => {
+                setCompanyType(val);
+                clearField("companyType");
+              }}
+              options={COMPANY_TYPE_OPTIONS}
+              placeholder="- Select -"
+              invalid={Boolean(errors.companyType)}
+              aria-describedby={errors.companyType ? "contact-company-error" : undefined}
+            />
             <FieldError id="contact-company-error" message={errors.companyType} />
-          </label>
+          </div>
 
           <label className="flex flex-col gap-2.5">
             <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">
@@ -241,9 +243,11 @@ export function ContactInquiryForm({
             </span>
           </label>
 
-          <p className="min-h-5 font-satoshi text-sm text-black/70" aria-live="polite">
-            {message}
-          </p>
+          {status === "error" && message ? (
+            <p className="font-satoshi text-sm text-[#FF3838]" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
 
           <PillButton
             variant="dark"
@@ -256,6 +260,11 @@ export function ContactInquiryForm({
           </PillButton>
         </form>
       </div>
+
+      <FormSubmissionToast
+        show={status === "success"}
+        onClose={() => setStatus("idle")}
+      />
     </section>
   );
 }

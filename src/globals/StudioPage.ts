@@ -1,5 +1,4 @@
 import type { Field, GlobalConfig } from "payload";
-import { teamPersonHeroHref } from "@/data/teamPage";
 
 function imageField(name = "image", label?: string, description?: string): Field {
   return {
@@ -129,14 +128,23 @@ export const StudioPage: GlobalConfig = {
               name: "people",
               type: "array",
               fields: [
+                {
+                  name: "member",
+                  label: "Linked Team Member Profile",
+                  type: "relationship",
+                  relationTo: "team-members",
+                  admin: {
+                    description: "Select a profile to automatically link this chip to /team/[slug].",
+                  },
+                },
                 imageField(),
                 { name: "name", type: "text", required: true },
                 {
                   name: "href",
-                  label: "URL",
+                  label: "Custom URL",
                   type: "text",
                   admin: {
-                    description: `Optional. Use ${teamPersonHeroHref} to open the team person page at the hero.`,
+                    description: `Optional override. Leave empty if a profile is linked above, or specify a custom URL.`,
                   },
                 },
               ],

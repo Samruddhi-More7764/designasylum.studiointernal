@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type InViewVideoProps = {
   src: string;
@@ -10,12 +10,12 @@ type InViewVideoProps = {
 };
 
 /**
- * Muted looping video that plays while on screen and pauses when it
- * fully leaves — same behaviour as the homepage film.
+ * Muted looping video that only buffers and plays when scrolled near or into view.
  */
 export function InViewVideo({ src, poster, label, className = "" }: InViewVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -23,17 +23,17 @@ export function InViewVideo({ src, poster, label, className = "" }: InViewVideoP
     if (!wrap || !video) return;
 
     video.muted = true;
-    void video.play().catch(() => {});
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          setInView(true);
           if (video.paused) void video.play().catch(() => {});
         } else if (entry.intersectionRatio === 0) {
           video.pause();
         }
       },
-      { threshold: [0, 0.01, 0.25] },
+      { rootMargin: "250px", threshold: [0, 0.01, 0.25] },
     );
 
     observer.observe(wrap);
@@ -45,13 +45,12 @@ export function InViewVideo({ src, poster, label, className = "" }: InViewVideoP
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
-        src={src}
+        src={inView ? src : undefined}
         poster={poster && !poster.match(/\.(mp4|webm|mov|m4v)(\?|$)/i) ? poster : undefined}
         muted
-        autoPlay
         playsInline
         loop
-        preload="metadata"
+        preload="none"
         aria-label={label}
       />
     </div>

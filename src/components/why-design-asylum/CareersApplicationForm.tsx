@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { X } from "lucide-react";
 import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { FormSubmissionToast } from "@/components/ui/FormSubmissionToast";
 import { PillButton } from "@/components/ui/PillButton";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { careersForm } from "@/data/whyDesignAsylumPage";
@@ -123,15 +126,19 @@ export function CareersApplicationForm({
 } = {}) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [interest, setInterest] = useState("");
   const [count, setCount] = useState(0);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [cv, setCv] = useState<CvUpload>({ status: "empty" });
   const cvRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  const isCvUploading = cv.status === "uploading";
+  const uploadingCvFile = cv.status === "uploading" ? cv.file : null;
+
   useEffect(() => {
-    if (cv.status !== "uploading") return;
-    const file = cv.file;
+    if (!isCvUploading || !uploadingCvFile) return;
+    const file = uploadingCvFile;
     const started = performance.now();
     let frame = 0;
     const tick = (now: number) => {
@@ -145,7 +152,7 @@ export function CareersApplicationForm({
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [cv.status === "uploading" ? cv.file : null]);
+  }, [isCvUploading, uploadingCvFile]);
 
   function clearField(name: keyof FieldErrors) {
     setErrors((current) => {
@@ -215,6 +222,7 @@ export function CareersApplicationForm({
       }
 
       form.reset();
+      setInterest("");
       setCount(0);
       clearCv();
       setErrors({});
@@ -296,30 +304,24 @@ export function CareersApplicationForm({
             <FieldError id="career-mobile-error" message={errors.mobileNumber} />
           </div>
 
-          <label className="flex flex-col gap-2.5">
-            <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">What are you interested in?*</span>
-            <span className="relative">
-              <select
-                name="interest"
-                defaultValue=""
-                aria-invalid={Boolean(errors.interest)}
-                aria-describedby={errors.interest ? "career-interest-error" : undefined}
-                onChange={() => clearField("interest")}
-                className={`${controlClass(Boolean(errors.interest))} appearance-none pr-10`}
-              >
-                <option value="" disabled>
-                  - Select -
-                </option>
-                {interests.map((interest) => (
-                  <option key={interest} value={interest}>
-                    {interest}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-black" aria-hidden="true" />
+          <div className="flex flex-col gap-2.5">
+            <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">
+              What are you interested in?*
             </span>
+            <CustomSelect
+              name="interest"
+              value={interest}
+              options={interests}
+              placeholder="- Select -"
+              invalid={Boolean(errors.interest)}
+              aria-describedby={errors.interest ? "career-interest-error" : undefined}
+              onChange={(val) => {
+                setInterest(val);
+                clearField("interest");
+              }}
+            />
             <FieldError id="career-interest-error" message={errors.interest} />
-          </label>
+          </div>
 
           <label className="flex flex-col gap-2.5">
             <span className="font-satoshi text-[16px] leading-5 tracking-[-0.08px] text-black">Portfolio/Website*</span>
@@ -344,18 +346,18 @@ export function CareersApplicationForm({
                 onDrop={onDrop}
                 className={`flex h-[188px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border bg-input-bg px-6 text-center lg:h-[221px] ${errors.cv ? "border-[#cc1010]" : "border-transparent"}`}
               >
-                <img
+                <Image
                   src="/assets/images/why-design-asylum/upload-cv-mobile.svg"
                   alt=""
-                  width={17.5}
-                  height={21.5}
+                  width={18}
+                  height={22}
                   className="lg:hidden"
                 />
-                <img
+                <Image
                   src="/assets/images/why-design-asylum/upload-cv.svg"
                   alt=""
-                  width={22.8334}
-                  height={28.1667}
+                  width={23}
+                  height={28}
                   className="hidden lg:block"
                 />
                 <span className="font-satoshi text-[16px] tracking-[-0.08px] text-black">
@@ -417,9 +419,11 @@ export function CareersApplicationForm({
             <span className="text-right font-satoshi text-[14px] leading-5 tracking-[-0.07px] text-black">{count}/500</span>
           </label>
 
-          <p className="min-h-5 font-satoshi text-sm text-black/70" aria-live="polite">
-            {message}
-          </p>
+          {status === "error" && message ? (
+            <p className="font-satoshi text-sm text-[#FF3838]" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
 
           <PillButton
             variant="dark"
@@ -432,6 +436,11 @@ export function CareersApplicationForm({
           </PillButton>
         </form>
       </div>
+
+      <FormSubmissionToast
+        show={status === "success"}
+        onClose={() => setStatus("idle")}
+      />
     </section>
   );
 }

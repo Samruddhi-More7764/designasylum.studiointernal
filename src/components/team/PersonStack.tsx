@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const SLOTS = [
   { rotate: -4.45, x: 8, y: 12, z: 30, tone: "#d9d9d9" },
@@ -21,26 +22,29 @@ export function PersonStack({ images }: { images: Array<string | null> }) {
   const startX = useRef<number | null>(null);
   const reduced = useRef(false);
 
-  function show(direction: "next" | "prev") {
-    if (leaving) return;
-    if (reduced.current) {
-      setFront((current) => (current + (direction === "next" ? 1 : 2)) % 3);
-      return;
-    }
-    setLeaving(direction);
-    window.setTimeout(() => {
-      setFront((current) => (current + (direction === "next" ? 1 : 2)) % 3);
-      setLeaving(null);
-      setDrag(0);
-    }, 420);
-  }
+  const show = useCallback(
+    (direction: "next" | "prev") => {
+      if (leaving) return;
+      if (reduced.current) {
+        setFront((current) => (current + (direction === "next" ? 1 : 2)) % 3);
+        return;
+      }
+      setLeaving(direction);
+      window.setTimeout(() => {
+        setFront((current) => (current + (direction === "next" ? 1 : 2)) % 3);
+        setLeaving(null);
+        setDrag(0);
+      }, 420);
+    },
+    [leaving],
+  );
 
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced.current) return;
     const timer = window.setInterval(() => show("next"), 3400);
     return () => window.clearInterval(timer);
-  }, [front, leaving]);
+  }, [show]);
 
   return (
     <div className="relative mx-auto flex w-full max-w-[1190px] items-center justify-center">
@@ -50,7 +54,7 @@ export function PersonStack({ images }: { images: Array<string | null> }) {
         onClick={() => show("prev")}
         className="absolute left-0 z-40 hidden size-10 items-center justify-center rounded-lg bg-black/8 lg:flex"
       >
-        <img src="/assets/images/team/chevron-left.svg" alt="" width={16} height={16} />
+        <Image src="/assets/images/team/chevron-left.svg" alt="" width={16} height={16} />
       </button>
       <div
         className="relative h-[476px] w-[324px] max-w-full touch-pan-y lg:h-[462px] lg:w-[360px]"
@@ -94,7 +98,7 @@ export function PersonStack({ images }: { images: Array<string | null> }) {
                 transform,
               }}
             >
-              {src ? <img src={src} alt="" className="size-full object-cover" /> : null}
+              {src ? <Image src={src} alt="" fill sizes="(max-width: 1024px) 300px, 320px" className="object-cover" /> : null}
             </div>
           );
         })}
@@ -105,7 +109,7 @@ export function PersonStack({ images }: { images: Array<string | null> }) {
         onClick={() => show("next")}
         className="absolute right-0 z-40 hidden size-10 items-center justify-center rounded-lg bg-black/8 lg:flex"
       >
-        <img
+        <Image
           src="/assets/images/team/chevron-left.svg"
           alt=""
           width={16}

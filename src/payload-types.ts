@@ -79,6 +79,7 @@ export interface Config {
     'faq-items': FaqItem;
     clients: Client;
     'case-studies': CaseStudy;
+    'team-members': TeamMember;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +99,7 @@ export interface Config {
     'faq-items': FaqItemsSelect<false> | FaqItemsSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
+    'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -123,7 +125,6 @@ export interface Config {
     'clients-index': ClientsIndex;
     'studio-page': StudioPage;
     'team-page': TeamPage;
-    'team-person': TeamPerson;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
@@ -141,7 +142,6 @@ export interface Config {
     'clients-index': ClientsIndexSelect<false> | ClientsIndexSelect<true>;
     'studio-page': StudioPageSelect<false> | StudioPageSelect<true>;
     'team-page': TeamPageSelect<false> | TeamPageSelect<true>;
-    'team-person': TeamPersonSelect<false> | TeamPersonSelect<true>;
   };
   locale: null;
   widgets: {
@@ -842,6 +842,129 @@ export interface FaqItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: number;
+  name: string;
+  /**
+   * URL slug, e.g. 'tanmaya-rao' (accessible at /team/tanmaya-rao).
+   */
+  slug: string;
+  /**
+   * e.g. 'Lead Brand Designer | Illustrator'
+   */
+  role?: string | null;
+  /**
+   * Check if this person is part of the Leadership team.
+   */
+  isLeadership?: boolean | null;
+  breadcrumbCurrent?: string | null;
+  /**
+   * Front card. Leave empty to keep the grey placeholder.
+   */
+  photoOne?: (number | null) | Media;
+  /**
+   * Middle card. Leave empty to keep the grey placeholder.
+   */
+  photoTwo?: (number | null) | Media;
+  /**
+   * Back card. Leave empty to keep the grey placeholder.
+   */
+  photoThree?: (number | null) | Media;
+  paragraphs?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  servicesBefore?: string | null;
+  servicesAccent?: string | null;
+  servicesAfter?: string | null;
+  services?:
+    | {
+        /**
+         * Leave empty to keep the grey placeholder.
+         */
+        icon?: (number | null) | Media;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  logos?:
+    | {
+        /**
+         * Leave the list empty to keep the temporary logos.
+         */
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  projectsBefore?: string | null;
+  projectsAccent?: string | null;
+  projectsAfter?: string | null;
+  projects?:
+    | {
+        /**
+         * Leave empty to keep the designed photo.
+         */
+        image?: (number | null) | Media;
+        name: string;
+        body?: string | null;
+        /**
+         * Where View website goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blogsBefore?: string | null;
+  blogsAccent?: string | null;
+  blogsAfter?: string | null;
+  posts?:
+    | {
+        title: string;
+        /**
+         * Where the row goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  solutionsBefore?: string | null;
+  solutionsAccent?: string | null;
+  solutionsAfter?: string | null;
+  solutions?:
+    | {
+        /**
+         * Leave empty to keep the grey placeholder.
+         */
+        icon?: (number | null) | Media;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  industriesBefore?: string | null;
+  industriesAccent?: string | null;
+  industriesAfter?: string | null;
+  industries?:
+    | {
+        /**
+         * Leave empty to keep the grey placeholder.
+         */
+        icon?: (number | null) | Media;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -911,6 +1034,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'case-studies';
         value: number | CaseStudy;
+      } | null)
+    | ({
+        relationTo: 'team-members';
+        value: number | TeamMember;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1416,6 +1543,89 @@ export interface CaseStudiesSelect<T extends boolean = true> {
     | {
         label?: T;
         href?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members_select".
+ */
+export interface TeamMembersSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  role?: T;
+  isLeadership?: T;
+  breadcrumbCurrent?: T;
+  photoOne?: T;
+  photoTwo?: T;
+  photoThree?: T;
+  paragraphs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  servicesBefore?: T;
+  servicesAccent?: T;
+  servicesAfter?: T;
+  services?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  logos?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  projectsBefore?: T;
+  projectsAccent?: T;
+  projectsAfter?: T;
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        body?: T;
+        href?: T;
+        id?: T;
+      };
+  blogsBefore?: T;
+  blogsAccent?: T;
+  blogsAfter?: T;
+  posts?:
+    | T
+    | {
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  solutionsBefore?: T;
+  solutionsAccent?: T;
+  solutionsAfter?: T;
+  solutions?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
+      };
+  industriesBefore?: T;
+  industriesAccent?: T;
+  industriesAfter?: T;
+  industries?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2218,9 +2428,13 @@ export interface BlogArticle {
   authorRole?: string | null;
   authorBio?: string | null;
   /**
-   * Open a custom URL, or the team person page.
+   * Open a custom URL, or a team member profile page.
    */
   authorLink?: ('none' | 'url' | 'team') | null;
+  /**
+   * Select which team member profile to link to.
+   */
+  authorMember?: (number | null) | TeamMember;
   /**
    * A path such as /contact, or a full https URL.
    */
@@ -2610,10 +2824,14 @@ export interface StudioPage {
   teamAccent?: string | null;
   people?:
     | {
+        /**
+         * Select a profile to automatically link this chip to /team/[slug].
+         */
+        member?: (number | null) | TeamMember;
         image?: (number | null) | Media;
         name: string;
         /**
-         * Optional. Use /team/tanmaya-rao#hero to open the team person page at the hero.
+         * Optional override. Leave empty if a profile is linked above, or specify a custom URL.
          */
         href?: string | null;
         id?: string | null;
@@ -2635,13 +2853,17 @@ export interface TeamPage {
   leadership?:
     | {
         /**
+         * Select a profile to automatically link Read more to /team/[slug].
+         */
+        member?: (number | null) | TeamMember;
+        /**
          * Leave empty to keep the designed portrait.
          */
         image?: (number | null) | Media;
         name: string;
         role?: string | null;
         /**
-         * Where Read more goes. Leave empty until that page exists.
+         * Optional override. If a Linked Team Member is selected above, this can be left empty.
          */
         href?: string | null;
         id?: string | null;
@@ -2652,127 +2874,19 @@ export interface TeamPage {
   members?:
     | {
         /**
+         * Select a profile to automatically link Read more to /team/[slug].
+         */
+        member?: (number | null) | TeamMember;
+        /**
          * Leave empty to keep the designed portrait.
          */
         image?: (number | null) | Media;
         name: string;
         role?: string | null;
         /**
-         * Where Read more goes. Leave empty until that page exists.
+         * Optional override. If a Linked Team Member is selected above, this can be left empty.
          */
         href?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "team-person".
- */
-export interface TeamPerson {
-  id: number;
-  breadcrumbCurrent?: string | null;
-  name?: string | null;
-  role?: string | null;
-  /**
-   * Front card. Leave empty to keep the grey placeholder.
-   */
-  photoOne?: (number | null) | Media;
-  /**
-   * Middle card. Leave empty to keep the grey placeholder.
-   */
-  photoTwo?: (number | null) | Media;
-  /**
-   * Back card. Leave empty to keep the grey placeholder.
-   */
-  photoThree?: (number | null) | Media;
-  paragraphs?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  servicesBefore?: string | null;
-  servicesAccent?: string | null;
-  servicesAfter?: string | null;
-  services?:
-    | {
-        /**
-         * Leave empty to keep the grey placeholder.
-         */
-        icon?: (number | null) | Media;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  clientsBefore?: string | null;
-  clientsAccent?: string | null;
-  clientsAfter?: string | null;
-  logos?:
-    | {
-        /**
-         * Leave the list empty to keep the temporary logos.
-         */
-        image?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
-  projectsBefore?: string | null;
-  projectsAccent?: string | null;
-  projectsAfter?: string | null;
-  projects?:
-    | {
-        /**
-         * Leave empty to keep the designed photo.
-         */
-        image?: (number | null) | Media;
-        name: string;
-        body?: string | null;
-        /**
-         * Where View website goes. Leave empty until that page exists.
-         */
-        href?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  blogsBefore?: string | null;
-  blogsAccent?: string | null;
-  blogsAfter?: string | null;
-  posts?:
-    | {
-        title: string;
-        /**
-         * Where the row goes. Leave empty until that page exists.
-         */
-        href?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  solutionsBefore?: string | null;
-  solutionsAccent?: string | null;
-  solutionsAfter?: string | null;
-  solutions?:
-    | {
-        /**
-         * Leave empty to keep the grey placeholder.
-         */
-        icon?: (number | null) | Media;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  industriesBefore?: string | null;
-  industriesAccent?: string | null;
-  industriesAfter?: string | null;
-  industries?:
-    | {
-        /**
-         * Leave empty to keep the grey placeholder.
-         */
-        icon?: (number | null) | Media;
-        label: string;
         id?: string | null;
       }[]
     | null;
@@ -3381,6 +3495,7 @@ export interface BlogArticleSelect<T extends boolean = true> {
   authorRole?: T;
   authorBio?: T;
   authorLink?: T;
+  authorMember?: T;
   authorUrl?: T;
   topicsBefore?: T;
   topicsAccent?: T;
@@ -3711,6 +3826,7 @@ export interface StudioPageSelect<T extends boolean = true> {
   people?:
     | T
     | {
+        member?: T;
         image?: T;
         name?: T;
         href?: T;
@@ -3732,6 +3848,7 @@ export interface TeamPageSelect<T extends boolean = true> {
   leadership?:
     | T
     | {
+        member?: T;
         image?: T;
         name?: T;
         role?: T;
@@ -3743,92 +3860,11 @@ export interface TeamPageSelect<T extends boolean = true> {
   members?:
     | T
     | {
+        member?: T;
         image?: T;
         name?: T;
         role?: T;
         href?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "team-person_select".
- */
-export interface TeamPersonSelect<T extends boolean = true> {
-  breadcrumbCurrent?: T;
-  name?: T;
-  role?: T;
-  photoOne?: T;
-  photoTwo?: T;
-  photoThree?: T;
-  paragraphs?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  servicesBefore?: T;
-  servicesAccent?: T;
-  servicesAfter?: T;
-  services?:
-    | T
-    | {
-        icon?: T;
-        label?: T;
-        id?: T;
-      };
-  clientsBefore?: T;
-  clientsAccent?: T;
-  clientsAfter?: T;
-  logos?:
-    | T
-    | {
-        image?: T;
-        id?: T;
-      };
-  projectsBefore?: T;
-  projectsAccent?: T;
-  projectsAfter?: T;
-  projects?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        body?: T;
-        href?: T;
-        id?: T;
-      };
-  blogsBefore?: T;
-  blogsAccent?: T;
-  blogsAfter?: T;
-  posts?:
-    | T
-    | {
-        title?: T;
-        href?: T;
-        id?: T;
-      };
-  solutionsBefore?: T;
-  solutionsAccent?: T;
-  solutionsAfter?: T;
-  solutions?:
-    | T
-    | {
-        icon?: T;
-        label?: T;
-        id?: T;
-      };
-  industriesBefore?: T;
-  industriesAccent?: T;
-  industriesAfter?: T;
-  industries?:
-    | T
-    | {
-        icon?: T;
-        label?: T;
         id?: T;
       };
   updatedAt?: T;

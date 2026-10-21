@@ -26,7 +26,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
           />
           {post.badge && icon ? (
             <span className="absolute top-3 right-3 inline-flex h-10 items-center gap-1 rounded-full bg-white px-4">
-              <img
+              <Image
                 src={icon.src}
                 alt=""
                 width={icon.width}

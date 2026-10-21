@@ -1,4 +1,4 @@
-import type { Field, GlobalConfig } from "payload";
+import type { CollectionConfig, Field } from "payload";
 
 function photo(name: string, label: string, description: string): Field {
   return {
@@ -22,16 +22,51 @@ function chips(name: string): Field {
   };
 }
 
-/**
- * Tanmaya Rao’s page at /team/tanmaya-rao.
- * Empty fields fall back to the designed page.
- * The closing line and Start a project stay in code.
- */
-export const TeamPerson: GlobalConfig = {
-  slug: "team-person",
-  label: "Team person",
+export const TeamMembers: CollectionConfig = {
+  slug: "team-members",
+  labels: {
+    singular: "Team Member",
+    plural: "Team Members",
+  },
+  admin: {
+    useAsTitle: "name",
+    defaultColumns: ["name", "role", "slug", "isLeadership"],
+  },
   access: { read: () => true },
   fields: [
+    {
+      name: "name",
+      label: "Full Name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "slug",
+      label: "URL Slug",
+      type: "text",
+      required: true,
+      unique: true,
+      admin: {
+        description: "URL slug, e.g. 'tanmaya-rao' (accessible at /team/tanmaya-rao).",
+      },
+    },
+    {
+      name: "role",
+      label: "Role / Title",
+      type: "text",
+      admin: {
+        description: "e.g. 'Lead Brand Designer | Illustrator'",
+      },
+    },
+    {
+      name: "isLeadership",
+      label: "Leadership Member",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        description: "Check if this person is part of the Leadership team.",
+      },
+    },
     {
       type: "tabs",
       tabs: [
@@ -39,8 +74,6 @@ export const TeamPerson: GlobalConfig = {
           label: "Hero",
           fields: [
             { name: "breadcrumbCurrent", label: "Breadcrumb", type: "text" },
-            { name: "name", type: "text" },
-            { name: "role", type: "text" },
             photo("photoOne", "Photo 1", "Front card. Leave empty to keep the grey placeholder."),
             photo("photoTwo", "Photo 2", "Middle card. Leave empty to keep the grey placeholder."),
             photo("photoThree", "Photo 3", "Back card. Leave empty to keep the grey placeholder."),

@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ChevronDown } from "lucide-react";
 import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { FormSubmissionToast } from "@/components/ui/FormSubmissionToast";
 import { PillButton } from "@/components/ui/PillButton";
 import { Accent } from "@/components/ui/SectionHeading";
 import { submitContactLead } from "@/lib/submitContactLead";
+
+const COMPANY_TYPE_OPTIONS = [
+  { label: "Startup", value: "startup" },
+  { label: "Enterprise", value: "enterprise" },
+  { label: "Agency", value: "agency" },
+];
 
 interface FieldProps {
   label: string;
@@ -38,6 +45,7 @@ export function ContactLeadForm() {
     "idle",
   );
   const [message, setMessage] = useState("");
+  const [companyType, setCompanyType] = useState("");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,6 +72,7 @@ export function ContactLeadForm() {
       }
 
       form.reset();
+      setCompanyType("");
       setStatus("success");
       setMessage("Thanks — we will be in touch.");
     } catch {
@@ -132,26 +141,15 @@ export function ContactLeadForm() {
           </Field>
 
           <Field label="Company Type*" htmlFor="contact-company">
-            <div className="relative">
-              <select
-                id="contact-company"
-                name="companyType"
-                defaultValue=""
-                required
-                className={`${inputClasses} appearance-none pr-10`}
-              >
-                <option value="" disabled>
-                  - Select -
-                </option>
-                <option value="startup">Startup</option>
-                <option value="enterprise">Enterprise</option>
-                <option value="agency">Agency</option>
-              </select>
-              <ChevronDown
-                className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-black"
-                aria-hidden="true"
-              />
-            </div>
+            <CustomSelect
+              id="contact-company"
+              name="companyType"
+              value={companyType}
+              onChange={setCompanyType}
+              options={COMPANY_TYPE_OPTIONS}
+              placeholder="- Select -"
+              required
+            />
           </Field>
         </div>
 
@@ -172,12 +170,14 @@ export function ContactLeadForm() {
           />
         </div>
 
-        <p
-          className="min-h-5 w-full text-center font-satoshi text-sm text-white"
-          aria-live="polite"
-        >
-          {message}
-        </p>
+        {status === "error" && message ? (
+          <p
+            className="w-full text-center font-satoshi text-sm text-[#FFB4B4]"
+            aria-live="polite"
+          >
+            {message}
+          </p>
+        ) : null}
 
         <PillButton
           variant="dark"
@@ -189,6 +189,11 @@ export function ContactLeadForm() {
           {status === "submitting" ? "Sending" : "Submit"}
         </PillButton>
       </div>
+
+      <FormSubmissionToast
+        show={status === "success"}
+        onClose={() => setStatus("idle")}
+      />
     </form>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { activeSnapIndex, scrollToSnap, ScrollDots } from "@/components/ui/ScrollDots";
 
@@ -27,7 +28,7 @@ export function BenefitCarousel({
             style={{ gridColumn: index % 2 === 0 ? 1 : 2, gridRow: index + 1 }}
           >
             <article className="flex flex-col gap-[73px] py-2 lg:gap-16 lg:py-6">
-              <img
+              <Image
                 src="/assets/images/why-design-asylum/benefit-icon.svg"
                 alt=""
                 width={64}

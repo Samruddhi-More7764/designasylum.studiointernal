@@ -213,7 +213,17 @@ export const BlogArticleGlobal: GlobalConfig = {
                 { label: "Team person page", value: "team" },
               ],
               admin: {
-                description: "Open a custom URL, or the team person page.",
+                description: "Open a custom URL, or a team member profile page.",
+              },
+            },
+            {
+              name: "authorMember",
+              label: "Linked Team Member Profile",
+              type: "relationship",
+              relationTo: "team-members",
+              admin: {
+                description: "Select which team member profile to link to.",
+                condition: (data) => data?.authorLink === "team",
               },
             },
             {

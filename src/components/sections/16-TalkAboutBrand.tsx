@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ChevronDown } from "lucide-react";
 import { CountryCodeSelect } from "@/components/ui/CountryCodeSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { FormSubmissionToast } from "@/components/ui/FormSubmissionToast";
 import { PillButton } from "@/components/ui/PillButton";
 import { SectionHeading, Accent } from "@/components/ui/SectionHeading";
 import { submitContactLead } from "@/lib/submitContactLead";
+
+const COMPANY_TYPE_OPTIONS = [
+  { label: "Startup", value: "startup" },
+  { label: "Enterprise", value: "enterprise" },
+  { label: "Agency", value: "agency" },
+];
 
 interface FieldProps {
   label: string;
@@ -40,6 +47,7 @@ export function TalkAboutBrand() {
     "idle",
   );
   const [message, setMessage] = useState("");
+  const [companyType, setCompanyType] = useState("");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -66,6 +74,7 @@ export function TalkAboutBrand() {
       }
 
       form.reset();
+      setCompanyType("");
       setStatus("success");
       setMessage("Thanks — we will be in touch.");
     } catch {
@@ -131,26 +140,15 @@ export function TalkAboutBrand() {
           </Field>
 
           <Field label="Company Type*" htmlFor="talk-company">
-            <div className="relative">
-              <select
-                id="talk-company"
-                name="companyType"
-                defaultValue=""
-                required
-                className={`${inputClasses} appearance-none pr-10`}
-              >
-                <option value="" disabled>
-                  - Select -
-                </option>
-                <option value="startup">Startup</option>
-                <option value="enterprise">Enterprise</option>
-                <option value="agency">Agency</option>
-              </select>
-              <ChevronDown
-                className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-black"
-                aria-hidden="true"
-              />
-            </div>
+            <CustomSelect
+              id="talk-company"
+              name="companyType"
+              value={companyType}
+              onChange={setCompanyType}
+              options={COMPANY_TYPE_OPTIONS}
+              placeholder="- Select -"
+              required
+            />
           </Field>
 
           <Field
@@ -167,9 +165,11 @@ export function TalkAboutBrand() {
             />
           </Field>
 
-          <p className="min-h-5 font-satoshi text-sm text-muted" aria-live="polite">
-            {message}
-          </p>
+          {status === "error" && message ? (
+            <p className="font-satoshi text-sm text-[#FF3838]" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
 
           <div className="pt-2">
             <PillButton
@@ -184,6 +184,11 @@ export function TalkAboutBrand() {
           </div>
         </form>
       </div>
+
+      <FormSubmissionToast
+        show={status === "success"}
+        onClose={() => setStatus("idle")}
+      />
     </section>
   );
 }

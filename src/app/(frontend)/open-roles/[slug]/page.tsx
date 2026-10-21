@@ -8,7 +8,7 @@ import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { getFooter } from "@/cms/content";
 import { getOpenRole } from "@/cms/openRolesPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 type PageProps = {
   params: Promise<{ slug: string }>;

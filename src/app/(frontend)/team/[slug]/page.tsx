@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/sections/15-Footer";
 import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
@@ -7,16 +8,32 @@ import { PersonStack } from "@/components/team/PersonStack";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
-import { getTeamPerson, type PersonChip } from "@/cms/teamPerson";
+import { getTeamPersonBySlug, type PersonChip } from "@/cms/teamPerson";
 import { teamPersonCta } from "@/data/teamPersonPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Tanmaya Rao",
-  description:
-    "Tanmaya Rao is the Lead Brand Designer and Illustrator at Design Asylum.",
+type Props = {
+  params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const page = await getTeamPersonBySlug(slug);
+  if (!page) {
+    return {
+      title: "Team Member",
+      description: "Team member profile at Design Asylum.",
+    };
+  }
+
+  return {
+    title: page.name,
+    description: page.role
+      ? `${page.name} is the ${page.role} at Design Asylum.`
+      : `${page.name} — Design Asylum Team.`,
+  };
+}
 
 function Arrow() {
   return (
@@ -71,7 +88,7 @@ function Chips({ items }: { items: PersonChip[] }) {
           className="flex h-12 items-center gap-2 rounded-xl border border-black/30 px-3"
         >
           {chip.icon ? (
-            <img src={chip.icon} alt="" className="size-6 rounded object-contain" />
+            <img src={chip.icon} alt="" loading="lazy" decoding="async" className="size-6 rounded object-contain" />
           ) : (
             <span className="size-6 shrink-0 rounded bg-[#d9d9d9]" />
           )}
@@ -84,8 +101,13 @@ function Chips({ items }: { items: PersonChip[] }) {
   );
 }
 
-export default async function TeamPersonPage() {
-  const [page, footer] = await Promise.all([getTeamPerson(), getFooter()]);
+export default async function TeamPersonPage({ params }: Props) {
+  const { slug } = await params;
+  const [page, footer] = await Promise.all([getTeamPersonBySlug(slug), getFooter()]);
+
+  if (!page) {
+    notFound();
+  }
 
   return (
     <>
@@ -150,7 +172,7 @@ export default async function TeamPersonPage() {
                     key={`${logo}-${index}`}
                     className="flex aspect-[10/7] h-auto w-full items-center justify-center rounded-xl border border-black/15 px-3 lg:aspect-auto lg:h-[140px] lg:w-[200px]"
                   >
-                    <img src={logo} alt="" className="max-h-[70px] w-full object-contain lg:max-h-[101px]" />
+                    <img src={logo} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain lg:max-h-[101px]" />
                   </li>
                 ))}
               </ul>
@@ -169,6 +191,8 @@ export default async function TeamPersonPage() {
                       <img
                         src={project.image}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="aspect-[358/201] h-auto w-full object-cover lg:aspect-auto lg:h-[279px] lg:w-[496px] lg:shrink-0"
                       />
                       <div className="flex flex-1 flex-col gap-4 lg:h-[279px] lg:flex-row lg:items-start lg:justify-between lg:gap-6">
@@ -215,6 +239,8 @@ export default async function TeamPersonPage() {
                         alt=""
                         width={26}
                         height={10}
+                        loading="lazy"
+                        decoding="async"
                         className="shrink-0"
                       />
                     </a>

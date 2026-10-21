@@ -9,7 +9,7 @@ import { getFooter } from "@/cms/content";
 import { getTeamPage, type TeamMember } from "@/cms/teamPage";
 import { teamCta } from "@/data/teamPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Team",
@@ -36,10 +36,12 @@ function PersonCard({ member }: { member: TeamMember }) {
     <article>
       <a href={member.href || "#"} className="group flex w-full flex-col gap-3 lg:gap-4">
         <div className="relative aspect-square w-full overflow-hidden rounded-[13px] lg:rounded-xl">
-          <img
+          <Image
             src={member.image}
             alt=""
-            className="absolute inset-0 size-full object-cover"
+            fill
+            sizes="(max-width: 1024px) 50vw, 25vw"
+            className="object-cover"
           />
         </div>
         <div className="flex flex-col gap-3 lg:gap-4">

@@ -7,7 +7,7 @@ import { StickyTableOfContents } from "@/components/branding-agency/StickyTableO
 import { getFaqDetail } from "@/cms/faqDetail";
 import { getFooter } from "@/cms/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 type PageProps = {
   params: Promise<{ slug: string }>;

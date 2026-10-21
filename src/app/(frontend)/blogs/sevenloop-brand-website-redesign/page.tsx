@@ -8,7 +8,7 @@ import { getBlogArticle } from "@/cms/blogArticle";
 import { getFooter } from "@/cms/content";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Sevenloop Rebrand & Webflow Site: A 5-Month Case Study",

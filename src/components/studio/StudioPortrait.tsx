@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 
 export function StudioPortrait({ src, isVideo }: { src: string; isVideo: boolean }) {
@@ -14,11 +15,12 @@ export function StudioPortrait({ src, isVideo }: { src: string; isVideo: boolean
           src={src}
           className="absolute inset-0 size-full object-cover"
           playsInline
+          preload="none"
           controls={playing}
           onEnded={() => setPlaying(false)}
         />
       ) : (
-        <img src={src} alt="" className="absolute inset-0 size-full object-cover" />
+        <Image src={src} alt="" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
       )}
       {isVideo && !playing ? (
         <button
@@ -32,10 +34,10 @@ export function StudioPortrait({ src, isVideo }: { src: string; isVideo: boolean
           }}
           className="relative"
         >
-          <img src="/assets/images/studio/play.svg" alt="" className="size-24" />
+          <Image src="/assets/images/studio/play.svg" alt="" width={96} height={96} className="size-24" />
         </button>
       ) : null}
-      {!isVideo ? <img src="/assets/images/studio/play.svg" alt="" className="relative size-24" /> : null}
+      {!isVideo ? <Image src="/assets/images/studio/play.svg" alt="" width={96} height={96} className="relative size-24" /> : null}
     </div>
   );
 }

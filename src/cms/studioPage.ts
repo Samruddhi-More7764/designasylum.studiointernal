@@ -84,7 +84,7 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
   try {
     const doc = (await payload.findGlobal({
       slug: "studio-page" as "site-footer",
-      depth: 1,
+      depth: 2,
     })) as unknown as {
       breadcrumbCurrent?: string | null;
       headingBefore?: string | null;
@@ -109,7 +109,12 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
       missCards?: Array<{ caption?: string | null } | null> | null;
       teamBefore?: string | null;
       teamAccent?: string | null;
-      people?: Array<{ image?: unknown; name?: string | null; href?: string | null } | null> | null;
+      people?: Array<{
+        member?: { name?: string; slug?: string; photoOne?: unknown } | string | null;
+        image?: unknown;
+        name?: string | null;
+        href?: string | null;
+      } | null> | null;
     };
 
     const chips = (doc.chips || [])
@@ -144,13 +149,24 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
 
     const people = (doc.people || [])
       .map((row, index) => {
-        const name = row?.name?.trim() || "";
+        const linked =
+          row?.member && typeof row.member === "object" ? row.member : null;
+        const name = row?.name?.trim() || linked?.name?.trim() || "";
         if (!name) return null;
         const designed = fallback.people[index];
+        const customHref = row?.href?.trim();
+        const href =
+          customHref ||
+          (linked?.slug ? `/team/${linked.slug}` : designed?.href || "");
+        const image = storedImage(
+          row?.image || linked?.photoOne,
+          designed?.image || studioTeam.people[0].image,
+        );
+
         return {
           name,
-          image: storedImage(row?.image, designed?.image || studioTeam.people[0].image),
-          href: row?.href?.trim() || "",
+          image,
+          href,
         };
       })
       .filter((row): row is StudioPerson => Boolean(row));

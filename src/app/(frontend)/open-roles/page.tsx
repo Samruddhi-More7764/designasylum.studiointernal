@@ -6,7 +6,7 @@ import { JobBoard } from "@/components/open-roles/JobBoard";
 import { getFooter } from "@/cms/content";
 import { getOpenRolesPage } from "@/cms/openRolesPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Open roles",

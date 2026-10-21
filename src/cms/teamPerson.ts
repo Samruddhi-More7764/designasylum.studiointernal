@@ -128,114 +128,157 @@ function chips(
   return next.length ? next : designed;
 }
 
+type RawPersonDoc = {
+  breadcrumbCurrent?: string | null;
+  name?: string | null;
+  role?: string | null;
+  photoOne?: unknown;
+  photoTwo?: unknown;
+  photoThree?: unknown;
+  paragraphs?: Array<{ text?: string | null } | null> | null;
+  servicesBefore?: string | null;
+  servicesAccent?: string | null;
+  servicesAfter?: string | null;
+  services?: Array<{ icon?: unknown; label?: string | null } | null> | null;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  logos?: Array<{ image?: unknown } | null> | null;
+  projectsBefore?: string | null;
+  projectsAccent?: string | null;
+  projectsAfter?: string | null;
+  projects?: Array<{
+    image?: unknown;
+    name?: string | null;
+    body?: string | null;
+    href?: string | null;
+  } | null> | null;
+  blogsBefore?: string | null;
+  blogsAccent?: string | null;
+  blogsAfter?: string | null;
+  posts?: Array<{ title?: string | null; href?: string | null } | null> | null;
+  solutionsBefore?: string | null;
+  solutionsAccent?: string | null;
+  solutionsAfter?: string | null;
+  solutions?: Array<{ icon?: unknown; label?: string | null } | null> | null;
+  industriesBefore?: string | null;
+  industriesAccent?: string | null;
+  industriesAfter?: string | null;
+  industries?: Array<{ icon?: unknown; label?: string | null } | null> | null;
+};
+
+function parseTeamPersonDoc(
+  doc: RawPersonDoc,
+  baseFallback: TeamPersonContent,
+): TeamPersonContent {
+  const paragraphs = (doc.paragraphs || [])
+    .map((row) => row?.text?.trim() || "")
+    .filter(Boolean);
+  const logos = (doc.logos || [])
+    .map((row) => optionalImage(row?.image))
+    .filter((src): src is string => Boolean(src));
+  const projects = (doc.projects || [])
+    .map((row, index) => {
+      const name = row?.name?.trim() || "";
+      if (!name) return null;
+      const designed = baseFallback.projects[index];
+      return {
+        id: `project-${index}`,
+        name,
+        body: row?.body?.trim() || designed?.body || "",
+        image: storedImage(row?.image, designed?.image || teamPersonPortrait),
+        href: row?.href?.trim() || "#",
+      };
+    })
+    .filter((row): row is PersonProject => Boolean(row));
+  const posts = (doc.posts || [])
+    .map((row, index) => {
+      const title = row?.title?.trim() || "";
+      if (!title) return null;
+      return { id: `post-${index}`, title, href: row?.href?.trim() || "#" };
+    })
+    .filter((row): row is PersonPost => Boolean(row));
+
+  const fallbackName = baseFallback.name;
+  const personName = text(doc.name, fallbackName);
+
+  return {
+    breadcrumbCurrent: text(doc.breadcrumbCurrent, personName || baseFallback.breadcrumbCurrent),
+    name: personName,
+    role: text(doc.role, baseFallback.role),
+    photos: [optionalImage(doc.photoOne), optionalImage(doc.photoTwo), optionalImage(doc.photoThree)],
+    paragraphs: paragraphs.length ? paragraphs : baseFallback.paragraphs,
+    servicesBefore: text(doc.servicesBefore, baseFallback.servicesBefore),
+    servicesAccent: text(doc.servicesAccent, baseFallback.servicesAccent),
+    servicesAfter: text(doc.servicesAfter, baseFallback.servicesAfter),
+    services: chips(doc.services, baseFallback.services, "service"),
+    clientsBefore: text(doc.clientsBefore, baseFallback.clientsBefore),
+    clientsAccent: text(doc.clientsAccent, baseFallback.clientsAccent),
+    clientsAfter: text(doc.clientsAfter, baseFallback.clientsAfter),
+    logos: logos.length ? logos : baseFallback.logos,
+    projectsBefore: text(doc.projectsBefore, baseFallback.projectsBefore),
+    projectsAccent: text(doc.projectsAccent, baseFallback.projectsAccent),
+    projectsAfter: text(doc.projectsAfter, baseFallback.projectsAfter),
+    projects: projects.length ? projects : baseFallback.projects,
+    blogsBefore: text(doc.blogsBefore, baseFallback.blogsBefore),
+    blogsAccent: text(doc.blogsAccent, baseFallback.blogsAccent),
+    blogsAfter: text(doc.blogsAfter, baseFallback.blogsAfter),
+    posts: posts.length ? posts : baseFallback.posts,
+    solutionsBefore: text(doc.solutionsBefore, baseFallback.solutionsBefore),
+    solutionsAccent: text(doc.solutionsAccent, baseFallback.solutionsAccent),
+    solutionsAfter: text(doc.solutionsAfter, baseFallback.solutionsAfter),
+    solutions: chips(doc.solutions, baseFallback.solutions, "solution"),
+    industriesBefore: text(doc.industriesBefore, baseFallback.industriesBefore),
+    industriesAccent: text(doc.industriesAccent, baseFallback.industriesAccent),
+    industriesAfter: text(doc.industriesAfter, baseFallback.industriesAfter),
+    industries: chips(doc.industries, baseFallback.industries, "industry"),
+  };
+}
+
+export const getTeamPersonBySlug = cache(
+  async (slug: string): Promise<TeamPersonContent | null> => {
+    const payload = await getPayloadClient();
+
+    if (payload) {
+      try {
+        const res = (await payload.find({
+          collection: "team-members" as "users",
+          where: {
+            slug: { equals: slug },
+          },
+          limit: 1,
+          depth: 1,
+        })) as unknown as { docs: RawPersonDoc[] };
+
+        if (res.docs && res.docs.length > 0 && res.docs[0]) {
+          return parseTeamPersonDoc(res.docs[0], fallback);
+        }
+      } catch (error) {
+        console.warn("[cms] team-members collection query error:", error);
+      }
+    }
+
+    // Fallback: If querying tanmaya-rao, check legacy global or use default design
+    if (slug === "tanmaya-rao") {
+      if (payload) {
+        try {
+          const doc = (await payload.findGlobal({
+            slug: "team-person" as "site-footer",
+            depth: 1,
+          })) as unknown as RawPersonDoc;
+          if (doc && (doc.name || doc.photoOne || doc.paragraphs?.length)) {
+            return parseTeamPersonDoc(doc, fallback);
+          }
+        } catch {}
+      }
+      return fallback;
+    }
+
+    return null;
+  },
+);
+
 export const getTeamPerson = cache(async (): Promise<TeamPersonContent> => {
-  const payload = await getPayloadClient();
-  if (!payload) return fallback;
-
-  try {
-    const doc = (await payload.findGlobal({
-      slug: "team-person" as "site-footer",
-      depth: 1,
-    })) as unknown as {
-      breadcrumbCurrent?: string | null;
-      name?: string | null;
-      role?: string | null;
-      photoOne?: unknown;
-      photoTwo?: unknown;
-      photoThree?: unknown;
-      paragraphs?: Array<{ text?: string | null } | null> | null;
-      servicesBefore?: string | null;
-      servicesAccent?: string | null;
-      servicesAfter?: string | null;
-      services?: Array<{ icon?: unknown; label?: string | null } | null> | null;
-      clientsBefore?: string | null;
-      clientsAccent?: string | null;
-      clientsAfter?: string | null;
-      logos?: Array<{ image?: unknown } | null> | null;
-      projectsBefore?: string | null;
-      projectsAccent?: string | null;
-      projectsAfter?: string | null;
-      projects?: Array<{
-        image?: unknown;
-        name?: string | null;
-        body?: string | null;
-        href?: string | null;
-      } | null> | null;
-      blogsBefore?: string | null;
-      blogsAccent?: string | null;
-      blogsAfter?: string | null;
-      posts?: Array<{ title?: string | null; href?: string | null } | null> | null;
-      solutionsBefore?: string | null;
-      solutionsAccent?: string | null;
-      solutionsAfter?: string | null;
-      solutions?: Array<{ icon?: unknown; label?: string | null } | null> | null;
-      industriesBefore?: string | null;
-      industriesAccent?: string | null;
-      industriesAfter?: string | null;
-      industries?: Array<{ icon?: unknown; label?: string | null } | null> | null;
-    };
-
-    const paragraphs = (doc.paragraphs || [])
-      .map((row) => row?.text?.trim() || "")
-      .filter(Boolean);
-    const logos = (doc.logos || [])
-      .map((row) => optionalImage(row?.image))
-      .filter((src): src is string => Boolean(src));
-    const projects = (doc.projects || [])
-      .map((row, index) => {
-        const name = row?.name?.trim() || "";
-        if (!name) return null;
-        const designed = fallback.projects[index];
-        return {
-          id: `project-${index}`,
-          name,
-          body: row?.body?.trim() || designed?.body || "",
-          image: storedImage(row?.image, designed?.image || teamPersonPortrait),
-          href: row?.href?.trim() || "#",
-        };
-      })
-      .filter((row): row is PersonProject => Boolean(row));
-    const posts = (doc.posts || [])
-      .map((row, index) => {
-        const title = row?.title?.trim() || "";
-        if (!title) return null;
-        return { id: `post-${index}`, title, href: row?.href?.trim() || "#" };
-      })
-      .filter((row): row is PersonPost => Boolean(row));
-
-    return {
-      breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
-      name: text(doc.name, fallback.name),
-      role: text(doc.role, fallback.role),
-      photos: [optionalImage(doc.photoOne), optionalImage(doc.photoTwo), optionalImage(doc.photoThree)],
-      paragraphs: paragraphs.length ? paragraphs : fallback.paragraphs,
-      servicesBefore: text(doc.servicesBefore, fallback.servicesBefore),
-      servicesAccent: text(doc.servicesAccent, fallback.servicesAccent),
-      servicesAfter: text(doc.servicesAfter, fallback.servicesAfter),
-      services: chips(doc.services, fallback.services, "service"),
-      clientsBefore: text(doc.clientsBefore, fallback.clientsBefore),
-      clientsAccent: text(doc.clientsAccent, fallback.clientsAccent),
-      clientsAfter: text(doc.clientsAfter, fallback.clientsAfter),
-      logos: logos.length ? logos : fallback.logos,
-      projectsBefore: text(doc.projectsBefore, fallback.projectsBefore),
-      projectsAccent: text(doc.projectsAccent, fallback.projectsAccent),
-      projectsAfter: text(doc.projectsAfter, fallback.projectsAfter),
-      projects: projects.length ? projects : fallback.projects,
-      blogsBefore: text(doc.blogsBefore, fallback.blogsBefore),
-      blogsAccent: text(doc.blogsAccent, fallback.blogsAccent),
-      blogsAfter: text(doc.blogsAfter, fallback.blogsAfter),
-      posts: posts.length ? posts : fallback.posts,
-      solutionsBefore: text(doc.solutionsBefore, fallback.solutionsBefore),
-      solutionsAccent: text(doc.solutionsAccent, fallback.solutionsAccent),
-      solutionsAfter: text(doc.solutionsAfter, fallback.solutionsAfter),
-      solutions: chips(doc.solutions, fallback.solutions, "solution"),
-      industriesBefore: text(doc.industriesBefore, fallback.industriesBefore),
-      industriesAccent: text(doc.industriesAccent, fallback.industriesAccent),
-      industriesAfter: text(doc.industriesAfter, fallback.industriesAfter),
-      industries: chips(doc.industries, fallback.industries, "industry"),
-    };
-  } catch (error) {
-    console.warn("[cms] team person fallback", error);
-    return fallback;
-  }
+  const member = await getTeamPersonBySlug("tanmaya-rao");
+  return member || fallback;
 });

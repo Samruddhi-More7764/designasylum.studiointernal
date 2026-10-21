@@ -43,8 +43,7 @@ export function Hero() {
           src="/assets/images/hero-fade-overlay-mobile.png"
           alt=""
           fill
-          priority
-          sizes="100vw"
+          sizes="(max-width: 1023px) 100vw, 1px"
           className="object-fill"
         />
       </div>
@@ -57,8 +56,7 @@ export function Hero() {
           src="/assets/images/hero-fade-overlay.png"
           alt=""
           fill
-          priority
-          sizes="100vw"
+          sizes="(min-width: 1024px) 100vw, 1px"
           className="object-fill"
         />
       </div>

@@ -7,7 +7,7 @@ import { getClientsIndex } from "@/cms/clientsIndex";
 import { getFooter } from "@/cms/content";
 import { clientCards, clientsCta } from "@/data/clientsIndexPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Clients",
@@ -36,6 +36,8 @@ export default async function ClientsPage() {
                       <img
                         src={card.image}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 size-full object-cover"
                       />
                       {card.image === clientCards[0].image ? (
@@ -43,11 +45,15 @@ export default async function ClientsPage() {
                           <img
                             src="/assets/images/clients/logo-left.svg"
                             alt=""
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-[51.1%] object-contain"
                           />
                           <img
                             src="/assets/images/clients/logo-right.svg"
                             alt=""
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-[48.9%] object-contain"
                           />
                         </div>
@@ -80,6 +86,8 @@ export default async function ClientsPage() {
                   alt=""
                   width={10}
                   height={13}
+                  loading="lazy"
+                  decoding="async"
                   className={`h-[13px] w-[10px] ${ctaArrowClass}`}
                 />
               </a>

@@ -176,7 +176,9 @@ export function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const menuOpenRef = useRef(false);
-  menuOpenRef.current = menuOpen;
+  useEffect(() => {
+    menuOpenRef.current = menuOpen;
+  }, [menuOpen]);
   const mode = useNavMode();
   const tone = mode === "light" ? "light" : "dark";
   const barHidden = hidden && !menuOpen;

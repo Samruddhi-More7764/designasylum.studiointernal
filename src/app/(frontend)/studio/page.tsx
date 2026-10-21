@@ -11,7 +11,7 @@ import { getFooter } from "@/cms/content";
 import { getStudioPage } from "@/cms/studioPage";
 import { studioOffer } from "@/data/studioPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Studio",
@@ -50,7 +50,7 @@ export default async function StudioPage() {
               />
             </h1>
           </div>
-          <img src={page.heroImage} alt="" className="aspect-[390/220] h-auto w-full object-cover lg:aspect-auto lg:h-[831px]" />
+          <img src={page.heroImage} alt="" loading="lazy" decoding="async" className="aspect-[390/220] h-auto w-full object-cover lg:aspect-auto lg:h-[831px]" />
         </section>
 
         <section className="px-4 py-16 lg:px-8 lg:py-[120px]">
@@ -76,7 +76,7 @@ export default async function StudioPage() {
                   {page.quoteName}
                 </p>
                 <p className="flex items-center gap-1 font-figtree text-[16px] leading-[1.2] tracking-[-1.5px] text-black/70 lg:gap-2 lg:font-satoshi lg:text-[20px] lg:tracking-normal lg:text-black/80">
-                  <img src="/assets/images/studio/masify.svg" alt="" className="size-6" />
+                  <img src="/assets/images/studio/masify.svg" alt="" loading="lazy" decoding="async" className="size-6" />
                   {page.quoteRole}
                 </p>
               </div>
@@ -95,6 +95,8 @@ export default async function StudioPage() {
                   <img
                     src={project.image}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="aspect-[358/201] h-auto w-full object-cover lg:aspect-auto lg:h-[279px] lg:w-[496px] lg:shrink-0"
                   />
                   <div className="flex flex-1 flex-col gap-6 lg:h-[279px] lg:flex-row lg:items-start lg:justify-between">
@@ -169,7 +171,7 @@ export default async function StudioPage() {
               {page.people.map((person) => {
                 const chip = (
                   <>
-                    <img src={person.image} alt="" className="size-6 rounded object-cover" />
+                    <img src={person.image} alt="" loading="lazy" decoding="async" className="size-6 rounded object-cover" />
                     <span className="font-figtree text-[18px] leading-[40px] tracking-[-0.8px] text-black lg:text-[20px] lg:leading-[45px] lg:tracking-[-1.5px]">
                       {person.name}
                     </span>

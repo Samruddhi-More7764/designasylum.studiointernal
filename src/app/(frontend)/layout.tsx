@@ -35,9 +35,9 @@ export const metadata: Metadata = {
   description: "Design Asylum landing page — built from Figma design specs.",
 };
 
-// Always read Payload at request time so CMS media/content edits show
-// without a redeploy. These pages were previously static at build.
-export const dynamic = "force-dynamic";
+// Incremental Static Regeneration (ISR): Serve instant pre-rendered pages (<50ms)
+// and background revalidate every 120 seconds or on-demand via CMS hooks.
+export const revalidate = 120;
 
 export default function RootLayout({
   children,
@@ -58,7 +58,7 @@ export default function RootLayout({
           TODO: once licensed font files are supplied, migrate to next/font/local
           for full self-hosting/optimization parity with Figtree and Playfair Display.
         */}
-        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
         <link
           href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500&display=swap"
           rel="stylesheet"

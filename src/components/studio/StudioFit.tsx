@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 function CheckRow({ width }: { width: string }) {
   return (
     <div className="flex h-12 items-center gap-2 border-b border-black/10 last:border-b-0">
-      <img src="/assets/images/studio/check.svg" alt="" className="size-[17px] shrink-0" />
+      <img src="/assets/images/studio/check.svg" alt="" loading="lazy" decoding="async" className="size-[17px] shrink-0" />
       <span className={`h-5 rounded bg-[rgba(58,133,227,0.2)] ${width}`} />
     </div>
   );
@@ -41,7 +41,7 @@ export function FitIllustration({ index, tone }: { index: number; tone: "right" 
       {index === 0 && tone === "right" ? (
         <Panel>
           <div className="flex h-9 items-center gap-2 border-b border-black/10">
-            <img src="/assets/images/studio/plus.svg" alt="" className="size-4" />
+            <img src="/assets/images/studio/plus.svg" alt="" loading="lazy" decoding="async" className="size-4" />
             <span className="font-satoshi text-[15px] font-medium text-black">Your project</span>
           </div>
           <CheckRow width="w-36" />
@@ -55,7 +55,7 @@ export function FitIllustration({ index, tone }: { index: number; tone: "right" 
           <div className="border-b border-black/10 py-2">
             <p className="font-satoshi text-[13px] font-medium text-black/50">Team Lead</p>
             <div className="mt-1 flex items-center gap-2">
-              <img src="/assets/images/studio/viaan.png" alt="" className="size-8 rounded-full object-cover" />
+              <img src="/assets/images/studio/viaan.png" alt="" loading="lazy" decoding="async" className="size-8 rounded-full object-cover" />
               <span className="font-satoshi text-[14px] font-medium">Viaan</span>
             </div>
           </div>
@@ -68,6 +68,8 @@ export function FitIllustration({ index, tone }: { index: number; tone: "right" 
                     key={name}
                     src={`/assets/images/studio/${name}.png`}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="-ml-2 size-8 rounded-full border-2 border-white object-cover first:ml-0"
                   />
                 ))}
@@ -85,7 +87,7 @@ export function FitIllustration({ index, tone }: { index: number; tone: "right" 
               <span className="font-satoshi text-[11px] text-black/50">4:33 PM</span>
             </div>
             <div className="flex items-start gap-2">
-              <img src="/assets/images/studio/cohen.png" alt="" className="size-7 rounded-full object-cover" />
+              <img src="/assets/images/studio/cohen.png" alt="" loading="lazy" decoding="async" className="size-7 rounded-full object-cover" />
               <div>
                 <p className="font-satoshi text-[12px] font-medium">Mr. Cohen</p>
                 <p className="mt-1 max-w-[180px] rounded-2xl rounded-tl-sm bg-white px-3 py-2 font-satoshi text-[12px] leading-4 text-black">
@@ -138,7 +140,7 @@ export function FitIllustration({ index, tone }: { index: number; tone: "right" 
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <img src="/assets/images/studio/mrs.png" alt="" className="size-8 rounded-full object-cover" />
+            <img src="/assets/images/studio/mrs.png" alt="" loading="lazy" decoding="async" className="size-8 rounded-full object-cover" />
             <div>
               <p className="font-satoshi text-[12px] font-medium">
                 Mrs. XXX <span className="ml-2 font-normal text-black/40">4:33 PM</span>

@@ -11,7 +11,7 @@ import { Footer } from "@/components/sections/15-Footer";
 import { getClientBySlug, getFooter } from "@/cms/content";
 import { caseStudyPath } from "@/cms/urls";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 type Props = { params: Promise<{ slug: string }> };
 

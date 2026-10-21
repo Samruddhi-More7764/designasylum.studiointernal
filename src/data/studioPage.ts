@@ -67,6 +67,7 @@ export const studioTeam = {
   ].map((name, index) => ({
     name,
     image: `/assets/images/studio/person-${index}.png`,
+    href: name === "Tanmaya Rao" ? "/team/tanmaya-rao" : "",
   })),
 };
 

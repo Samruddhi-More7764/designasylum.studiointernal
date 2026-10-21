@@ -164,19 +164,26 @@ function mapGallery(
   if (!rows?.length) return fallback;
   const mapped = rows.flatMap((row, i) => {
     const layout = row.layout === "split" ? "split" : "full";
-    const fallbackStill = fallback[i]?.image || { src: "", alt: "" };
+    const fallbackFrame = fallback.length ? fallback[i % fallback.length] : undefined;
+    const fallbackStill = fallbackFrame?.image || fallback[0]?.image || { src: "", alt: "" };
     const image = still(
       { image: row.image, alt: row.alt },
       layout === "full" ? fallbackStill : null,
     );
-    const left = still(row.left, null);
-    const right = still(row.right, null);
+    const left = still(
+      row.left,
+      layout === "split" ? fallbackFrame?.left || fallbackStill : null,
+    );
+    const right = still(
+      row.right,
+      layout === "split" ? fallbackFrame?.right || fallbackStill : null,
+    );
     if (layout === "split" && !left && !right) return [];
     if (layout === "full" && !image) return [];
     return [
       {
         layout,
-        image: image || { src: "", alt: "" },
+        image: image || fallbackStill,
         left,
         right,
       } satisfies CaseStudyMediaFrame,

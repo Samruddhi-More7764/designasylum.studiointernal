@@ -18,11 +18,8 @@ function LogoCard({
   logo: ClientLogo;
   className?: string;
 }) {
-  // Desktop: 200×140. Mobile: fluid card in 2-col grid.
-  const desktopW = logo.width * LOGO_SCALE;
-  const desktopH = logo.height * LOGO_SCALE;
-  const mobileW = logo.width * LOGO_SCALE_MOBILE;
-  const mobileH = logo.height * LOGO_SCALE_MOBILE;
+  const desktopW = Math.round(logo.width * LOGO_SCALE);
+  const desktopH = Math.round(logo.height * LOGO_SCALE);
 
   return (
     <div
@@ -31,19 +28,10 @@ function LogoCard({
       <Image
         src={logo.image}
         alt={logo.name}
-        width={logo.width}
-        height={logo.height}
-        className="object-contain lg:hidden"
-        style={{ width: mobileW, height: mobileH }}
-      />
-      <Image
-        src={logo.image}
-        alt=""
-        aria-hidden="true"
-        width={logo.width}
-        height={logo.height}
-        className="hidden object-contain lg:block"
-        style={{ width: desktopW, height: desktopH }}
+        width={desktopW}
+        height={desktopH}
+        className="max-h-[60%] max-w-[75%] object-contain lg:max-h-[70%] lg:max-w-[80%]"
+        sizes="(max-width: 1023px) 150px, 200px"
       />
     </div>
   );

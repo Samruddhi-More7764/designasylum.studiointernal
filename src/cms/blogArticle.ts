@@ -202,7 +202,7 @@ export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
   try {
     const doc = (await payload.findGlobal({
       slug: "blog-article" as "site-footer",
-      depth: 1,
+      depth: 2,
     })) as unknown as {
       breadcrumbCurrent?: string | null;
       titleBefore?: string | null;
@@ -229,6 +229,7 @@ export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
       authorRole?: string | null;
       authorBio?: string | null;
       authorLink?: string | null;
+      authorMember?: { slug?: string; name?: string } | string | null;
       authorUrl?: string | null;
       topicsBefore?: string | null;
       topicsAccent?: string | null;
@@ -304,7 +305,9 @@ export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
       authorBio: text(doc.authorBio, fallback.authorBio),
       authorHref:
         doc.authorLink === "team"
-          ? teamPersonHeroHref
+          ? (doc.authorMember && typeof doc.authorMember === "object" && doc.authorMember.slug
+              ? `/team/${doc.authorMember.slug}#hero`
+              : teamPersonHeroHref)
           : doc.authorLink === "url"
             ? doc.authorUrl?.trim() || ""
             : "",

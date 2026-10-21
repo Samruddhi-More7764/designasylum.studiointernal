@@ -18,7 +18,7 @@ import {
   RIGHT_TO_WIN_ID,
 } from "@/data/manufacturingIndustryPage";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Design Agency for Manufacturing Firms",

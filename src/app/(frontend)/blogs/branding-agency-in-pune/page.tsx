@@ -13,7 +13,7 @@ import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getBrandingStrategy } from "@/cms/brandingStrategy";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Branding agency in Pune",

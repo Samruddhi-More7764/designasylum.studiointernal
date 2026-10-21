@@ -58,11 +58,11 @@ export function WorkGrid({
                     {project.service}
                   </p>
                 </div>
-                <img
+                <Image
                   src="/assets/images/work/arrow.svg"
                   alt=""
-                  width={26.4398}
-                  height={10.2501}
+                  width={27}
+                  height={11}
                   className="mt-2 shrink-0 lg:mt-0"
                 />
               </div>
