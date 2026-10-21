@@ -6,11 +6,11 @@ import { revalidatePath } from "next/cache";
  */
 export function revalidateMarketingPages(slug?: string) {
   try {
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     revalidatePath("/studio");
-    revalidatePath("/team");
-    revalidatePath("/clients");
-    revalidatePath("/work");
+    revalidatePath("/team", "layout");
+    revalidatePath("/clients", "layout");
+    revalidatePath("/work", "layout");
     revalidatePath("/contact");
     revalidatePath("/why-design-asylum");
 
