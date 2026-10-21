@@ -142,11 +142,23 @@ function still(
     typeof value === "object" && value !== null && "image" in value
       ? (value as { image?: unknown }).image
       : undefined;
+  // When value is a wrapper {image: <MediaDoc>, alt: '...'}, only resolve via
+  // directImage. The wrapper has no url/filename/sourcePath, so safeMediaUrl(value)
+  // would always return null and is a wasted call.
   const src =
-    safeMediaUrl(directImage) ||
-    safeMediaUrl(value) ||
+    safeMediaUrl(directImage !== undefined ? directImage : value) ||
     null;
-  if (!src) return fallback;
+  if (!src) {
+    console.warn("[cms] still(): could not resolve src for media", {
+      hasDirectImage: directImage !== undefined,
+      directImageType: typeof directImage,
+      directImageKeys:
+        directImage && typeof directImage === "object"
+          ? Object.keys(directImage as object).join(",")
+          : null,
+    });
+    return fallback;
+  }
   const alt =
     (typeof value === "object" && value !== null && "alt" in value
       ? (value as { alt?: string | null }).alt?.trim()

@@ -39,6 +39,8 @@ export async function GET(request: Request, { params }: Props) {
     // Keep rawPath if decoding fails
   }
 
+  console.log(`[media-route] GET /api/media/file/${filename}`);
+
   // 1. Check local disk (for local development or seeded media files)
   const onDiskName = path.basename(filename);
   const localFilePath = path.join(process.cwd(), "media", onDiskName);
@@ -52,6 +54,7 @@ export async function GET(request: Request, { params }: Props) {
       const nodeStream = createReadStream(localFilePath);
       const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
+      console.log(`[media-route] serving from local disk: ${onDiskName}`);
       return new NextResponse(webStream, {
         status: 200,
         headers: {
@@ -68,6 +71,7 @@ export async function GET(request: Request, { params }: Props) {
   // 2. Resolve to Vercel Blob CDN if token is available
   const blobUrl = publicBlobUrl(filename);
   if (blobUrl) {
+    console.log(`[media-route] redirecting to blob CDN: ${blobUrl.slice(0, 80)}`);
     try {
       const blobRes = await fetch(blobUrl);
       if (blobRes.ok && blobRes.body) {
@@ -89,11 +93,15 @@ export async function GET(request: Request, { params }: Props) {
       }
 
       // If streaming was non-200, issue redirect so client/CDN handles it directly
+      console.warn(`[media-route] blob fetch non-ok (${blobRes.status}), issuing 307 redirect`);
       return NextResponse.redirect(blobUrl, 307);
-    } catch {
+    } catch (err) {
+      console.error(`[media-route] blob fetch threw, issuing 307 redirect:`, err);
       return NextResponse.redirect(blobUrl, 307);
     }
   }
 
+  console.error(`[media-route] 404 — no blob token or blob URL for: ${filename}`);
   return new NextResponse("File not found", { status: 404 });
 }
+
