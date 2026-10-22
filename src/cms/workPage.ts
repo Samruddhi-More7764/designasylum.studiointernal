@@ -69,22 +69,163 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
       })
       .filter((row): row is { id: WorkFilterId; label: string } => Boolean(row));
 
-    const projects = (doc.projects || [])
-      .map((row, index) => {
-        const name = row?.name?.trim() || "";
-        const category = row?.category?.trim() || "";
-        if (!name || !projectCategories.has(category as Exclude<WorkFilterId, "all">)) return null;
-        const designed = fallback.projects[index];
-        return {
-          id: `work-${index}`,
-          name,
-          service: row?.service?.trim() || designed?.service || "",
-          image: storedImage(row?.image, designed?.image || "/assets/images/work/01.png"),
-          category: category as Exclude<WorkFilterId, "all">,
-          href: row?.href?.trim() || "#",
-        };
-      })
-      .filter((row): row is WorkContent["projects"][number] => Boolean(row));
+    const projects = (
+      await Promise.all(
+        (doc.projects || []).map(async (row, index) => {
+          const name = row?.name?.trim() || "";
+          const category = row?.category?.trim() || "";
+          if (!name || !projectCategories.has(category as Exclude<WorkFilterId, "all">)) return null;
+          const designed = fallback.projects[index];
+          let imageSrc = storedImage(row?.image, "");
+
+          if (!imageSrc && row?.image != null) {
+            const mediaId =
+              typeof row.image === "number"
+                ? row.image
+                : typeof row.image === "string" && /^\d+$/.test(row.image)
+                  ? Number(row.image)
+                  : typeof row.image === "object" && "id" in row.image
+                    ? Number((row.image as { id: unknown }).id)
+                    : null;
+            if (mediaId && Number.isFinite(mediaId)) {
+              try {
+                const mediaDoc = await payload.findByID({
+                  collection: "media",
+                  id: mediaId,
+                  depth: 0,
+                });
+                imageSrc = storedImage(mediaDoc, "");
+              } catch {}
+            }
+          }
+
+          if (!imageSrc) {
+            let clientDoc: Record<string, unknown> | null = null;
+            const slugMatch = row?.href?.match(/^\/(?:clients|work)\/([^/?#]+)/);
+            const clientSlug = slugMatch ? slugMatch[1].trim() : "";
+            if (clientSlug) {
+              try {
+                const found = await payload.find({
+                  collection: "clients",
+                  where: { slug: { equals: clientSlug } },
+                  limit: 1,
+                  depth: 1,
+                });
+                clientDoc = (found.docs[0] as unknown as Record<string, unknown>) || null;
+              } catch {}
+            }
+            if (!clientDoc && name) {
+              try {
+                const found = await payload.find({
+                  collection: "clients",
+                  where: { name: { equals: name } },
+                  limit: 1,
+                  depth: 1,
+                });
+                clientDoc = (found.docs[0] as unknown as Record<string, unknown>) || null;
+              } catch {}
+            }
+
+            if (clientDoc) {
+              const hubHeroImg = (clientDoc.hero as { image?: unknown } | undefined)?.image;
+              imageSrc = storedImage(hubHeroImg, "");
+              if (!imageSrc && hubHeroImg != null) {
+                const id =
+                  typeof hubHeroImg === "number"
+                    ? hubHeroImg
+                    : (hubHeroImg as { id?: unknown })?.id;
+                if (typeof id === "number" || (typeof id === "string" && /^\d+$/.test(id))) {
+                  try {
+                    const mediaDoc = await payload.findByID({
+                      collection: "media",
+                      id: Number(id),
+                      depth: 0,
+                    });
+                    imageSrc = storedImage(mediaDoc, "");
+                  } catch {}
+                }
+              }
+
+              if (!imageSrc) {
+                let studyDoc: Record<string, unknown> | null = null;
+                const studyId =
+                  typeof clientDoc.featuredStudy === "object" && clientDoc.featuredStudy !== null
+                    ? (clientDoc.featuredStudy as { id?: unknown }).id
+                    : clientDoc.featuredStudy;
+                if (typeof studyId === "number" || (typeof studyId === "string" && /^\d+$/.test(studyId))) {
+                  try {
+                    studyDoc = (await payload.findByID({
+                      collection: "case-studies",
+                      id: Number(studyId),
+                      depth: 1,
+                    })) as unknown as Record<string, unknown>;
+                  } catch {}
+                }
+                if (!studyDoc && clientDoc.id) {
+                  try {
+                    const found = await payload.find({
+                      collection: "case-studies",
+                      where: { client: { equals: clientDoc.id } },
+                      limit: 1,
+                      depth: 1,
+                    });
+                    studyDoc = (found.docs[0] as unknown as Record<string, unknown>) || null;
+                  } catch {}
+                }
+                if (studyDoc) {
+                  const studyHero = studyDoc.hero as {
+                    layout?: string;
+                    left?: { image?: unknown };
+                    right?: { image?: unknown };
+                    image?: { image?: unknown };
+                  } | undefined;
+                  const candidate =
+                    studyHero?.layout === "split"
+                      ? studyHero?.left?.image || studyHero?.right?.image || studyHero?.image?.image || studyHero?.image
+                      : studyHero?.image?.image || studyHero?.image || studyHero?.left?.image || studyHero?.right?.image;
+                  imageSrc = storedImage(candidate, "");
+                  if (!imageSrc && candidate != null) {
+                    const id =
+                      typeof candidate === "number"
+                        ? candidate
+                        : (candidate as { id?: unknown })?.id;
+                    if (typeof id === "number" || (typeof id === "string" && /^\d+$/.test(id))) {
+                      try {
+                        const mediaDoc = await payload.findByID({
+                          collection: "media",
+                          id: Number(id),
+                          depth: 0,
+                        });
+                        imageSrc = storedImage(mediaDoc, "");
+                      } catch {}
+                    }
+                  }
+                  if (!imageSrc) {
+                    imageSrc = "/assets/images/client-hub/case-study-hero.jpg";
+                  }
+                }
+              }
+            }
+          }
+
+          if (!imageSrc) {
+            imageSrc =
+              designed?.image && designed.name.toLowerCase() === name.toLowerCase()
+                ? designed.image
+                : "/assets/images/work/01.png";
+          }
+
+          return {
+            id: `work-${index}`,
+            name,
+            service: row?.service?.trim() || designed?.service || "",
+            image: imageSrc,
+            category: category as Exclude<WorkFilterId, "all">,
+            href: row?.href?.trim() || "#",
+          };
+        }),
+      )
+    ).filter((row): row is WorkContent["projects"][number] => Boolean(row));
 
     return {
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),

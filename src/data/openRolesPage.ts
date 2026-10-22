@@ -39,6 +39,7 @@ export type JobRole = {
   detailType: string;
   responsibilities: string[];
   requirements: string[];
+  content?: string | null;
   applyNowLabel: string;
   applyNowHref: string;
 };

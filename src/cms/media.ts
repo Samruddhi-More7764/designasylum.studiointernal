@@ -35,6 +35,11 @@ export function resolveMediaUrl(value: unknown): string | null {
   }
 
   if (typeof value === "object") {
+    if ("image" in value && (value as { image?: unknown }).image) {
+      const nested = resolveMediaUrl((value as { image?: unknown }).image);
+      if (nested) return nested;
+    }
+
     const sourcePath =
       "sourcePath" in value
         ? (value as { sourcePath?: string | null }).sourcePath?.trim()

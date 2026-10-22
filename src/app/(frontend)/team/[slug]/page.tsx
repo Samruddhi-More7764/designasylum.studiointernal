@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { PersonStack } from "@/components/team/PersonStack";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { SplitHeading } from "@/components/ui/SectionHeading";
-import { getFooter } from "@/cms/content";
+import { distributeLogosTriangle, getFooter } from "@/cms/content";
 import { getTeamPersonBySlug, type PersonChip } from "@/cms/teamPerson";
 import { teamPersonCta } from "@/data/teamPersonPage";
 
@@ -166,16 +166,87 @@ export default async function TeamPersonPage({ params }: Props) {
                 accent={page.clientsAccent}
                 after={page.clientsAfter}
               />
-              <ul className="mx-auto mt-8 grid max-w-[358px] grid-cols-2 gap-4 lg:mt-16 lg:flex lg:max-w-[1130px] lg:flex-wrap lg:justify-center">
-                {page.logos.map((logo, index) => (
-                  <li
-                    key={`${logo}-${index}`}
-                    className="flex aspect-[10/7] h-auto w-full items-center justify-center rounded-xl border border-black/15 px-3 lg:aspect-auto lg:h-[140px] lg:w-[200px]"
-                  >
-                    <img src={logo} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain lg:max-h-[101px]" />
-                  </li>
-                ))}
-              </ul>
+              {(() => {
+                const { row1: clientRow1, row2: clientRow2 } = distributeLogosTriangle(page.logos);
+                return (
+                  <>
+                    <div className="mt-8 lg:hidden">
+                      {page.logos.length === 1 && (
+                        <div className="mx-auto flex w-full max-w-[200px] justify-center">
+                          <div className="flex aspect-[10/7] h-auto w-full items-center justify-center rounded-xl border border-black/15 px-3">
+                            <img src={page.logos[0]} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain" />
+                          </div>
+                        </div>
+                      )}
+                      {page.logos.length === 2 && (
+                        <div className="mx-auto flex w-full max-w-[358px] justify-center gap-4">
+                          {page.logos.map((logo, index) => (
+                            <div key={`m-${logo}-${index}`} className="flex aspect-[10/7] h-auto w-[calc(50%-0.5rem)] max-w-[160px] items-center justify-center rounded-xl border border-black/15 px-3">
+                              <img src={logo} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {page.logos.length === 3 && (
+                        <div className="mx-auto flex w-full max-w-[358px] flex-col items-center gap-4">
+                          <div className="flex aspect-[10/7] h-auto w-[calc(50%-0.5rem)] max-w-[160px] items-center justify-center rounded-xl border border-black/15 px-3">
+                            <img src={page.logos[0]} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain" />
+                          </div>
+                          <div className="flex w-full justify-center gap-4">
+                            <div className="flex aspect-[10/7] h-auto w-[calc(50%-0.5rem)] max-w-[160px] items-center justify-center rounded-xl border border-black/15 px-3">
+                              <img src={page.logos[1]} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain" />
+                            </div>
+                            <div className="flex aspect-[10/7] h-auto w-[calc(50%-0.5rem)] max-w-[160px] items-center justify-center rounded-xl border border-black/15 px-3">
+                              <img src={page.logos[2]} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {page.logos.length > 3 && (
+                        <ul className="mx-auto grid max-w-[358px] grid-cols-2 gap-4">
+                          {page.logos.map((logo, index) => (
+                            <li
+                              key={`${logo}-${index}`}
+                              className={`flex aspect-[10/7] h-auto w-full items-center justify-center rounded-xl border border-black/15 px-3 ${
+                                index === page.logos.length - 1 && page.logos.length % 2 === 1 ? "col-span-2 mx-auto w-1/2" : ""
+                              }`}
+                            >
+                              <img src={logo} alt="" loading="lazy" decoding="async" className="max-h-[70px] w-full object-contain" />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div className="mx-auto mt-8 hidden w-full max-w-[1130px] flex-col gap-6 lg:mt-16 lg:flex">
+                      {clientRow1.length > 0 && (
+                        <ul className="flex justify-center gap-6">
+                          {clientRow1.map((logo, index) => (
+                            <li
+                              key={`r1-${logo}-${index}`}
+                              className="flex h-[140px] w-[200px] shrink-0 items-center justify-center rounded-xl border border-black/15 px-3"
+                            >
+                              <img src={logo} alt="" loading="lazy" decoding="async" className="max-h-[101px] w-full object-contain" />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {clientRow2.length > 0 && (
+                        <ul className="flex justify-center gap-6">
+                          {clientRow2.map((logo, index) => (
+                            <li
+                              key={`r2-${logo}-${index}`}
+                              className="flex h-[140px] w-[200px] shrink-0 items-center justify-center rounded-xl border border-black/15 px-3"
+                            >
+                              <img src={logo} alt="" loading="lazy" decoding="async" className="max-h-[101px] w-full object-contain" />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             <div className="mt-[120px] w-full lg:mt-[160px]">

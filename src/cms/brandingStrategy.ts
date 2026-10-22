@@ -17,6 +17,7 @@ import {
   type ArticleSection,
 } from "@/data/brandingAgencyPage";
 import type { FaqItem } from "@/data/faq";
+import { distributeLogosTriangle } from "@/cms/content";
 import { marqueeRow1, marqueeRow2, type ClientLogo } from "@/data/clients";
 
 const heroTitle = "Branding agency in Pune";
@@ -268,12 +269,30 @@ export const getBrandingStrategy = cache(async (): Promise<BrandingStrategyConte
     const assignedTop = logos.filter((logo) => logo.row === "1");
     const assignedBottom = logos.filter((logo) => logo.row === "2");
     const unassigned = logos.filter((logo) => !logo.row);
-    const logoRow1 = [...assignedTop, ...unassigned.slice(0, 4)].map(
-      ({ name, image, width, height }) => ({ name, image, width, height }),
-    );
-    const logoRow2 = [...assignedBottom, ...unassigned.slice(4)].map(
-      ({ name, image, width, height }) => ({ name, image, width, height }),
-    );
+    const { row1: logoRow1, row2: logoRow2 } = (() => {
+      if (!logos.length) {
+        return { row1: fallback.logoRow1, row2: fallback.logoRow2 };
+      }
+      if (logos.length <= 3) {
+        return distributeLogosTriangle(
+          logos.map(({ name, image, width, height }) => ({ name, image, width, height })),
+        );
+      }
+      if (assignedTop.length && assignedBottom.length) {
+        const splitPoint = Math.floor(unassigned.length / 2);
+        return {
+          row1: [...assignedTop, ...unassigned.slice(0, splitPoint)].map(
+            ({ name, image, width, height }) => ({ name, image, width, height }),
+          ),
+          row2: [...assignedBottom, ...unassigned.slice(splitPoint)].map(
+            ({ name, image, width, height }) => ({ name, image, width, height }),
+          ),
+        };
+      }
+      return distributeLogosTriangle(
+        logos.map(({ name, image, width, height }) => ({ name, image, width, height })),
+      );
+    })();
 
     return {
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
@@ -282,8 +301,8 @@ export const getBrandingStrategy = cache(async (): Promise<BrandingStrategyConte
       heroImage: mediaSrc(doc.heroImage, fallback.heroImage),
       lead: text(doc.lead, fallback.lead),
       sections: sections ?? fallback.sections,
-      logoRow1: logos.length ? logoRow1 : fallback.logoRow1,
-      logoRow2: logos.length ? logoRow2 : fallback.logoRow2,
+      logoRow1,
+      logoRow2,
       clientsBefore: text(doc.clientsBefore, fallback.clientsBefore),
       clientsAccent: text(doc.clientsAccent, fallback.clientsAccent),
       clientsAfter: text(doc.clientsAfter, fallback.clientsAfter),

@@ -68,8 +68,9 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
         detailLocation?: string | null;
         detailExperience?: string | null;
         detailType?: string | null;
-        responsibilities?: Array<{ text?: string | null } | null> | null;
-        requirements?: Array<{ text?: string | null } | null> | null;
+        responsibilities?: string | Array<{ text?: string | null } | null> | null;
+        requirements?: string | Array<{ text?: string | null } | null> | null;
+        content?: string | null;
         applyNowLabel?: string | null;
         applyNowHref?: string | null;
       } | null> | null;
@@ -84,8 +85,8 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
       })
       .filter((row): row is { id: JobCategoryId; label: string } => Boolean(row));
 
-    const roles = (doc.roles || [])
-      .map((row, index) => {
+    const roles: JobRole[] = (doc.roles || [])
+      .map((row, index): JobRole | null => {
         const title = row?.title?.trim() || "";
         const summary = row?.summary?.trim() || "";
         const category = row?.category?.trim() || "";
@@ -94,6 +95,7 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
         const slug = text(row?.slug, designed?.slug || slugFrom(title, index));
         const responsibilities = lines(row?.responsibilities);
         const requirements = lines(row?.requirements);
+        const roleContent = row?.content?.trim() || null;
         return {
           id: slug,
           slug,
@@ -110,11 +112,12 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
           detailType: text(row?.detailType, designed?.detailType || "Full-time"),
           responsibilities: responsibilities.length ? responsibilities : designed?.responsibilities || [],
           requirements: requirements.length ? requirements : designed?.requirements || [],
+          content: roleContent,
           applyNowLabel: text(row?.applyNowLabel, designed?.applyNowLabel || "Apply now"),
           applyNowHref: text(row?.applyNowHref, designed?.applyNowHref || "/why-design-asylum#apply"),
         };
       })
-      .filter((row): row is JobRole => Boolean(row));
+      .filter((row): row is JobRole => row !== null);
 
     return {
       titleBefore: text(doc.titleBefore, fallback.titleBefore),
@@ -131,8 +134,26 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
   }
 });
 
-function lines(rows: Array<{ text?: string | null } | null> | null | undefined) {
-  return (rows || []).map((row) => row?.text?.trim() || "").filter(Boolean);
+function lines(value: string | Array<{ text?: string | null } | null> | null | undefined): string[] {
+  if (!value) return [];
+  if (typeof value === "string") {
+    return value
+      .split("\n")
+      .map((line) => line.trim().replace(/^[\u2022\u25E6\u2219\u00B7\u25AA\u25CF\-*]\s*/, "").replace(/^\d+\.\s*/, "").trim())
+      .filter(Boolean);
+  }
+  if (Array.isArray(value)) {
+    return (value as unknown[])
+      .map((row) => {
+        if (typeof row === "string") return row.trim();
+        if (row && typeof row === "object" && "text" in row) {
+          return String((row as { text?: unknown }).text || "").trim();
+        }
+        return "";
+      })
+      .filter(Boolean);
+  }
+  return [];
 }
 
 function slugFrom(title: string, index: number) {

@@ -12,6 +12,7 @@ import {
   relatedBlogsHeading,
   type ArticleSection,
 } from "@/data/brandingAgencyPage";
+import { distributeLogosTriangle } from "@/cms/content";
 import type { ClientLogo } from "@/data/clients";
 import {
   manufacturingBreadcrumbCurrent,
@@ -277,12 +278,20 @@ export const getManufacturingIndustry = cache(async (): Promise<ManufacturingCon
       lead: text(doc.lead, fallback.lead),
       preface: preface.length ? preface : fallback.preface,
       sections: sections ?? fallback.sections,
-      logos: logos.length
-        ? {
-            row1: [...assignedTop, ...unassigned.slice(0, 4)].map(toLogo),
-            row2: [...assignedBottom, ...unassigned.slice(4)].map(toLogo),
-          }
-        : null,
+      logos: (() => {
+        if (!logos.length) return null;
+        if (logos.length <= 3) {
+          return distributeLogosTriangle(logos.map(toLogo));
+        }
+        if (assignedTop.length && assignedBottom.length) {
+          const splitPoint = Math.floor(unassigned.length / 2);
+          return {
+            row1: [...assignedTop, ...unassigned.slice(0, splitPoint)].map(toLogo),
+            row2: [...assignedBottom, ...unassigned.slice(splitPoint)].map(toLogo),
+          };
+        }
+        return distributeLogosTriangle(logos.map(toLogo));
+      })(),
       clientsBefore: text(doc.clientsBefore, fallback.clientsBefore),
       clientsAccent: text(doc.clientsAccent, fallback.clientsAccent),
       clientsAfter: text(doc.clientsAfter, fallback.clientsAfter),

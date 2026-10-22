@@ -104,12 +104,6 @@ function safeMediaUrl(value: unknown): string | null {
     if (sourcePath?.startsWith("/")) return sourcePath;
   }
 
-  // On Vercel / serverless production, trust the resolved media source so editor
-  // uploads are rendered rather than discarded.
-  if (process.env.VERCEL || process.env.NODE_ENV === "production" || process.env.BLOB_READ_WRITE_TOKEN) {
-    return src;
-  }
-
   return null;
 }
 
@@ -391,10 +385,22 @@ const HERO_ROW1 = 4;
 const HERO_ROW2 = 5;
 const GRID_ROW = 4;
 
+export function distributeLogosTriangle<T>(items: T[]): { row1: T[]; row2: T[] } {
+  const n = items.length;
+  if (n <= 0) return { row1: [], row2: [] };
+  if (n === 1) return { row1: items, row2: [] };
+  if (n === 2) return { row1: items, row2: [] };
+  const topCount = Math.floor(n / 2);
+  return {
+    row1: items.slice(0, topCount),
+    row2: items.slice(topCount),
+  };
+}
+
 /**
- * Designed cells stay in place. Each saved logo replaces one cell, in order:
- * hero row 1, hero row 2, then the 8-in-10 grid. A logo is never copied into
- * another cell. Cells with no saved logo keep the static artwork.
+ * Designed cells stay in place. When saved logos are present, the hero marquee
+ * arranges them dynamically in a centered triangle / pyramid layout (fewer than 9
+ * logos auto-align cleanly). Clients grid rows replace cells in order.
  */
 export function logosToLayouts(logos: ClientLogo[]) {
   const slots = [...fallbackMarquee1, ...fallbackMarquee2, ...fallbackGridRows.flat()].map(
@@ -406,10 +412,17 @@ export function logosToLayouts(logos: ClientLogo[]) {
   });
 
   const gridStart = HERO_ROW1 + HERO_ROW2;
+  const marquee = logos.length
+    ? distributeLogosTriangle(logos.map(logoCell))
+    : {
+        row1: slots.slice(0, HERO_ROW1),
+        row2: slots.slice(HERO_ROW1, gridStart),
+      };
+
   return {
     logos: logos.map(logoCell),
-    marqueeRow1: slots.slice(0, HERO_ROW1),
-    marqueeRow2: slots.slice(HERO_ROW1, gridStart),
+    marqueeRow1: marquee.row1,
+    marqueeRow2: marquee.row2,
     clientsGridRows: [
       slots.slice(gridStart, gridStart + GRID_ROW),
       slots.slice(gridStart + GRID_ROW, gridStart + GRID_ROW * 2),
@@ -773,6 +786,11 @@ export type ClientHubMeta = {
   name: string;
   projectType: "hub" | "direct";
   featuredStudySlug: string | null;
+  /** When the featuredStudy belongs to a different client, this is that client's slug. */
+  featuredStudyClientSlug: string | null;
+  heroImage: string | null;
+  heroHeading: string | null;
+  heroSubheading: string | null;
 };
 
 export const getClientBySlug = cache(
@@ -785,6 +803,10 @@ export const getClientBySlug = cache(
           name: "Sevenloop",
           projectType: "hub",
           featuredStudySlug: "case-study",
+          featuredStudyClientSlug: null,
+          heroImage: null,
+          heroHeading: null,
+          heroSubheading: null,
         };
       }
       return null;
@@ -801,7 +823,11 @@ export const getClientBySlug = cache(
       if (!doc) return null;
 
       let featuredStudySlug = relatedSlug(doc.featuredStudy);
+      // Tracks the actual owner client of the featured study (may differ from this client).
+      let featuredStudyClientSlug: string | null = null;
+
       if (doc.projectType === "direct" && !featuredStudySlug) {
+        // No featuredStudy set — find the first case study that belongs to this client.
         const studies = await payload.find({
           collection: "case-studies",
           where: { client: { equals: doc.id } },
@@ -809,13 +835,54 @@ export const getClientBySlug = cache(
           depth: 0,
         });
         featuredStudySlug = studies.docs[0]?.slug?.trim() || null;
+        // Study belongs to this client — no cross-client redirect needed.
+        featuredStudyClientSlug = null;
+      } else if (doc.projectType === "direct" && featuredStudySlug) {
+        // featuredStudy is set — check if it belongs to a different client.
+        // depth:1 on the client doc populates featuredStudy as an object.
+        const embeddedStudy = doc.featuredStudy as Record<string, unknown> | null;
+        const studyOwnerSlug =
+          embeddedStudy && typeof embeddedStudy === "object"
+            ? asClientDoc((embeddedStudy as { client?: unknown }).client)?.slug?.trim() || null
+            : null;
+
+        if (studyOwnerSlug && studyOwnerSlug !== slug) {
+          // Cross-client: the study's canonical URL is under a different client.
+          featuredStudyClientSlug = studyOwnerSlug;
+        } else if (!studyOwnerSlug) {
+          // Population didn't resolve — do an explicit lookup.
+          try {
+            const studyId = relatedId(doc.featuredStudy as never);
+            if (studyId != null) {
+              const studyDoc = await payload.findByID({
+                collection: "case-studies",
+                id: studyId,
+                depth: 1,
+              });
+              const ownerSlug = asClientDoc(studyDoc?.client)?.slug?.trim() || null;
+              if (ownerSlug && ownerSlug !== slug) {
+                featuredStudyClientSlug = ownerSlug;
+              }
+            }
+          } catch {
+            /* ignore — cross-client resolution is best-effort */
+          }
+        }
       }
+
+      const heroImage = safeMediaUrl(doc.hero?.image);
+      const heroHeading = doc.hero?.heading ? String(doc.hero.heading) : null;
+      const heroSubheading = doc.hero?.subheading ? String(doc.hero.subheading) : null;
 
       return {
         slug: String(doc.slug),
         name: String(doc.name),
         projectType: doc.projectType === "hub" ? "hub" : "direct",
         featuredStudySlug,
+        featuredStudyClientSlug,
+        heroHeading,
+        heroSubheading,
+        heroImage,
       };
     } catch (error) {
       console.warn("[cms] getClientBySlug", error);
@@ -1049,7 +1116,41 @@ export const getCaseStudyPage = cache(
         limit: 1,
         depth: 2,
       });
-      const g = studies.docs[0];
+      let g = studies.docs[0];
+
+      // Fallback: check if the client references this study via featuredStudy
+      if (!g && client.featuredStudy) {
+        const featuredStudyId =
+          typeof client.featuredStudy === "object" && client.featuredStudy !== null
+            ? (client.featuredStudy as { id?: unknown }).id
+            : client.featuredStudy;
+        if (featuredStudyId) {
+          try {
+            const directStudy = await payload.findByID({
+              collection: "case-studies",
+              id: featuredStudyId as string | number,
+              depth: 2,
+            });
+            if (directStudy && directStudy.slug === studySlug) {
+              g = directStudy;
+            }
+          } catch {}
+        }
+      }
+
+      // Fallback: find any case study matching the study slug
+      if (!g) {
+        try {
+          const anyStudy = await payload.find({
+            collection: "case-studies",
+            where: { slug: { equals: studySlug } },
+            limit: 1,
+            depth: 2,
+          });
+          g = anyStudy.docs[0];
+        } catch {}
+      }
+
       if (!g) {
         return clientSlug === "sevenloop" && studySlug === "case-study"
           ? fallbackCaseStudyPage

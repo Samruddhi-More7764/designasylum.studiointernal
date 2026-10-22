@@ -9,6 +9,7 @@ export const HomepageCaseStudies: CollectionConfig = {
   slug: "homepage-case-studies",
   defaultSort: "order",
   admin: {
+    hidden: true,
     useAsTitle: "name",
     defaultColumns: ["number", "name", "caseStudy", "order"],
   },

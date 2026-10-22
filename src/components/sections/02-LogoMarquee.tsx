@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getClientLogoLayouts } from "@/cms/content";
+import { distributeLogosTriangle, getClientLogoLayouts } from "@/cms/content";
 import type { ClientLogo } from "@/data/clients";
 
 // The raw dimensions in data/clients.ts (192×49 / 191×51 / 193×82 / 176×101)
@@ -30,6 +30,7 @@ function LogoCard({
         alt={logo.name}
         width={desktopW}
         height={desktopH}
+        unoptimized
         className="max-h-[60%] max-w-[75%] object-contain lg:max-h-[70%] lg:max-w-[80%]"
         sizes="(max-width: 1023px) 150px, 200px"
       />
@@ -40,7 +41,7 @@ function LogoCard({
 function LogoRow({ logos }: { logos: ClientLogo[] }) {
   // Desktop only — each row centered within the 1130px container.
   return (
-    <div className="hidden justify-center gap-6 lg:flex">
+    <div className="flex justify-center gap-6">
       {logos.map((logo, i) => (
         <LogoCard key={`${logo.name}-${i}-${logo.image}`} logo={logo} />
       ))}
@@ -51,8 +52,11 @@ function LogoRow({ logos }: { logos: ClientLogo[] }) {
 /**
  * Client logos — Frame 2095588032 (254:618).
  *
- * Desktop (lg+): 1130×304, gap 24, two static rows (4 + 5).
- * Mobile (<lg): 2-column grid matching Homepagemobile reference.
+ * Supports dynamic logo counts with auto-centering in a triangle / pyramid layout:
+ * - 1 logo: 1 centered card
+ * - 2 logos: 1 row with 2 cards centered
+ * - 3 logos: 1 card on top, 2 cards below (triangle)
+ * - 4-9 logos: balanced centered rows
  */
 export async function LogoMarquee({
   placement = "home",
@@ -60,13 +64,34 @@ export async function LogoMarquee({
 }: {
   /** Service and location pages use Figma gaps; homepage keeps its own pull and padding. */
   placement?: "home" | "service" | "location";
-  /** When set, these logos replace the homepage list. Used by the branding strategy page. */
-  logos?: { row1: ClientLogo[]; row2: ClientLogo[] };
+  /** When set, these logos replace the homepage list. */
+  logos?: { row1: ClientLogo[]; row2: ClientLogo[] } | ClientLogo[];
 } = {}) {
-  const { marqueeRow1, marqueeRow2 } = logos
-    ? { marqueeRow1: logos.row1, marqueeRow2: logos.row2 }
-    : await getClientLogoLayouts();
-  const mobileLogos = [...marqueeRow1, ...marqueeRow2];
+  let allLogos: ClientLogo[] = [];
+  if (Array.isArray(logos)) {
+    allLogos = logos;
+  } else if (logos) {
+    allLogos = [...(logos.row1 || []), ...(logos.row2 || [])];
+  } else {
+    const layouts = await getClientLogoLayouts();
+    if (layouts.logos && layouts.logos.length > 0) {
+      allLogos = layouts.logos;
+    } else {
+      allLogos = [...layouts.marqueeRow1, ...layouts.marqueeRow2];
+    }
+  }
+
+  let marqueeRow1: ClientLogo[] = [];
+  let marqueeRow2: ClientLogo[] = [];
+
+  if (allLogos.length === 9) {
+    marqueeRow1 = allLogos.slice(0, 4);
+    marqueeRow2 = allLogos.slice(4);
+  } else {
+    const distributed = distributeLogosTriangle(allLogos);
+    marqueeRow1 = distributed.row1;
+    marqueeRow2 = distributed.row2;
+  }
   const service = placement === "service";
   const location = placement === "location";
 
@@ -80,23 +105,73 @@ export async function LogoMarquee({
             : "relative z-10 mt-0 bg-transparent px-5 pb-12 sm:px-6 sm:pb-16 lg:-mt-[calc(116/1470*100%)] lg:px-0 lg:pb-20"
       }
     >
-      <div
-        className={`mx-auto grid w-full grid-cols-2 lg:hidden ${
-          service ? "max-w-[292px] gap-3" : "max-w-[358px] gap-3 sm:gap-4"
-        }`}
-      >
-        {mobileLogos.map((logo, i) => (
-          <LogoCard
-            key={`m-${logo.name}-${i}-${logo.image}`}
-            logo={logo}
-            className={i === mobileLogos.length - 1 ? "col-start-2" : ""}
-          />
-        ))}
+      {/* Mobile (<lg) */}
+      <div className="lg:hidden">
+        {allLogos.length === 1 && (
+          <div className="mx-auto flex w-full max-w-[200px] justify-center">
+            <LogoCard logo={allLogos[0]} />
+          </div>
+        )}
+        {allLogos.length === 2 && (
+          <div
+            className={`mx-auto flex w-full justify-center gap-3 sm:gap-4 ${
+              service ? "max-w-[292px]" : "max-w-[358px]"
+            }`}
+          >
+            <div className="w-[calc(50%-6px)] max-w-[160px]">
+              <LogoCard logo={allLogos[0]} />
+            </div>
+            <div className="w-[calc(50%-6px)] max-w-[160px]">
+              <LogoCard logo={allLogos[1]} />
+            </div>
+          </div>
+        )}
+        {allLogos.length === 3 && (
+          <div
+            className={`mx-auto flex w-full flex-col items-center gap-3 sm:gap-4 ${
+              service ? "max-w-[292px]" : "max-w-[358px]"
+            }`}
+          >
+            <div className="w-[calc(50%-6px)] max-w-[160px]">
+              <LogoCard logo={allLogos[0]} />
+            </div>
+            <div
+              className="flex w-full justify-center gap-3 sm:gap-4"
+            >
+              <div className="w-[calc(50%-6px)] max-w-[160px]">
+                <LogoCard logo={allLogos[1]} />
+              </div>
+              <div className="w-[calc(50%-6px)] max-w-[160px]">
+                <LogoCard logo={allLogos[2]} />
+              </div>
+            </div>
+          </div>
+        )}
+        {allLogos.length > 3 && (
+          <div
+            className={`mx-auto grid w-full grid-cols-2 ${
+              service ? "max-w-[292px] gap-3" : "max-w-[358px] gap-3 sm:gap-4"
+            }`}
+          >
+            {allLogos.map((logo, i) => (
+              <LogoCard
+                key={`m-${logo.name}-${i}-${logo.image}`}
+                logo={logo}
+                className={
+                  i === allLogos.length - 1 && allLogos.length % 2 === 1
+                    ? "col-span-2 mx-auto w-1/2"
+                    : ""
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="mx-auto hidden h-[304px] w-full max-w-[1130px] flex-col gap-6 lg:flex">
-        <LogoRow logos={marqueeRow1} />
-        <LogoRow logos={marqueeRow2} />
+      {/* Desktop (lg+) */}
+      <div className="mx-auto hidden w-full max-w-[1130px] flex-col gap-6 lg:flex">
+        {marqueeRow1.length > 0 && <LogoRow logos={marqueeRow1} />}
+        {marqueeRow2.length > 0 && <LogoRow logos={marqueeRow2} />}
       </div>
     </section>
   );

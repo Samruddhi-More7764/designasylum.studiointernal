@@ -19,7 +19,7 @@ export const clientPlacementsFields: Field[] = [
       {
         name: "featuredProject",
         type: "group",
-        label: "Featured Project (Homepage Hero Carousel)",
+        label: "Featured Project",
         fields: [
           {
             name: "enabled",
@@ -88,7 +88,7 @@ export const clientPlacementsFields: Field[] = [
       {
         name: "portfolioItem",
         type: "group",
-        label: "Portfolio Item (Homepage Grid)",
+        label: "Brand Strategy",
         fields: [
           {
             name: "enabled",
@@ -138,7 +138,7 @@ export const clientPlacementsFields: Field[] = [
       {
         name: "painPoint",
         type: "group",
-        label: "Pain Point (Homepage Why Choose Us Carousel)",
+        label: "Pain Point",
         fields: [
           {
             name: "enabled",
@@ -188,7 +188,7 @@ export const clientPlacementsFields: Field[] = [
       {
         name: "homepageCaseStudy",
         type: "group",
-        label: "Homepage Case Study (Ranked Numbered List)",
+        label: "Diverse",
         fields: [
           {
             name: "enabled",
@@ -269,7 +269,7 @@ export const clientPlacementsFields: Field[] = [
             name: "enabled",
             type: "checkbox",
             label: "Include on the /clients directory page",
-            defaultValue: false,
+            defaultValue: true,
           },
           {
             name: "service",
@@ -301,7 +301,7 @@ export const clientPlacementsFields: Field[] = [
             name: "enabled",
             type: "checkbox",
             label: "Include on the /work portfolio page",
-            defaultValue: false,
+            defaultValue: true,
           },
           {
             name: "service",

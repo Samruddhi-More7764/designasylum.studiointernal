@@ -1,4 +1,8 @@
-import type { CollectionBeforeValidateHook, CollectionConfig } from "payload";
+import type {
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+} from "payload";
 import { clientHubFields } from "../fields/clientHubFields";
 import { clientPlacementsFields } from "../fields/clientPlacementsFields";
 import { syncClientPlacementsAfterChange } from "../cms/hooks/syncClientPlacements";
@@ -17,19 +21,179 @@ const ensureSlug: CollectionBeforeValidateHook = ({ data }) => {
   return data;
 };
 
+const computeClientAdminTitle: CollectionBeforeValidateHook = async ({ data, req }) => {
+  if (!data) return data;
+  const name = String(data.name || data.slug || "Client").trim();
+  const type = data.projectType === "hub" ? "Hub" : "Direct";
+  let studyTitle = "";
+  const studyRef = data.featuredStudy;
+  const studyId =
+    typeof studyRef === "object" && studyRef !== null
+      ? (studyRef as { id?: string | number; title?: string }).id
+      : studyRef;
+  if (typeof studyRef === "object" && studyRef !== null && "title" in studyRef) {
+    studyTitle = String((studyRef as { title?: string }).title || "").trim();
+  }
+  if (!studyTitle && studyId != null) {
+    try {
+      const study = await req.payload.findByID({
+        collection: "case-studies",
+        id: studyId,
+        depth: 0,
+      });
+      studyTitle = String(study?.title || study?.slug || "").trim();
+    } catch {}
+  }
+
+  let autoTitle = "";
+  if (type === "Hub") {
+    autoTitle = `${name} (Client Hub)`;
+  } else if (studyTitle) {
+    autoTitle = `${name} — ${studyTitle}`;
+  } else {
+    autoTitle = `${name} (${type})`;
+  }
+
+  if (!data.adminTitle || typeof data.adminTitle !== "string" || !data.adminTitle.trim()) {
+    data.adminTitle = autoTitle;
+  }
+  return data;
+};
+
+const autoPopulatePlacements: CollectionBeforeChangeHook = async ({
+  data,
+  originalDoc,
+  req,
+}) => {
+  if (!data) return data;
+
+  data.placements = data.placements || {};
+  const placements = data.placements as Record<string, Record<string, unknown>>;
+
+  // If new client, ensure clientsPage and workPage are enabled by default
+  if (!originalDoc) {
+    placements.clientsPage = placements.clientsPage || {};
+    if (placements.clientsPage.enabled === undefined) {
+      placements.clientsPage.enabled = true;
+    }
+    placements.workPage = placements.workPage || {};
+    if (placements.workPage.enabled === undefined) {
+      placements.workPage.enabled = true;
+    }
+  }
+
+function extractMediaId(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (typeof value === "object") {
+    if ("id" in value && (value as { id: unknown }).id != null) {
+      return extractMediaId((value as { id: unknown }).id);
+    }
+    if ("image" in value && (value as { image: unknown }).image != null) {
+      return extractMediaId((value as { image: unknown }).image);
+    }
+  }
+  return null;
+}
+
+  // 1. Check for hero image from client's own hero field (Client Hub)
+  let heroImageId: number | null = extractMediaId(data.hero?.image);
+  let heroHeading = String(data.hero?.heading || "").trim();
+
+  // 2. If no hero image yet, look up linked case study (featured study or any study assigned to this client)
+  const studyId = extractMediaId(data.featuredStudy);
+  const clientId = data.id || (originalDoc as { id?: unknown } | undefined)?.id;
+
+  if (!heroImageId) {
+    try {
+      let study: Record<string, unknown> | null = null;
+      if (studyId) {
+        study = (await req.payload.findByID({
+          collection: "case-studies",
+          id: studyId,
+          depth: 0,
+        })) as unknown as Record<string, unknown>;
+      }
+      if (!study && clientId) {
+        const found = await req.payload.find({
+          collection: "case-studies",
+          where: { client: { equals: clientId } },
+          limit: 1,
+          depth: 0,
+        });
+        study = (found.docs[0] as unknown as Record<string, unknown>) || null;
+      }
+      if (study) {
+        const studyHero = study.hero as {
+          layout?: string;
+          left?: unknown;
+          right?: unknown;
+          image?: unknown;
+          heading?: string;
+        } | undefined;
+        const candidateLeft = extractMediaId(studyHero?.left);
+        const candidateRight = extractMediaId(studyHero?.right);
+        const candidateImg = extractMediaId(studyHero?.image);
+        heroImageId =
+          studyHero?.layout === "split"
+            ? candidateLeft || candidateRight || candidateImg
+            : candidateImg || candidateLeft || candidateRight;
+        if (!heroHeading) {
+          heroHeading = String(studyHero?.heading || study.title || "").trim();
+        }
+      }
+    } catch {
+      // Study lookup skipped
+    }
+  }
+
+  const defaultService = heroHeading || String(data.name || "").trim();
+
+  const updateIfEmpty = (
+    key: "clientsPage" | "workPage" | "featuredProject" | "portfolioItem",
+    opts: { image?: unknown; service?: string },
+  ) => {
+    placements[key] = placements[key] || {};
+    const target = placements[key];
+    if (opts.image != null && !target.image) {
+      target.image = opts.image;
+    }
+    if (opts.service && !target.service) {
+      target.service = opts.service;
+    }
+  };
+
+  if (heroImageId != null) {
+    updateIfEmpty("clientsPage", { image: heroImageId, service: defaultService });
+    updateIfEmpty("workPage", { image: heroImageId, service: defaultService });
+    updateIfEmpty("featuredProject", { image: heroImageId });
+    updateIfEmpty("portfolioItem", { image: heroImageId });
+  } else if (defaultService) {
+    updateIfEmpty("clientsPage", { service: defaultService });
+    updateIfEmpty("workPage", { service: defaultService });
+  }
+
+  return data;
+};
+
 export const Clients: CollectionConfig = {
   slug: "clients",
   labels: { singular: "Client", plural: "Clients" },
   admin: {
     group: "Work",
-    useAsTitle: "name",
-    defaultColumns: ["name", "slug", "projectType"],
+    useAsTitle: "adminTitle",
+    defaultColumns: ["adminTitle", "slug", "projectType", "updatedAt"],
     description:
       "One record per brand. Hub = 2+ projects (library). Direct = one project, skip hub.",
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug],
+    beforeValidate: [ensureSlug, computeClientAdminTitle],
+    beforeChange: [autoPopulatePlacements],
     afterChange: [syncClientPlacementsAfterChange],
   },
   fields: [
@@ -39,6 +203,16 @@ export const Clients: CollectionConfig = {
         {
           label: "Brand & Hub",
           fields: [
+            {
+              name: "adminTitle",
+              label: "Display Name (Lists & Select)",
+              type: "text",
+              admin: {
+                position: "sidebar",
+                description:
+                  "Shown in lists and dropdowns (e.g. Puma (Direct) or Sevenloop (Client Hub)). Auto-generated if left empty.",
+              },
+            },
             { name: "name", type: "text", required: true },
             {
               name: "slug",

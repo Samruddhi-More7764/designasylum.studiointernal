@@ -24,6 +24,37 @@ const ensureSlug: CollectionBeforeValidateHook = ({ data }) => {
   return data;
 };
 
+const computeCaseStudyAdminTitle: CollectionBeforeValidateHook = async ({ data, req }) => {
+  if (!data) return data;
+  let clientName = "";
+  const clientRef = data.client;
+  const clientId =
+    typeof clientRef === "object" && clientRef !== null
+      ? (clientRef as { id?: string | number; name?: string; slug?: string }).id
+      : clientRef;
+
+  if (typeof clientRef === "object" && clientRef !== null) {
+    clientName = String((clientRef as { name?: string }).name || (clientRef as { slug?: string }).slug || "").trim();
+  }
+  if (!clientName && clientId != null) {
+    try {
+      const client = await req.payload.findByID({
+        collection: "clients",
+        id: clientId,
+        depth: 0,
+      });
+      clientName = String(client?.name || client?.slug || "").trim();
+    } catch {}
+  }
+
+  const studyTitle = String(data.title || data.slug || "Case study").trim();
+  const autoTitle = clientName ? `${clientName} — ${studyTitle}` : studyTitle;
+  if (!data.adminTitle || typeof data.adminTitle !== "string" || !data.adminTitle.trim()) {
+    data.adminTitle = autoTitle;
+  }
+  return data;
+};
+
 const uniqueSlugPerClient: CollectionBeforeValidateHook = async ({
   data,
   req,
@@ -176,23 +207,122 @@ const attachAsFeaturedIfNeeded: CollectionAfterChangeHook = async ({
   return doc;
 };
 
+const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
+  doc,
+  req,
+  context,
+}) => {
+  if (context?.skipHeroSync) return doc;
+  const clientRef = doc.client;
+  const clientId =
+    typeof clientRef === "object" && clientRef !== null
+      ? (clientRef as { id?: string | number }).id
+      : clientRef;
+  if (clientId == null) return doc;
+
+  const heroImageId =
+    doc.hero?.layout === "split"
+      ? (typeof doc.hero?.left?.image === "object" && doc.hero?.left?.image !== null
+          ? (doc.hero.left.image as { id?: string | number }).id
+          : doc.hero?.left?.image) ||
+        (typeof doc.hero?.right?.image === "object" && doc.hero?.right?.image !== null
+          ? (doc.hero.right.image as { id?: string | number }).id
+          : doc.hero?.right?.image)
+      : typeof doc.hero?.image?.image === "object" && doc.hero?.image?.image !== null
+        ? (doc.hero.image.image as { id?: string | number }).id
+        : doc.hero?.image?.image;
+
+  const heroHeading = String(doc.hero?.heading || doc.title || "").trim();
+
+  try {
+    const client = await req.payload.findByID({
+      collection: "clients",
+      id: clientId,
+      depth: 0,
+    });
+    if (!client) return doc;
+
+    const placements = (client.placements || {}) as Record<string, Record<string, unknown>>;
+    let modified = false;
+
+    const updatePlacement = (
+      key: "clientsPage" | "workPage" | "featuredProject" | "portfolioItem",
+      defaults: { image?: unknown; service?: string },
+    ) => {
+      const current = placements[key] || {};
+      const updated = { ...current };
+      let changed = false;
+
+      if (defaults.image != null && !current.image) {
+        updated.image = defaults.image;
+        changed = true;
+      }
+      if (defaults.service && !current.service) {
+        updated.service = defaults.service;
+        changed = true;
+      }
+
+      if (changed) {
+        placements[key] = updated;
+        modified = true;
+      }
+    };
+
+    if (heroImageId != null) {
+      updatePlacement("clientsPage", { image: heroImageId, service: heroHeading });
+      updatePlacement("workPage", { image: heroImageId, service: heroHeading });
+      updatePlacement("featuredProject", { image: heroImageId });
+      updatePlacement("portfolioItem", { image: heroImageId });
+    } else if (heroHeading) {
+      updatePlacement("clientsPage", { service: heroHeading });
+      updatePlacement("workPage", { service: heroHeading });
+    }
+
+    if (modified) {
+      await req.payload.update({
+        collection: "clients",
+        id: clientId,
+        data: { placements } as never,
+        context: { skipHeroSync: true },
+      });
+    }
+  } catch (err) {
+    req.payload.logger.error({
+      err,
+      msg: `Could not sync case study hero to client placements for client ${clientId}`,
+    });
+  }
+
+  return doc;
+};
+
 export const CaseStudies: CollectionConfig = {
   slug: "case-studies",
   labels: { singular: "Case study", plural: "Case studies" },
   admin: {
     group: "Work",
-    useAsTitle: "title",
-    defaultColumns: ["title", "slug", "client"],
+    useAsTitle: "adminTitle",
+    defaultColumns: ["adminTitle", "client", "slug", "updatedAt"],
     description:
       "Belongs to a Client. Hub clients can have many; a Direct client usually has one.",
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug, uniqueSlugPerClient],
+    beforeValidate: [ensureSlug, computeCaseStudyAdminTitle, uniqueSlugPerClient],
     beforeChange: [preserveHiddenMedia],
-    afterChange: [attachAsFeaturedIfNeeded, revalidatePublishedStudy],
+    afterChange: [attachAsFeaturedIfNeeded, syncHeroToClientPlacements, revalidatePublishedStudy],
   },
   fields: [
+    {
+      name: "adminTitle",
+      label: "Display Name (Lists & Select)",
+      type: "text",
+      admin: {
+        position: "sidebar",
+        description:
+          "Shown in lists and dropdowns (e.g. Puma — Logo Design). Auto-generated from Client and Title if left empty.",
+      },
+    },
     { name: "title", type: "text", required: true },
     {
       name: "slug",

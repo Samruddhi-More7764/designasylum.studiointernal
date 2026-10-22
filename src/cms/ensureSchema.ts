@@ -88,6 +88,9 @@ async function addMissingColumns(payload: Payload): Promise<void> {
       }
     }
 
+    await ensureCascadeForeignKeys(client);
+    await ensureDataMigrations(client);
+
     await client.query("COMMIT");
     if (createdTables || addedColumns) {
       payload.logger.info({
@@ -241,3 +244,90 @@ function quoteIdent(name: string): string {
 function quoteLiteral(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
 }
+
+async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
+  const cascades = [
+    {
+      table: "open_roles_page_roles_responsibilities",
+      constraint: "open_roles_page_roles_responsibilities_parent_fk",
+      parentTable: "open_roles_page_roles",
+    },
+    {
+      table: "open_roles_page_roles_requirements",
+      constraint: "open_roles_page_roles_requirements_parent_fk",
+      parentTable: "open_roles_page_roles",
+    },
+  ];
+
+  for (const item of cascades) {
+    const { rows } = await client.query(
+      `SELECT 1 FROM pg_constraint WHERE conname = $1`,
+      [item.constraint],
+    );
+    if (rows.length === 0) {
+      await client.query(
+        `ALTER TABLE ${quoteIdent(item.table)}
+         ADD CONSTRAINT ${quoteIdent(item.constraint)}
+         FOREIGN KEY (_parent_id) REFERENCES ${quoteIdent(item.parentTable)}(id)
+         ON DELETE CASCADE`,
+      );
+    }
+  }
+}
+
+async function ensureDataMigrations(client: QueryClient): Promise<void> {
+  // 1. Roles pointers migration to single textarea columns
+  await client.query(`
+    ALTER TABLE IF EXISTS open_roles_page_roles
+    ADD COLUMN IF NOT EXISTS responsibilities text,
+    ADD COLUMN IF NOT EXISTS requirements text,
+    ADD COLUMN IF NOT EXISTS content text;
+  `).catch(() => undefined);
+
+  await client.query(`
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'open_roles_page_roles_responsibilities') THEN
+        UPDATE open_roles_page_roles r
+        SET responsibilities = sub.items
+        FROM (
+          SELECT _parent_id, string_agg(text, E'\n' ORDER BY _order) AS items
+          FROM open_roles_page_roles_responsibilities
+          GROUP BY _parent_id
+        ) sub
+        WHERE r.id = sub._parent_id AND (r.responsibilities IS NULL OR r.responsibilities = '');
+      END IF;
+
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'open_roles_page_roles_requirements') THEN
+        UPDATE open_roles_page_roles r
+        SET requirements = sub.items
+        FROM (
+          SELECT _parent_id, string_agg(text, E'\n' ORDER BY _order) AS items
+          FROM open_roles_page_roles_requirements
+          GROUP BY _parent_id
+        ) sub
+        WHERE r.id = sub._parent_id AND (r.requirements IS NULL OR r.requirements = '');
+      END IF;
+    END $$;
+  `).catch(() => undefined);
+
+  // 2. Admin titles for case studies and clients
+  await client.query(`
+    ALTER TABLE IF EXISTS case_studies ADD COLUMN IF NOT EXISTS admin_title text;
+    ALTER TABLE IF EXISTS clients ADD COLUMN IF NOT EXISTS admin_title text;
+
+    UPDATE case_studies cs
+    SET admin_title = COALESCE(c.name, c.slug, '') || ' — ' || COALESCE(cs.title, cs.slug, 'Case study')
+    FROM clients c
+    WHERE cs.client_id = c.id AND (cs.admin_title IS NULL OR cs.admin_title = '');
+
+    UPDATE case_studies
+    SET admin_title = COALESCE(title, slug, 'Case study')
+    WHERE admin_title IS NULL OR admin_title = '';
+
+    UPDATE clients c
+    SET admin_title = c.name || CASE WHEN c.project_type = 'hub' THEN ' (Client Hub)' ELSE ' (Direct)' END
+    WHERE admin_title IS NULL OR admin_title = '';
+  `).catch(() => undefined);
+}
+

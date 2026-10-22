@@ -1,16 +1,23 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { clientHubPath } from "@/cms/urls";
 
 /**
- * Client hub — first section: breadcrumb + title + category line + media placeholder.
+ * Client hub — first section: breadcrumb + title + category line + media visual.
  */
 export function ClientHubHero({
   name,
   slug,
+  heading,
+  subheading,
+  imageSrc,
 }: {
   name: string;
   slug: string;
+  heading?: string | null;
+  subheading?: string | null;
+  imageSrc?: string | null;
 }) {
   const hubHref = clientHubPath(slug);
   return (
@@ -46,26 +53,45 @@ export function ClientHubHero({
         </nav>
 
         <h1 className="font-figtree text-[40px] font-normal leading-[1.15] tracking-[-0.5px] text-black uppercase sm:text-[48px] lg:text-[56px] lg:leading-[79.2px]">
-          {name}
+          {heading || name}
         </h1>
 
-        <p className="max-w-[842px] px-1 text-center font-satoshi text-[11px] font-normal leading-[140%] tracking-[-0.5px] text-black uppercase sm:text-[13px] sm:leading-[120%] lg:text-[14px]">
-          <span>
-            Design Agency for Manufacturing Firms – Branding, Website,&nbsp;
-          </span>
-          <span>Design Agency for Startups,&nbsp;</span>
-          <span>Design Agency for Technology Businesses,&nbsp;</span>
-          <span>Aviation Design Agency,&nbsp;</span>
-          <span>Chemical Industry – Design Strategy Consultants</span>
-        </p>
+        {subheading ? (
+          <p className="max-w-[842px] px-1 text-center font-satoshi text-[11px] font-normal leading-[140%] tracking-[-0.5px] text-black uppercase sm:text-[13px] sm:leading-[120%] lg:text-[14px]">
+            {subheading}
+          </p>
+        ) : (
+          <p className="max-w-[842px] px-1 text-center font-satoshi text-[11px] font-normal leading-[140%] tracking-[-0.5px] text-black uppercase sm:text-[13px] sm:leading-[120%] lg:text-[14px]">
+            <span>
+              Design Agency for Manufacturing Firms – Branding, Website,&nbsp;
+            </span>
+            <span>Design Agency for Startups,&nbsp;</span>
+            <span>Design Agency for Technology Businesses,&nbsp;</span>
+            <span>Aviation Design Agency,&nbsp;</span>
+            <span>Chemical Industry – Design Strategy Consultants</span>
+          </p>
+        )}
       </div>
 
       <div className="mx-auto flex w-full max-w-[1438px] items-center justify-center px-5 sm:px-8 lg:h-[573px]">
-        <div
-          className="aspect-[1150.4/532] w-full max-w-[1150.4px] rounded-xl bg-black"
-          aria-label={`${name} media placeholder`}
-          role="img"
-        />
+        {imageSrc ? (
+          <div className="relative aspect-[1150.4/532] w-full max-w-[1150.4px] overflow-hidden rounded-xl bg-black">
+            <Image
+              src={imageSrc}
+              alt={heading || name}
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 1438px) 100vw, 1150px"
+            />
+          </div>
+        ) : (
+          <div
+            className="aspect-[1150.4/532] w-full max-w-[1150.4px] rounded-xl bg-black"
+            aria-label={`${name} media placeholder`}
+            role="img"
+          />
+        )}
       </div>
     </section>
   );

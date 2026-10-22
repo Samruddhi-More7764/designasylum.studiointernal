@@ -8,7 +8,11 @@ import {
 export const FeaturedProjects: CollectionConfig = {
   slug: "featured-projects",
   defaultSort: "order",
-  admin: { useAsTitle: "name", defaultColumns: ["name", "client", "order"] },
+  admin: {
+    hidden: true,
+    useAsTitle: "name",
+    defaultColumns: ["name", "client", "order"],
+  },
   access: { read: () => true },
   hooks: {
     afterChange: [syncFeaturedProjectToClient],

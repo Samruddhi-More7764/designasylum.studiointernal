@@ -35,6 +35,43 @@ function sectionHeadingFields(italic: string, rest: string): Field[] {
 /** Hub page sections — shown only when projectType is hub. */
 export const clientHubFields: Field[] = [
   {
+    name: "hero",
+    type: "group",
+    label: "Hero Section",
+    admin: {
+      condition: hubOnly,
+      description: "Hero heading and visual shown at the top of the client hub.",
+    },
+    fields: [
+      {
+        name: "heading",
+        type: "text",
+        label: "Hero heading",
+        admin: {
+          description: "Main headline for the hub page. Defaults to client name if left blank.",
+        },
+      },
+      {
+        name: "image",
+        type: "upload",
+        relationTo: "media",
+        label: "Hero image / visual",
+        filterOptions: { mimeType: { contains: "image" } },
+        admin: {
+          description: "Hero visual at the top of the client hub. Used as default thumbnail for website placements.",
+        },
+      },
+      {
+        name: "subheading",
+        type: "textarea",
+        label: "Hero category line / subheading",
+        admin: {
+          description: "Tags or subtitle below the main heading.",
+        },
+      },
+    ],
+  },
+  {
     name: "navItems",
     type: "array",
     labels: { singular: "Sidebar heading", plural: "Sidebar headings" },

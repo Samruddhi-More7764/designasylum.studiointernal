@@ -5,20 +5,18 @@ import type {
 
 function extractId(value: unknown): number | null {
   if (value == null) return null;
-  if (typeof value === "object" && "id" in value) {
-    const id = (value as { id: unknown }).id;
-    if (typeof id === "number") return id;
-    if (typeof id === "string") {
-      const parsed = Number(id);
-      return Number.isFinite(parsed) ? parsed : null;
-    }
-  }
-  if (typeof value === "number") {
-    return value;
-  }
+  if (typeof value === "number") return value;
   if (typeof value === "string") {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (typeof value === "object") {
+    if ("id" in value && (value as { id: unknown }).id != null) {
+      return extractId((value as { id: unknown }).id);
+    }
+    if ("image" in value && (value as { image: unknown }).image != null) {
+      return extractId((value as { image: unknown }).image);
+    }
   }
   return null;
 }
@@ -42,6 +40,54 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
   const clientSlug = String(doc.slug || "");
   const clientPath = clientSlug ? `/clients/${clientSlug}` : "";
 
+  // Resolve hero image fallback from Client Hub or associated Case Study
+  let defaultHeroImageId = extractId(doc.hero?.image);
+  let defaultHeroHeading = String(doc.hero?.heading || "").trim();
+
+  if (!defaultHeroImageId) {
+    let studyDoc: Record<string, unknown> | null = null;
+    const studyId = extractId(doc.featuredStudy);
+    if (studyId) {
+      try {
+        studyDoc = (await req.payload.findByID({
+          collection: "case-studies",
+          id: studyId,
+          depth: 0,
+        })) as unknown as Record<string, unknown>;
+      } catch {}
+    }
+    if (!studyDoc && clientId) {
+      try {
+        const found = await req.payload.find({
+          collection: "case-studies",
+          where: { client: { equals: clientId } },
+          limit: 1,
+          depth: 0,
+        });
+        studyDoc = (found.docs[0] as unknown as Record<string, unknown>) || null;
+      } catch {}
+    }
+    if (studyDoc) {
+      const studyHero = studyDoc.hero as {
+        layout?: string;
+        left?: unknown;
+        right?: unknown;
+        image?: unknown;
+        heading?: string;
+      } | undefined;
+      const cLeft = extractId(studyHero?.left);
+      const cRight = extractId(studyHero?.right);
+      const cImg = extractId(studyHero?.image);
+      defaultHeroImageId =
+        studyHero?.layout === "split"
+          ? cLeft || cRight || cImg
+          : cImg || cLeft || cRight;
+      if (!defaultHeroHeading) {
+        defaultHeroHeading = String(studyHero?.heading || studyDoc.title || "").trim();
+      }
+    }
+  }
+
   // 1. Featured Projects Sync
   try {
     const fpConfig = placements.featuredProject;
@@ -54,7 +100,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const fpDoc = existingFP.docs[0];
 
     if (fpConfig?.enabled) {
-      const imgId = extractId(fpConfig.image);
+      const imgId = extractId(fpConfig.image) || defaultHeroImageId;
       const data: Record<string, unknown> = {
         name: clientName,
         description: fpConfig.description || "",
@@ -108,7 +154,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const piDoc = existingPI.docs[0];
 
     if (piConfig?.enabled) {
-      const imgId = extractId(piConfig.image);
+      const imgId = extractId(piConfig.image) || defaultHeroImageId;
       const data: Record<string, unknown> = {
         name: clientName,
         category: piConfig.category || "Brand & Web",
@@ -272,10 +318,11 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     };
 
     if (cpConfig?.enabled) {
+      const cardImageId = extractId(cpConfig.image) || defaultHeroImageId;
       const cardData = {
         name: clientName,
-        service: cpConfig.service || "",
-        image: extractId(cpConfig.image),
+        service: cpConfig.service || defaultHeroHeading || "",
+        image: cardImageId,
         href: clientPath || "#",
       };
 
@@ -284,7 +331,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
         currentCards[matchIndex] = {
           ...currentCards[matchIndex],
           ...cardData,
-          image: cardData.image || currentCards[matchIndex].image,
+          image: cardImageId || null,
         };
       } else {
         currentCards.push(cardData);
@@ -334,11 +381,12 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     };
 
     if (wpConfig?.enabled) {
+      const projectImageId = extractId(wpConfig.image) || defaultHeroImageId;
       const projectData = {
         name: clientName,
-        service: wpConfig.service || "",
+        service: wpConfig.service || defaultHeroHeading || "",
         category: wpConfig.category || "technology",
-        image: extractId(wpConfig.image),
+        image: projectImageId,
         href: clientPath || "#",
       };
 
@@ -347,7 +395,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
         currentProjects[matchIndex] = {
           ...currentProjects[matchIndex],
           ...projectData,
-          image: projectData.image || currentProjects[matchIndex].image,
+          image: projectImageId || null,
         };
       } else {
         currentProjects.push(projectData);

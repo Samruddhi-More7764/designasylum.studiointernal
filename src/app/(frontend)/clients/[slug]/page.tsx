@@ -22,7 +22,9 @@ export default async function ClientPage({ params }: Props) {
 
   if (client.projectType === "direct") {
     if (!client.featuredStudySlug) notFound();
-    redirect(caseStudyPath(slug, client.featuredStudySlug));
+    // If the study belongs to a different client, redirect to its canonical URL.
+    const ownerSlug = client.featuredStudyClientSlug ?? slug;
+    redirect(caseStudyPath(ownerSlug, client.featuredStudySlug));
   }
 
   const footer = await getFooter();
@@ -31,7 +33,13 @@ export default async function ClientPage({ params }: Props) {
     <>
       <NavBar />
       <main data-nav="light" className="bg-white pt-28">
-        <ClientHubHero name={client.name} slug={client.slug} />
+        <ClientHubHero
+          name={client.name}
+          slug={client.slug}
+          heading={client.heroHeading}
+          subheading={client.heroSubheading}
+          imageSrc={client.heroImage}
+        />
         <ClientHubBody clientSlug={slug} />
         <ClientHubPartnership clientSlug={slug} />
         <ClientHubTransformation clientSlug={slug} />

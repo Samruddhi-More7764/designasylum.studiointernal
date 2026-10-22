@@ -54,6 +54,8 @@ export default async function OpenRolePage({ params }: PageProps) {
             </h1>
             <a
               href={role.applyNowHref}
+              target={role.applyNowHref.startsWith("http") ? "_blank" : undefined}
+              rel={role.applyNowHref.startsWith("http") ? "noopener noreferrer" : undefined}
               className="group inline-flex h-11 items-center justify-center gap-2 rounded-full border border-black bg-black px-5 font-satoshi text-[12px] leading-4 font-medium text-white uppercase lg:h-14 lg:text-[14px]"
             >
               <CtaHoverLabel>{role.applyNowLabel}</CtaHoverLabel>
@@ -84,6 +86,11 @@ export default async function OpenRolePage({ params }: PageProps) {
               <p className="font-satoshi text-[16px] leading-[1.2] font-normal tracking-[-0.5px] text-black lg:text-[20px] lg:leading-[26px]">
                 {role.summary}
               </p>
+              {role.content ? (
+                <div className="whitespace-pre-line font-satoshi text-[16px] leading-[1.4] text-black lg:text-[20px] lg:leading-[26px]">
+                  {role.content}
+                </div>
+              ) : null}
               <DetailList heading={dutiesHeading} items={role.responsibilities} />
               <DetailList heading={lookingHeading} items={role.requirements} />
             </div>

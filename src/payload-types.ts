@@ -264,6 +264,10 @@ export interface FeaturedProject {
  */
 export interface Client {
   id: number;
+  /**
+   * Shown in lists and dropdowns (e.g. Puma (Direct) or Sevenloop (Client Hub)). Auto-generated if left empty.
+   */
+  adminTitle?: string | null;
   name: string;
   /**
    * URL: /clients/{slug}. Example: sevenloop, puma.
@@ -277,6 +281,23 @@ export interface Client {
    * Homepage opens this study when Project type is Direct. Create the Case study first (or save this Client, then the study) — do not create a study from this field.
    */
   featuredStudy?: (number | null) | CaseStudy;
+  /**
+   * Hero heading and visual shown at the top of the client hub.
+   */
+  hero?: {
+    /**
+     * Main headline for the hub page. Defaults to client name if left blank.
+     */
+    heading?: string | null;
+    /**
+     * Hero visual at the top of the client hub. Used as default thumbnail for website placements.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Tags or subtitle below the main heading.
+     */
+    subheading?: string | null;
+  };
   /**
    * Sidebar labels. Defaults match the static page: About Client, Logo Design, Website Design & Development, Project Brochure, Brand Video, Behind the Scenes, Case Study. Not required to stay worded that way.
    */
@@ -606,6 +627,10 @@ export interface Client {
  */
 export interface CaseStudy {
   id: number;
+  /**
+   * Shown in lists and dropdowns (e.g. Puma — Logo Design). Auto-generated from Client and Title if left empty.
+   */
+  adminTitle?: string | null;
   title: string;
   /**
    * URL: /clients/{client}/{slug}. Example: case-study, website, branding.
@@ -1248,10 +1273,18 @@ export interface FaqItemsSelect<T extends boolean = true> {
  * via the `definition` "clients_select".
  */
 export interface ClientsSelect<T extends boolean = true> {
+  adminTitle?: T;
   name?: T;
   slug?: T;
   projectType?: T;
   featuredStudy?: T;
+  hero?:
+    | T
+    | {
+        heading?: T;
+        image?: T;
+        subheading?: T;
+      };
   navItems?:
     | T
     | {
@@ -1469,6 +1502,7 @@ export interface ClientsSelect<T extends boolean = true> {
  * via the `definition` "case-studies_select".
  */
 export interface CaseStudiesSelect<T extends boolean = true> {
+  adminTitle?: T;
   title?: T;
   slug?: T;
   client?: T;
@@ -2673,18 +2707,18 @@ export interface OpenRolesPage {
         detailLocation?: string | null;
         detailExperience?: string | null;
         detailType?: string | null;
-        responsibilities?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        requirements?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
+        /**
+         * Single container for all pointers and texts. Enter one pointer per line.
+         */
+        responsibilities?: string | null;
+        /**
+         * Single container for all pointers and texts. Enter one pointer per line.
+         */
+        requirements?: string | null;
+        /**
+         * Optional: Single container to add any extra pointers or paragraphs for this role.
+         */
+        content?: string | null;
         applyNowLabel?: string | null;
         /**
          * Where Apply now goes. Defaults to the careers form.
@@ -3702,18 +3736,9 @@ export interface OpenRolesPageSelect<T extends boolean = true> {
         detailLocation?: T;
         detailExperience?: T;
         detailType?: T;
-        responsibilities?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        requirements?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
+        responsibilities?: T;
+        requirements?: T;
+        content?: T;
         applyNowLabel?: T;
         applyNowHref?: T;
         id?: T;

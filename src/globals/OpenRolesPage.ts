@@ -84,14 +84,26 @@ export const OpenRolesPage: GlobalConfig = {
                 {
                   name: "responsibilities",
                   label: "What you’ll do",
-                  type: "array",
-                  fields: [{ name: "text", type: "text", required: true }],
+                  type: "textarea",
+                  admin: {
+                    description: "Single container for all pointers and texts. Enter one pointer per line.",
+                  },
                 },
                 {
                   name: "requirements",
                   label: "What we’re looking for",
-                  type: "array",
-                  fields: [{ name: "text", type: "text", required: true }],
+                  type: "textarea",
+                  admin: {
+                    description: "Single container for all pointers and texts. Enter one pointer per line.",
+                  },
+                },
+                {
+                  name: "content",
+                  label: "Additional role details / text",
+                  type: "textarea",
+                  admin: {
+                    description: "Optional: Single container to add any extra pointers or paragraphs for this role.",
+                  },
                 },
                 { name: "applyNowLabel", label: "Apply now label", type: "text" },
                 {

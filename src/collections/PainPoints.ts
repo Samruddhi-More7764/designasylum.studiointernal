@@ -8,7 +8,11 @@ import {
 export const PainPoints: CollectionConfig = {
   slug: "pain-points",
   defaultSort: "order",
-  admin: { useAsTitle: "tag", defaultColumns: ["tag", "client", "order"] },
+  admin: {
+    hidden: true,
+    useAsTitle: "tag",
+    defaultColumns: ["tag", "client", "order"],
+  },
   access: { read: () => true },
   hooks: {
     afterChange: [syncPainPointToClient],

@@ -9,6 +9,7 @@ export const PortfolioItems: CollectionConfig = {
   slug: "portfolio-items",
   defaultSort: "order",
   admin: {
+    hidden: true,
     useAsTitle: "name",
     defaultColumns: ["name", "category", "client", "order"],
   },

@@ -116,7 +116,7 @@ export async function GET(request: Request, { params }: Props) {
     }
   }
 
-  console.error(`[media-route] 404 — no blob token or blob URL for: ${filename}`);
+  console.warn(`[media-route] 404 — file not found on disk or blob: ${filename}`);
   return new NextResponse("File not found", { status: 404 });
 }
 
