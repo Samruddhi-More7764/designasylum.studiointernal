@@ -28,7 +28,7 @@ export function CaseStudyMedia({
 }
 
 const cell =
-  "relative w-full overflow-hidden rounded-[13.98px] bg-neutral-100";
+  "relative w-full overflow-hidden rounded-[13.98px] bg-neutral-100 transform-gpu isolate";
 
 /**
  * Desktop frame is 1316×740, shifted up 19px and left 2px.

@@ -125,6 +125,7 @@ export interface Config {
     'clients-index': ClientsIndex;
     'studio-page': StudioPage;
     'team-page': TeamPage;
+    'clients-grid': ClientsGrid;
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
@@ -142,6 +143,7 @@ export interface Config {
     'clients-index': ClientsIndexSelect<false> | ClientsIndexSelect<true>;
     'studio-page': StudioPageSelect<false> | StudioPageSelect<true>;
     'team-page': TeamPageSelect<false> | TeamPageSelect<true>;
+    'clients-grid': ClientsGridSelect<false> | ClientsGridSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2929,6 +2931,43 @@ export interface TeamPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients-grid".
+ */
+export interface ClientsGrid {
+  id: number;
+  /**
+   * Section headline. Default: '8 in 10 clients come back for more.'
+   */
+  heading?: string | null;
+  /**
+   * Section subtitle.
+   */
+  subheading?: string | null;
+  /**
+   * Assign logos from the 1st section (Client Logos) and specify each client's project count. Cards are displayed in a 4-column grid.
+   */
+  cards?:
+    | {
+        /**
+         * Select a logo uploaded in Client Logos.
+         */
+        logo: number | ClientLogo;
+        /**
+         * Project count shown below the logo. E.g. enter 3 to display '3 & Counting', or 2 to display '2 & Counting'.
+         */
+        count: number;
+        /**
+         * Optional description override. Leave empty to automatically display '{count} & Counting'.
+         */
+        customDescription?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-footer_select".
  */
 export interface SiteFooterSelect<T extends boolean = true> {
@@ -3890,6 +3929,25 @@ export interface TeamPageSelect<T extends boolean = true> {
         name?: T;
         role?: T;
         href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients-grid_select".
+ */
+export interface ClientsGridSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  cards?:
+    | T
+    | {
+        logo?: T;
+        count?: T;
+        customDescription?: T;
         id?: T;
       };
   updatedAt?: T;

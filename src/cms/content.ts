@@ -596,6 +596,118 @@ export const getClientLogoLayouts = cache(async () => {
   }
 });
 
+export interface ReturningClientCard {
+  name: string;
+  image: string;
+  width: number;
+  height: number;
+  count: number;
+  description: string;
+}
+
+export interface ClientsGridData {
+  heading: string;
+  subheading: string;
+  rows: ReturningClientCard[][];
+}
+
+const fallbackReturningGridRows: ReturningClientCard[][] = fallbackGridRows.map(
+  (row) =>
+    row.map((logo) => ({
+      name: logo.name,
+      image: logo.image,
+      width: logo.width,
+      height: logo.height,
+      count: 4,
+      description: "4 & Counting",
+    })),
+);
+
+export const getClientsGridData = cache(async (): Promise<ClientsGridData> => {
+  const defaultData: ClientsGridData = {
+    heading: "8 in 10 clients come back for more.",
+    subheading:
+      "Once people work with us, they tend to keep working with us. The number we’re quietly proud of.",
+    rows: fallbackReturningGridRows,
+  };
+
+  const payload = await getPayloadClient();
+  if (!payload) return defaultData;
+
+  try {
+    const doc = (await payload.findGlobal({
+      slug: "clients-grid" as never,
+      depth: 2,
+    })) as unknown as {
+      heading?: string;
+      subheading?: string;
+      cards?: Array<{
+        logo?: unknown;
+        count?: number;
+        customDescription?: string;
+      }>;
+    };
+
+    if (!doc) return defaultData;
+
+    const heading = doc.heading?.trim() || defaultData.heading;
+    const subheading = doc.subheading?.trim() || defaultData.subheading;
+
+    const rawCards = Array.isArray(doc.cards) ? doc.cards : [];
+    const validCards: ReturningClientCard[] = [];
+
+    for (const card of rawCards) {
+      if (!card || !card.logo) continue;
+      const logoDoc = (
+        typeof card.logo === "object" ? card.logo : null
+      ) as {
+        name?: string;
+        image?: unknown;
+        width?: number;
+        height?: number;
+      } | null;
+
+      if (!logoDoc) continue;
+      const imageSrc = safeMediaUrl(logoDoc.image);
+      if (!imageSrc) continue;
+
+      const count =
+        typeof card.count === "number" && !isNaN(card.count) ? card.count : 4;
+      const description =
+        typeof card.customDescription === "string" && card.customDescription.trim()
+          ? card.customDescription.trim()
+          : `${count} & Counting`;
+
+      validCards.push({
+        name: String(logoDoc.name || "Client"),
+        image: imageSrc,
+        width: Number(logoDoc.width) || 192,
+        height: Number(logoDoc.height) || 49,
+        count,
+        description,
+      });
+    }
+
+    if (!validCards.length) {
+      return { heading, subheading, rows: fallbackReturningGridRows };
+    }
+
+    const rows: ReturningClientCard[][] = [];
+    for (let i = 0; i < validCards.length; i += 4) {
+      rows.push(validCards.slice(i, i + 4));
+    }
+
+    return {
+      heading,
+      subheading,
+      rows,
+    };
+  } catch (error) {
+    console.warn("[cms] clients-grid fallback", error);
+    return defaultData;
+  }
+});
+
 export const getHomepageCaseStudies = cache(async (): Promise<CaseStudy[]> => {
   const payload = await getPayloadClient();
   if (!payload) return fallbackCaseStudies;

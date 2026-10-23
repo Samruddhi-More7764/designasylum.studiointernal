@@ -4,6 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { NextResponse } from "next/server";
 import { publicBlobUrl } from "@/cms/media";
+import { getPayloadClient } from "@/cms/getPayload";
 
 export const dynamic = "force-dynamic";
 
@@ -106,17 +107,49 @@ export async function GET(request: Request, { params }: Props) {
           headers,
         });
       }
-
-      // If streaming was non-200, issue redirect so client/CDN handles it directly
-      console.warn(`[media-route] blob fetch non-ok (${blobRes.status}), issuing 307 redirect`);
-      return NextResponse.redirect(blobUrl, 307);
     } catch (err) {
-      console.error(`[media-route] blob fetch threw, issuing 307 redirect:`, err);
-      return NextResponse.redirect(blobUrl, 307);
+      console.warn(`[media-route] direct blob fetch failed for ${filename}:`, err);
     }
   }
 
-  console.warn(`[media-route] 404 — file not found on disk or blob: ${filename}`);
+  // 3. Fallback: Query Payload database for media record with exact Blob URL (handles addRandomSuffix)
+  try {
+    const payload = await getPayloadClient();
+    if (payload) {
+      const mediaResult = await payload.find({
+        collection: "media",
+        where: { filename: { equals: filename } },
+        limit: 1,
+        depth: 0,
+      });
+      const storedUrl = mediaResult.docs[0]?.url;
+      if (storedUrl && (storedUrl.startsWith("http://") || storedUrl.startsWith("https://"))) {
+        console.log(`[media-route] found stored CDN URL in DB: ${storedUrl.slice(0, 80)}`);
+        const dbRes = await fetch(storedUrl);
+        if (dbRes.ok && dbRes.body) {
+          const headers = new Headers();
+          headers.set(
+            "Content-Type",
+            dbRes.headers.get("Content-Type") ||
+              MIME_TYPES[path.extname(filename).toLowerCase()] ||
+              "application/octet-stream",
+          );
+          const len = dbRes.headers.get("Content-Length");
+          if (len) headers.set("Content-Length", len);
+          headers.set("Cache-Control", "public, max-age=31536000, immutable");
+          return new NextResponse(dbRes.body as ReadableStream, {
+            status: 200,
+            headers,
+          });
+        }
+        return NextResponse.redirect(storedUrl, 307);
+      }
+    }
+  } catch (dbErr) {
+    console.warn(`[media-route] payload lookup failed for ${filename}:`, dbErr);
+  }
+
+  console.warn(`[media-route] 404 — file not found on disk, blob, or database: ${filename}`);
   return new NextResponse("File not found", { status: 404 });
 }
 

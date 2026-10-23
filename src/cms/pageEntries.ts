@@ -552,5 +552,14 @@ export function pageEntries(): PageEntry[] {
         })),
       },
     },
+    {
+      slug: "clients-grid",
+      data: {
+        heading: "8 in 10 clients come back for more.",
+        subheading:
+          "Once people work with us, they tend to keep working with us. The number we’re quietly proud of.",
+        cards: [],
+      },
+    },
   ];
 }

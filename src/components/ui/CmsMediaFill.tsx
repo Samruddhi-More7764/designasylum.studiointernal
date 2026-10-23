@@ -27,9 +27,12 @@ export function CmsMediaFill({
   priority = false,
 }: CmsMediaFillProps) {
   const videoSrc =
-    (video && isVideoSrc(video) ? video : null) ||
-    (image && isVideoSrc(image) ? image : null);
-  const poster = image && !isVideoSrc(image) ? image : undefined;
+    (video && typeof video === "string" && isVideoSrc(video) && video.trim() ? video.trim() : null) ||
+    (image && typeof image === "string" && isVideoSrc(image) && image.trim() ? image.trim() : null);
+  const poster =
+    image && typeof image === "string" && !isVideoSrc(image) && image.trim()
+      ? image.trim()
+      : undefined;
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {

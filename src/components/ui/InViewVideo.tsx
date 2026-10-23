@@ -41,10 +41,10 @@ export function InViewVideo({ src, poster, label, className = "" }: InViewVideoP
   }, [src]);
 
   return (
-    <div ref={wrapRef} className={`relative overflow-hidden bg-black ${className}`}>
+    <div ref={wrapRef} className={`relative overflow-hidden bg-transparent ${className}`}>
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover [transform:translateZ(0)] [backface-visibility:hidden] [isolation:isolate]"
         src={inView ? src : undefined}
         poster={poster && !poster.match(/\.(mp4|webm|mov|m4v)(\?|$)/i) ? poster : undefined}
         muted

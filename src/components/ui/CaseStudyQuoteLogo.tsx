@@ -12,14 +12,15 @@ export function CaseStudyQuoteLogo({
   alt?: string | null;
 }) {
   const [hasError, setHasError] = useState(false);
+  const cleanSrc = src?.trim();
 
-  if (!src || hasError) {
+  if (!cleanSrc || hasError) {
     return <CaseStudyQuoteIcon className="h-10 w-10 sm:h-12 sm:w-12 lg:h-[54px] lg:w-[54px]" />;
   }
 
   return (
     <Image
-      src={src}
+      src={cleanSrc}
       alt={alt || "Client logo"}
       width={54}
       height={54}

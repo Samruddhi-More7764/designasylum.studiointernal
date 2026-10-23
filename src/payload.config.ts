@@ -37,6 +37,7 @@ import { WorkPage } from "./globals/WorkPage";
 import { ClientsIndex } from "./globals/ClientsIndex";
 import { StudioPage } from "./globals/StudioPage";
 import { TeamPage } from "./globals/TeamPage";
+import { ClientsGridGlobal } from "./globals/ClientsGrid";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -138,6 +139,7 @@ export default buildConfig({
     ClientsIndex,
     StudioPage,
     TeamPage,
+    ClientsGridGlobal,
   ].map(withGlobalRevalidation),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",
