@@ -4,7 +4,7 @@ import { resolveMediaUrl } from "@/cms/media";
 import { distributeLogosTriangle } from "@/cms/content";
 import type { ClientLogo } from "@/data/clients";
 import {
-  getManufacturingIndustry,
+  manufacturingIndustryFallback,
   type ManufacturingContent,
 } from "@/cms/manufacturingIndustry";
 import type { ArticleSection } from "@/data/brandingAgencyPage";
@@ -329,7 +329,7 @@ export const getIndustryPageBySlug = cache(
     if (!cleanSlug) return null;
 
     const payload = await getPayloadClient();
-    const blueprintFallback = await getManufacturingIndustry();
+    const blueprintFallback = manufacturingIndustryFallback;
 
     if (payload) {
       try {

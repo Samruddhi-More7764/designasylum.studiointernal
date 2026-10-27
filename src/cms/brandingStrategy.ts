@@ -157,7 +157,12 @@ const fallback: BrandingStrategyContent = {
   relatedBlogs,
 };
 
+export const brandingStrategyFallback = fallback;
+
 export const getBrandingStrategy = cache(async (): Promise<BrandingStrategyContent> => {
+  const { getServicePageBySlug } = await import("@/cms/servicePages");
+  const doc = await getServicePageBySlug("brand-systems");
+  if (doc) return doc;
   return fallback;
 });
 

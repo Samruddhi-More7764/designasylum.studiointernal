@@ -4,7 +4,7 @@ import { resolveMediaUrl } from "@/cms/media";
 import { distributeLogosTriangle } from "@/cms/content";
 import type { ClientLogo } from "@/data/clients";
 import {
-  getBrandingStrategy,
+  brandingStrategyFallback,
   type BrandingStrategyContent,
 } from "@/cms/brandingStrategy";
 import type { ArticleSection } from "@/data/brandingAgencyPage";
@@ -327,7 +327,7 @@ export const getServicePageBySlug = cache(
     if (!cleanSlug) return null;
 
     const payload = await getPayloadClient();
-    const blueprintFallback = await getBrandingStrategy();
+    const blueprintFallback = brandingStrategyFallback;
 
     if (payload) {
       try {

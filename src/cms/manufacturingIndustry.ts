@@ -143,7 +143,12 @@ const fallback: ManufacturingContent = {
   relatedBlogs,
 };
 
+export const manufacturingIndustryFallback = fallback;
+
 export const getManufacturingIndustry = cache(async (): Promise<ManufacturingContent> => {
+  const { getIndustryPageBySlug } = await import("@/cms/industryPages");
+  const doc = await getIndustryPageBySlug("manufacturing");
+  if (doc) return doc;
   return fallback;
 });
 
