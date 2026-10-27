@@ -155,9 +155,10 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
         if (!name) return null;
         const designed = fallback.people[index];
         const customHref = row?.href?.trim();
+        const memberSlug = linked?.slug ? linked.slug.replace(/^\/+|\/+$/g, "").trim() : "";
         const href =
           customHref ||
-          (linked?.slug ? `/team/${linked.slug}` : designed?.href || "");
+          (memberSlug ? `/team/${memberSlug}` : designed?.href || "");
         const image = storedImage(
           row?.image || linked?.photoOne,
           designed?.image || studioTeam.people[0].image,

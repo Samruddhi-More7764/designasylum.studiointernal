@@ -74,7 +74,8 @@ function resolveMemberHref(
   if (custom) return custom;
 
   if (row?.member && typeof row.member === "object" && row.member.slug) {
-    return `/team/${row.member.slug}`;
+    const cleanSlug = row.member.slug.replace(/^\/+|\/+$/g, "").trim();
+    return `/team/${cleanSlug}`;
   }
 
   return designedHref || "#";

@@ -306,7 +306,7 @@ export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
       authorHref:
         doc.authorLink === "team"
           ? (doc.authorMember && typeof doc.authorMember === "object" && doc.authorMember.slug
-              ? `/team/${doc.authorMember.slug}#hero`
+              ? `/team/${doc.authorMember.slug.replace(/^\/+|\/+$/g, "").trim()}#hero`
               : teamPersonHeroHref)
           : doc.authorLink === "url"
             ? doc.authorUrl?.trim() || ""

@@ -15,9 +15,10 @@ export function revalidateMarketingPages(slug?: string) {
     revalidatePath("/why-design-asylum");
 
     if (slug) {
-      revalidatePath(`/team/${slug}`);
-      revalidatePath(`/clients/${slug}`);
-      revalidatePath(`/blog/${slug}`);
+      const cleanSlug = slug.replace(/^\/+|\/+$/g, "").trim();
+      revalidatePath(`/team/${cleanSlug}`);
+      revalidatePath(`/clients/${cleanSlug}`);
+      revalidatePath(`/blog/${cleanSlug}`);
     }
   } catch (error) {
     // If called outside of request context (e.g. during CLI scripts), safely ignore

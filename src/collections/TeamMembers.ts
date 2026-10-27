@@ -1,4 +1,23 @@
-import type { CollectionConfig, Field } from "payload";
+import type {
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+  Field,
+} from "payload";
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const ensureSlug: CollectionBeforeValidateHook = ({ data }) => {
+  if (!data) return data;
+  const source = String(data.slug || data.name || "");
+  if (source) data.slug = slugify(source);
+  return data;
+};
 
 function photo(name: string, label: string, description: string): Field {
   return {
@@ -33,6 +52,9 @@ export const TeamMembers: CollectionConfig = {
     defaultColumns: ["name", "role", "slug", "isLeadership"],
   },
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [ensureSlug],
+  },
   fields: [
     {
       name: "name",
@@ -47,7 +69,7 @@ export const TeamMembers: CollectionConfig = {
       required: true,
       unique: true,
       admin: {
-        description: "URL slug, e.g. 'tanmaya-rao' (accessible at /team/tanmaya-rao).",
+        description: "URL slug, e.g. 'tanmaya-rao' (accessible at /team/tanmaya-rao). Do not include slashes.",
       },
     },
     {

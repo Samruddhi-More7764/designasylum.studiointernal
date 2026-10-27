@@ -238,13 +238,20 @@ function parseTeamPersonDoc(
 export const getTeamPersonBySlug = cache(
   async (slug: string): Promise<TeamPersonContent | null> => {
     const payload = await getPayloadClient();
+    const cleanSlug = slug.replace(/^\/+|\/+$/g, "").trim();
+    if (!cleanSlug) return null;
 
     if (payload) {
       try {
         const res = (await payload.find({
           collection: "team-members" as "users",
           where: {
-            slug: { equals: slug },
+            or: [
+              { slug: { equals: cleanSlug } },
+              { slug: { equals: `/${cleanSlug}` } },
+              { slug: { equals: `${cleanSlug}/` } },
+              { slug: { equals: `/${cleanSlug}/` } },
+            ],
           },
           limit: 1,
           depth: 1,
@@ -259,7 +266,7 @@ export const getTeamPersonBySlug = cache(
     }
 
     // Fallback: If querying tanmaya-rao, check legacy global or use default design
-    if (slug === "tanmaya-rao") {
+    if (cleanSlug === "tanmaya-rao") {
       if (payload) {
         try {
           const doc = (await payload.findGlobal({
