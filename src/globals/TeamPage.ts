@@ -13,15 +13,19 @@ function imageField(): Field {
   };
 }
 
-function memberFields(): Field[] {
+function leadershipMemberFields(): Field[] {
   return [
     {
       name: "member",
-      label: "Linked Team Member Profile",
+      label: "Linked Leadership Profile",
       type: "relationship",
       relationTo: "team-members",
+      filterOptions: {
+        isLeadership: { equals: true },
+      },
       admin: {
-        description: "Select a profile to automatically link Read more to /team/[slug].",
+        description:
+          "Select a leadership profile created under Collections > Team & Leadership (must have 'Leadership Member' checked). Automatically links 'Read more' to /team/[slug]. Use '+' to create a new leadership profile with full details (bio, services, etc.).",
       },
     },
     imageField(),
@@ -32,7 +36,33 @@ function memberFields(): Field[] {
       label: "Custom Read more URL",
       type: "text",
       admin: {
-        description: "Optional override. If a Linked Team Member is selected above, this can be left empty.",
+        description: "Optional override. If a Linked Leadership Profile is selected above, this can be left empty.",
+      },
+    },
+  ];
+}
+
+function teamMemberFields(): Field[] {
+  return [
+    {
+      name: "member",
+      label: "Linked Team Member Profile",
+      type: "relationship",
+      relationTo: "team-members",
+      admin: {
+        description:
+          "Select a profile created under Collections > Team & Leadership. Automatically links 'Read more' to /team/[slug]. Use '+' to create a new team profile.",
+      },
+    },
+    imageField(),
+    { name: "name", type: "text", required: true },
+    { name: "role", type: "text" },
+    {
+      name: "href",
+      label: "Custom Read more URL",
+      type: "text",
+      admin: {
+        description: "Optional override. If a Linked Team Member Profile is selected above, this can be left empty.",
       },
     },
   ];
@@ -66,7 +96,7 @@ export const TeamPage: GlobalConfig = {
             {
               name: "leadership",
               type: "array",
-              fields: memberFields(),
+              fields: leadershipMemberFields(),
             },
           ],
         },
@@ -79,7 +109,7 @@ export const TeamPage: GlobalConfig = {
               name: "members",
               label: "People",
               type: "array",
-              fields: memberFields(),
+              fields: teamMemberFields(),
             },
           ],
         },

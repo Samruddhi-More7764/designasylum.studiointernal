@@ -96,7 +96,9 @@ function members(
       const role = row?.role?.trim() || linked?.role?.trim() || designedMember?.role || "";
       const imageUpload = row?.image || linked?.photoOne;
       const image = storedImage(imageUpload, designedMember?.image || teamPortrait);
-      const href = resolveMemberHref(row, designedMember?.href || "#");
+      const isCustomPerson = Boolean(row?.name?.trim() || linked?.name?.trim());
+      const fallbackHref = isCustomPerson ? "#" : designedMember?.href || "#";
+      const href = resolveMemberHref(row, fallbackHref);
 
       return {
         id: `${prefix}-${index}`,

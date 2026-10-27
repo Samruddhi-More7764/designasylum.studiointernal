@@ -868,6 +868,8 @@ export interface FaqItem {
   createdAt: string;
 }
 /**
+ * Full profile pages (/team/[slug]) for studio members (Leadership and Team).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "team-members".
  */
@@ -875,7 +877,7 @@ export interface TeamMember {
   id: number;
   name: string;
   /**
-   * URL slug, e.g. 'tanmaya-rao' (accessible at /team/tanmaya-rao).
+   * URL slug, e.g. 'tanmaya-rao' (accessible at /team/tanmaya-rao). Do not include slashes.
    */
   slug: string;
   /**
@@ -883,7 +885,7 @@ export interface TeamMember {
    */
   role?: string | null;
   /**
-   * Check if this person is part of the Leadership team.
+   * Check if this person is part of Leadership. This allows them to be linked under the Leadership section of the Team page.
    */
   isLeadership?: boolean | null;
   breadcrumbCurrent?: string | null;
@@ -2889,7 +2891,7 @@ export interface TeamPage {
   leadership?:
     | {
         /**
-         * Select a profile to automatically link Read more to /team/[slug].
+         * Select a leadership profile created under Collections > Team & Leadership (must have 'Leadership Member' checked). Automatically links 'Read more' to /team/[slug]. Use '+' to create a new leadership profile with full details (bio, services, etc.).
          */
         member?: (number | null) | TeamMember;
         /**
@@ -2899,7 +2901,7 @@ export interface TeamPage {
         name: string;
         role?: string | null;
         /**
-         * Optional override. If a Linked Team Member is selected above, this can be left empty.
+         * Optional override. If a Linked Leadership Profile is selected above, this can be left empty.
          */
         href?: string | null;
         id?: string | null;
@@ -2910,7 +2912,7 @@ export interface TeamPage {
   members?:
     | {
         /**
-         * Select a profile to automatically link Read more to /team/[slug].
+         * Select a profile created under Collections > Team & Leadership. Automatically links 'Read more' to /team/[slug]. Use '+' to create a new team profile.
          */
         member?: (number | null) | TeamMember;
         /**
@@ -2920,7 +2922,7 @@ export interface TeamPage {
         name: string;
         role?: string | null;
         /**
-         * Optional override. If a Linked Team Member is selected above, this can be left empty.
+         * Optional override. If a Linked Team Member Profile is selected above, this can be left empty.
          */
         href?: string | null;
         id?: string | null;

@@ -44,12 +44,13 @@ function chips(name: string): Field {
 export const TeamMembers: CollectionConfig = {
   slug: "team-members",
   labels: {
-    singular: "Team Member",
-    plural: "Team Members",
+    singular: "Team & Leadership Member",
+    plural: "Team & Leadership",
   },
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "role", "slug", "isLeadership"],
+    description: "Full profile pages (/team/[slug]) for studio members (Leadership and Team).",
   },
   access: { read: () => true },
   hooks: {
@@ -86,7 +87,7 @@ export const TeamMembers: CollectionConfig = {
       type: "checkbox",
       defaultValue: false,
       admin: {
-        description: "Check if this person is part of the Leadership team.",
+        description: "Check if this person is part of Leadership. This allows them to be linked under the Leadership section of the Team page.",
       },
     },
     {
