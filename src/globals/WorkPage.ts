@@ -83,8 +83,16 @@ export const WorkPage: GlobalConfig = {
                   type: "text",
                   admin: { description: "Where the card goes. Leave empty until that page exists." },
                 },
+                {
+                  name: "order",
+                  label: "Display order",
+                  type: "number",
+                  defaultValue: 0,
+                  admin: { description: "Card position order (lower numbers appear first)." },
+                },
               ],
             },
+
           ],
         },
       ],

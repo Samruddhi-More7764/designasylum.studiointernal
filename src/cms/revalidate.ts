@@ -19,6 +19,8 @@ export function revalidateMarketingPages(slug?: string) {
       revalidatePath(`/team/${cleanSlug}`);
       revalidatePath(`/clients/${cleanSlug}`);
       revalidatePath(`/blog/${cleanSlug}`);
+      revalidatePath(`/industries/${cleanSlug}`);
+      revalidatePath(`/services/${cleanSlug}`);
     }
   } catch (error) {
     // If called outside of request context (e.g. during CLI scripts), safely ignore

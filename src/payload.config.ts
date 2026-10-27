@@ -22,9 +22,10 @@ import { FaqItems } from "./collections/FaqItems";
 import { Clients } from "./collections/Clients";
 import { CaseStudies } from "./collections/CaseStudies";
 import { TeamMembers } from "./collections/TeamMembers";
+import { BlogPosts } from "./collections/BlogPosts";
+import { IndustryPages } from "./collections/IndustryPages";
+import { ServicePages } from "./collections/ServicePages";
 import { SiteFooter } from "./globals/SiteFooter";
-import { BrandingStrategy } from "./globals/BrandingStrategy";
-import { ManufacturingIndustry } from "./globals/ManufacturingIndustry";
 import { AhmedabadLocation } from "./globals/AhmedabadLocation";
 import { BlogIndex } from "./globals/BlogIndex";
 import { BlogArticleGlobal } from "./globals/BlogArticle";
@@ -122,11 +123,12 @@ export default buildConfig({
     withRevalidation(Clients),
     withRevalidation(CaseStudies),
     withRevalidation(TeamMembers),
+    withRevalidation(BlogPosts),
+    withRevalidation(IndustryPages),
+    withRevalidation(ServicePages),
   ],
   globals: [
     SiteFooter,
-    BrandingStrategy,
-    ManufacturingIndustry,
     AhmedabadLocation,
     BlogIndex,
     BlogArticleGlobal,

@@ -80,6 +80,9 @@ export interface Config {
     clients: Client;
     'case-studies': CaseStudy;
     'team-members': TeamMember;
+    'blog-posts': BlogPost;
+    'industry-pages': IndustryPage;
+    'service-pages': ServicePage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +103,9 @@ export interface Config {
     clients: ClientsSelect<false> | ClientsSelect<true>;
     'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
+    'industry-pages': IndustryPagesSelect<false> | IndustryPagesSelect<true>;
+    'service-pages': ServicePagesSelect<false> | ServicePagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -111,8 +117,6 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-footer': SiteFooter;
-    'branding-strategy': BrandingStrategy;
-    'manufacturing-industry': ManufacturingIndustry;
     'ahmedabad-location': AhmedabadLocation;
     'blog-index': BlogIndex;
     'blog-article': BlogArticle;
@@ -129,8 +133,6 @@ export interface Config {
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
-    'branding-strategy': BrandingStrategySelect<false> | BrandingStrategySelect<true>;
-    'manufacturing-industry': ManufacturingIndustrySelect<false> | ManufacturingIndustrySelect<true>;
     'ahmedabad-location': AhmedabadLocationSelect<false> | AhmedabadLocationSelect<true>;
     'blog-index': BlogIndexSelect<false> | BlogIndexSelect<true>;
     'blog-article': BlogArticleSelect<false> | BlogArticleSelect<true>;
@@ -604,6 +606,10 @@ export interface Client {
        */
       service?: string | null;
       image?: (number | null) | Media;
+      /**
+       * Controls the position on /clients. Lower numbers appear first (e.g. 1, 2, 10).
+       */
+      order?: number | null;
     };
     workPage?: {
       enabled?: boolean | null;
@@ -616,6 +622,10 @@ export interface Client {
        */
       category?: ('fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry') | null;
       image?: (number | null) | Media;
+      /**
+       * Controls the position on /work. Lower numbers appear first (e.g. 1, 2, 10).
+       */
+      order?: number | null;
     };
   };
   updatedAt: string;
@@ -810,9 +820,13 @@ export interface HomepageCaseStudy {
     id?: string | null;
   }[];
   /**
-   * Row opens this case study — /clients/{client}/{study}. Pick the project itself, not the brand.
+   * Row opens this case study — /clients/{client}/{study}. If omitted, opens the client profile.
    */
-  caseStudy: number | CaseStudy;
+  caseStudy?: (number | null) | CaseStudy;
+  /**
+   * Parent client brand for this homepage item.
+   */
+  client?: (number | null) | Client;
   order: number;
   updatedAt: string;
   createdAt: string;
@@ -994,6 +1008,453 @@ export interface TeamMember {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-posts".
+ */
+export interface BlogPost {
+  id: number;
+  title: string;
+  /**
+   * URL slug, e.g. 'branding-agency-in-pune' (accessible at /blogs/[slug]).
+   */
+  slug: string;
+  /**
+   * e.g. 'September 7, 2026'
+   */
+  date?: string | null;
+  /**
+   * e.g. '10 min read'
+   */
+  readTime?: string | null;
+  /**
+   * Category filter.
+   */
+  category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
+  image?: (number | null) | Media;
+  /**
+   * Optional. Leave empty to automatically use /blogs/[slug].
+   */
+  href?: string | null;
+  /**
+   * Optional card badge, e.g. 'Hot Right Now'
+   */
+  badge?: string | null;
+  badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Industry blueprint pages accessible at /industries/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "industry-pages".
+ */
+export interface IndustryPage {
+  id: number;
+  /**
+   * e.g. 'Manufacturing', 'Fintech', 'Deeptech'. Used as default footer link label.
+   */
+  title: string;
+  /**
+   * URL slug, e.g. 'manufacturing' (accessible at /industries/manufacturing).
+   */
+  slug: string;
+  /**
+   * Leave empty to use the Industry Name.
+   */
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * The large paragraph at the top of the article.
+   */
+  lead?: string | null;
+  /**
+   * The paragraphs between the lead and the first heading.
+   */
+  preface?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example manufacturing-website-orders.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * A bold subheading followed by paragraphs.
+         */
+        blocks?:
+          | {
+              title: string;
+              paragraphs?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        highlightTitle?: string | null;
+        highlightBody?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Logos on this industry page only. Leave empty to use homepage logos.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside card, in pixels. Default 48.
+         */
+        height?: number | null;
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Design projects in'
+   */
+  clientsBefore?: string | null;
+  /**
+   * e.g. 'manufacturing'
+   */
+  clientsAccent?: string | null;
+  /**
+   * e.g. 'industry'
+   */
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        /**
+         * Select from clients list to automatically pull name, image, and link.
+         */
+        client?: (number | null) | Client;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use client name.
+         */
+        name?: string | null;
+        /**
+         * Project summary or case study highlights.
+         */
+        description?: string | null;
+        /**
+         * Leave empty to link directly to the client page.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show on all tabs.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Manufacturing design'
+   */
+  expertsBefore?: string | null;
+  /**
+   * e.g. 'experts'
+   */
+  expertsAccent?: string | null;
+  expertsSubheading?: string | null;
+  experts?:
+    | {
+        /**
+         * Select from team members (leadership or team member) to automatically link profile.
+         */
+        member?: (number | null) | TeamMember;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use member name.
+         */
+        name?: string | null;
+        /**
+         * Leave empty to use member role.
+         */
+        role?: string | null;
+        /**
+         * Leave empty to automatically link to /team/[slug].
+         */
+        readMoreUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Related'
+   */
+  relatedBefore?: string | null;
+  /**
+   * e.g. 'blogs'
+   */
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        /**
+         * Select from all blogs list to automatically pull title, image, date, and link.
+         */
+        post?: (number | null) | BlogPost;
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        /**
+         * Leave empty to use blog post title.
+         */
+        title?: string | null;
+        /**
+         * Leave empty to use blog post link.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Service blueprint pages (Brand Systems) accessible at /services/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-pages".
+ */
+export interface ServicePage {
+  id: number;
+  /**
+   * e.g. 'Brand Systems', 'Website Design', 'Webflow Build'. Used as default footer link label.
+   */
+  title: string;
+  /**
+   * URL slug, e.g. 'brand-systems' (accessible at /services/brand-systems).
+   */
+  slug: string;
+  /**
+   * Leave empty to use the Service Name.
+   */
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * The large paragraph above the first section.
+   */
+  lead?: string | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example definitive-guide.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        pointers?:
+          | {
+              term?: string | null;
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        closing?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        highlightTitle?: string | null;
+        highlightBody?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Logos on this service page only. They do not change the homepage.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside card, in pixels. Default 48.
+         */
+        height?: number | null;
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Clients we did'
+   */
+  clientsBefore?: string | null;
+  /**
+   * e.g. 'branding'
+   */
+  clientsAccent?: string | null;
+  /**
+   * e.g. 'for'
+   */
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        /**
+         * Select from clients list to automatically pull name, image, and link.
+         */
+        client?: (number | null) | Client;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use client name.
+         */
+        name?: string | null;
+        /**
+         * Project summary or case study highlights.
+         */
+        description?: string | null;
+        /**
+         * Leave empty to link directly to the client page.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show on all tabs.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Branding'
+   */
+  expertsBefore?: string | null;
+  /**
+   * e.g. 'experts'
+   */
+  expertsAccent?: string | null;
+  expertsSubheading?: string | null;
+  experts?:
+    | {
+        /**
+         * Select from team members (leadership or team member) to automatically link profile.
+         */
+        member?: (number | null) | TeamMember;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use member name.
+         */
+        name?: string | null;
+        /**
+         * Leave empty to use member role.
+         */
+        role?: string | null;
+        /**
+         * Leave empty to automatically link to /team/[slug].
+         */
+        readMoreUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Related'
+   */
+  relatedBefore?: string | null;
+  /**
+   * e.g. 'blogs'
+   */
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        /**
+         * Select from all blogs list to automatically pull title, image, date, and link.
+         */
+        post?: (number | null) | BlogPost;
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        /**
+         * Leave empty to use blog post title.
+         */
+        title?: string | null;
+        /**
+         * Leave empty to use blog post link.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1067,6 +1528,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'team-members';
         value: number | TeamMember;
+      } | null)
+    | ({
+        relationTo: 'blog-posts';
+        value: number | BlogPost;
+      } | null)
+    | ({
+        relationTo: 'industry-pages';
+        value: number | IndustryPage;
+      } | null)
+    | ({
+        relationTo: 'service-pages';
+        value: number | ServicePage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1241,6 +1714,7 @@ export interface HomepageCaseStudiesSelect<T extends boolean = true> {
         id?: T;
       };
   caseStudy?: T;
+  client?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1488,6 +1962,7 @@ export interface ClientsSelect<T extends boolean = true> {
               enabled?: T;
               service?: T;
               image?: T;
+              order?: T;
             };
         workPage?:
           | T
@@ -1496,6 +1971,7 @@ export interface ClientsSelect<T extends boolean = true> {
               service?: T;
               category?: T;
               image?: T;
+              order?: T;
             };
       };
   updatedAt?: T;
@@ -1670,6 +2146,248 @@ export interface TeamMembersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-posts_select".
+ */
+export interface BlogPostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  date?: T;
+  readTime?: T;
+  category?: T;
+  image?: T;
+  href?: T;
+  badge?: T;
+  badgeIcon?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "industry-pages_select".
+ */
+export interface IndustryPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  lead?: T;
+  preface?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              title?: T;
+              paragraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        highlightTitle?: T;
+        highlightBody?: T;
+        id?: T;
+      };
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        client?: T;
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  expertsBefore?: T;
+  expertsAccent?: T;
+  expertsSubheading?: T;
+  experts?:
+    | T
+    | {
+        member?: T;
+        image?: T;
+        name?: T;
+        role?: T;
+        readMoreUrl?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        post?: T;
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-pages_select".
+ */
+export interface ServicePagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        pointers?:
+          | T
+          | {
+              term?: T;
+              text?: T;
+              id?: T;
+            };
+        closing?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        highlightTitle?: T;
+        highlightBody?: T;
+        id?: T;
+      };
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        client?: T;
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  expertsBefore?: T;
+  expertsAccent?: T;
+  expertsSubheading?: T;
+  experts?:
+    | T
+    | {
+        member?: T;
+        image?: T;
+        name?: T;
+        role?: T;
+        readMoreUrl?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        post?: T;
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1733,374 +2451,70 @@ export interface SiteFooter {
       }[]
     | null;
   /**
-   * Links under Work. Leave URL empty to keep the built-in page, or type a path such as /work.
+   * Links under Work.
    */
   work?:
     | {
         label: string;
-        /**
-         * Optional. Example: /blogs/branding-agency-in-pune
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Links under Company. Leave URL empty to keep the built-in page, or type a path such as /work.
+   * Links under Company.
    */
   company?:
     | {
         label: string;
-        /**
-         * Optional. Example: /blogs/branding-agency-in-pune
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Links under Solutions. Leave URL empty to keep the built-in page, or type a path such as /work.
+   * Links under Solutions.
    */
   solutions?:
     | {
         label: string;
-        /**
-         * Optional. Example: /blogs/branding-agency-in-pune
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Links under Services. Leave URL empty to keep the built-in page, or type a path such as /work.
+   * Links under Services. Select a Service Page created in CMS (auto-routes to /services/[slug] and uses page name).
    */
   services?:
     | {
-        label: string;
         /**
-         * Optional. Example: /blogs/branding-agency-in-pune
+         * Select a service page created in CMS. Routing and name are managed automatically.
          */
-        href?: string | null;
+        servicePage?: (number | null) | ServicePage;
+        /**
+         * Link name. If a Service Page is selected above, leave empty to automatically use the page's name.
+         */
+        label?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Links under Industries. Leave URL empty to keep the built-in page, or type a path such as /work.
+   * Links under Industries. Select an Industry Page created in CMS (auto-routes to /industries/[slug] and uses page name).
    */
   industries?:
     | {
-        label: string;
         /**
-         * Optional. Example: /blogs/branding-agency-in-pune
+         * Select an industry page created in CMS. Routing and name are managed automatically.
          */
-        href?: string | null;
+        industryPage?: (number | null) | IndustryPage;
+        /**
+         * Link name. If an Industry Page is selected above, leave empty to automatically use the page's name.
+         */
+        label?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Links under Studio. Leave URL empty to keep the built-in page, or type a path such as /work.
+   * Links under Studio.
    */
   studio?:
     | {
         label: string;
-        /**
-         * Optional. Example: /blogs/branding-agency-in-pune
-         */
-        href?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branding-strategy".
- */
-export interface BrandingStrategy {
-  id: number;
-  breadcrumbCurrent?: string | null;
-  heroTitle?: string | null;
-  heroIntro?: string | null;
-  heroImage?: (number | null) | Media;
-  /**
-   * The large paragraph above the first section.
-   */
-  lead?: string | null;
-  /**
-   * Each section becomes a heading, its body, and a table-of-contents item.
-   */
-  sections?:
-    | {
-        /**
-         * Stable id, for example definitive-guide.
-         */
-        anchor: string;
-        tocLabel: string;
-        headingBefore?: string | null;
-        headingAccent?: string | null;
-        headingAfter?: string | null;
-        paragraphs?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        pointers?:
-          | {
-              term?: string | null;
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        closing?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        highlightTitle?: string | null;
-        highlightBody?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Logos on the branding strategy page only. They do not change the homepage.
-   */
-  logos?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        /**
-         * Width inside the card, in pixels. Default 160.
-         */
-        width?: number | null;
-        /**
-         * Height inside the card, in pixels. Default 48.
-         */
-        height?: number | null;
-        /**
-         * Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.
-         */
-        row?: ('1' | '2') | null;
-        id?: string | null;
-      }[]
-    | null;
-  clientsBefore?: string | null;
-  clientsAccent?: string | null;
-  clientsAfter?: string | null;
-  clientTabs?:
-    | {
-        tabId: string;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  projects?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        description: string;
-        href?: string | null;
-        /**
-         * Which tab this project appears under. Leave empty to show it on every tab. The value must match the tab Id.
-         */
-        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
-        id?: string | null;
-      }[]
-    | null;
-  faqs?:
-    | {
-        question: string;
-        /**
-         * Leave empty to keep the question closed.
-         */
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  expertsBefore?: string | null;
-  expertsAccent?: string | null;
-  expertsSubheading?: string | null;
-  experts?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        role: string;
-        /**
-         * Where the Read more button goes.
-         */
-        readMoreUrl?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  relatedBefore?: string | null;
-  relatedAccent?: string | null;
-  relatedBlogs?:
-    | {
-        image?: (number | null) | Media;
-        date?: string | null;
-        readTime?: string | null;
-        title: string;
-        href?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-  primaryCta?: string | null;
-  secondaryCta?: string | null;
-  ctaBefore?: string | null;
-  ctaAccent?: string | null;
-  ctaBody?: string | null;
-  ctaButton?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "manufacturing-industry".
- */
-export interface ManufacturingIndustry {
-  id: number;
-  breadcrumbCurrent?: string | null;
-  heroTitle?: string | null;
-  heroIntro?: string | null;
-  heroImage?: (number | null) | Media;
-  /**
-   * The large paragraph at the top of the article.
-   */
-  lead?: string | null;
-  /**
-   * The paragraphs between the lead and the first heading.
-   */
-  preface?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Each section becomes a heading, its body, and a table-of-contents item.
-   */
-  sections?:
-    | {
-        /**
-         * Stable id, for example manufacturing-website-orders.
-         */
-        anchor: string;
-        tocLabel: string;
-        headingBefore?: string | null;
-        headingAccent?: string | null;
-        headingAfter?: string | null;
-        paragraphs?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * A bold subheading followed by paragraphs.
-         */
-        blocks?:
-          | {
-              title: string;
-              paragraphs?:
-                | {
-                    text: string;
-                    id?: string | null;
-                  }[]
-                | null;
-              id?: string | null;
-            }[]
-          | null;
-        highlightTitle?: string | null;
-        highlightBody?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Logos on the manufacturing page only. Leave this empty to keep using the homepage logos. Filling it does not change the homepage.
-   */
-  logos?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        /**
-         * Width inside the card, in pixels. Default 160.
-         */
-        width?: number | null;
-        /**
-         * Height inside the card, in pixels. Default 48.
-         */
-        height?: number | null;
-        /**
-         * Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.
-         */
-        row?: ('1' | '2') | null;
-        id?: string | null;
-      }[]
-    | null;
-  clientsBefore?: string | null;
-  clientsAccent?: string | null;
-  clientsAfter?: string | null;
-  clientTabs?:
-    | {
-        tabId: string;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  projects?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        description: string;
-        /**
-         * Where the View website button goes. Leave empty until that page exists.
-         */
-        href?: string | null;
-        /**
-         * Which tab this project appears under. Leave empty to show it on every tab.
-         */
-        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
-        id?: string | null;
-      }[]
-    | null;
-  faqs?:
-    | {
-        question: string;
-        /**
-         * Leave empty to keep the question closed.
-         */
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  expertsBefore?: string | null;
-  expertsAccent?: string | null;
-  expertsSubheading?: string | null;
-  experts?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        role: string;
-        /**
-         * Where the Read more button goes.
-         */
-        readMoreUrl?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  relatedBefore?: string | null;
-  relatedAccent?: string | null;
-  relatedBlogs?:
-    | {
-        image?: (number | null) | Media;
-        date?: string | null;
-        readTime?: string | null;
-        title: string;
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -2765,6 +3179,10 @@ export interface WorkPage {
          * Where the card goes. Leave empty until that page exists.
          */
         href?: string | null;
+        /**
+         * Card position order (lower numbers appear first).
+         */
+        order?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -2791,6 +3209,10 @@ export interface ClientsIndex {
          * Where the card goes. Leave empty until that page exists.
          */
         href?: string | null;
+        /**
+         * Card position order (lower numbers appear first).
+         */
+        order?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -2995,267 +3417,38 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | T
     | {
         label?: T;
-        href?: T;
         id?: T;
       };
   company?:
     | T
     | {
         label?: T;
-        href?: T;
         id?: T;
       };
   solutions?:
     | T
     | {
         label?: T;
-        href?: T;
         id?: T;
       };
   services?:
     | T
     | {
+        servicePage?: T;
         label?: T;
-        href?: T;
         id?: T;
       };
   industries?:
     | T
     | {
+        industryPage?: T;
         label?: T;
-        href?: T;
         id?: T;
       };
   studio?:
     | T
     | {
         label?: T;
-        href?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "branding-strategy_select".
- */
-export interface BrandingStrategySelect<T extends boolean = true> {
-  breadcrumbCurrent?: T;
-  heroTitle?: T;
-  heroIntro?: T;
-  heroImage?: T;
-  lead?: T;
-  sections?:
-    | T
-    | {
-        anchor?: T;
-        tocLabel?: T;
-        headingBefore?: T;
-        headingAccent?: T;
-        headingAfter?: T;
-        paragraphs?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        pointers?:
-          | T
-          | {
-              term?: T;
-              text?: T;
-              id?: T;
-            };
-        closing?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        highlightTitle?: T;
-        highlightBody?: T;
-        id?: T;
-      };
-  logos?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        width?: T;
-        height?: T;
-        row?: T;
-        id?: T;
-      };
-  clientsBefore?: T;
-  clientsAccent?: T;
-  clientsAfter?: T;
-  clientTabs?:
-    | T
-    | {
-        tabId?: T;
-        label?: T;
-        id?: T;
-      };
-  projects?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        description?: T;
-        href?: T;
-        tab?: T;
-        id?: T;
-      };
-  faqs?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  expertsBefore?: T;
-  expertsAccent?: T;
-  expertsSubheading?: T;
-  experts?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        role?: T;
-        readMoreUrl?: T;
-        id?: T;
-      };
-  relatedBefore?: T;
-  relatedAccent?: T;
-  relatedBlogs?:
-    | T
-    | {
-        image?: T;
-        date?: T;
-        readTime?: T;
-        title?: T;
-        href?: T;
-        id?: T;
-      };
-  metaTitle?: T;
-  metaDescription?: T;
-  primaryCta?: T;
-  secondaryCta?: T;
-  ctaBefore?: T;
-  ctaAccent?: T;
-  ctaBody?: T;
-  ctaButton?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "manufacturing-industry_select".
- */
-export interface ManufacturingIndustrySelect<T extends boolean = true> {
-  breadcrumbCurrent?: T;
-  heroTitle?: T;
-  heroIntro?: T;
-  heroImage?: T;
-  lead?: T;
-  preface?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  sections?:
-    | T
-    | {
-        anchor?: T;
-        tocLabel?: T;
-        headingBefore?: T;
-        headingAccent?: T;
-        headingAfter?: T;
-        paragraphs?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        blocks?:
-          | T
-          | {
-              title?: T;
-              paragraphs?:
-                | T
-                | {
-                    text?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-        highlightTitle?: T;
-        highlightBody?: T;
-        id?: T;
-      };
-  logos?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        width?: T;
-        height?: T;
-        row?: T;
-        id?: T;
-      };
-  clientsBefore?: T;
-  clientsAccent?: T;
-  clientsAfter?: T;
-  clientTabs?:
-    | T
-    | {
-        tabId?: T;
-        label?: T;
-        id?: T;
-      };
-  projects?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        description?: T;
-        href?: T;
-        tab?: T;
-        id?: T;
-      };
-  faqs?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  expertsBefore?: T;
-  expertsAccent?: T;
-  expertsSubheading?: T;
-  experts?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        role?: T;
-        readMoreUrl?: T;
-        id?: T;
-      };
-  relatedBefore?: T;
-  relatedAccent?: T;
-  relatedBlogs?:
-    | T
-    | {
-        image?: T;
-        date?: T;
-        readTime?: T;
-        title?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -3810,6 +4003,7 @@ export interface WorkPageSelect<T extends boolean = true> {
         service?: T;
         category?: T;
         href?: T;
+        order?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -3830,6 +4024,7 @@ export interface ClientsIndexSelect<T extends boolean = true> {
         name?: T;
         service?: T;
         href?: T;
+        order?: T;
         id?: T;
       };
   updatedAt?: T;

@@ -5,9 +5,10 @@ export const homepageStudyLink: Field = {
   name: "caseStudy",
   type: "relationship",
   relationTo: "case-studies",
-  required: true,
+  required: false,
   admin: {
     description:
-      "Row opens this case study — /clients/{client}/{study}. Pick the project itself, not the brand.",
+      "Row opens this case study — /clients/{client}/{study}. If omitted, opens the client profile.",
   },
 };
+

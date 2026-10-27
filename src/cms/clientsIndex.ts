@@ -42,8 +42,10 @@ export const getClientsIndex = cache(async (): Promise<ClientsIndexContent> => {
         name?: string | null;
         service?: string | null;
         href?: string | null;
+        order?: number | string | null;
       } | null> | null;
     };
+
 
     const cards = (
       await Promise.all(
@@ -190,22 +192,35 @@ export const getClientsIndex = cache(async (): Promise<ClientsIndexContent> => {
                 : clientCards[0].image;
           }
 
+          const rawOrder = row?.order;
+          const order =
+            typeof rawOrder === "number" && !isNaN(rawOrder)
+              ? rawOrder
+              : typeof rawOrder === "string" && /^\d+/.test(rawOrder)
+                ? parseInt(rawOrder, 10)
+                : index + 1;
+
           return {
             id: `client-card-${index}`,
             name,
             service: row?.service?.trim() || designed?.service || "",
             image: imageSrc,
             href: row?.href?.trim() || "#",
+            order,
           };
         }),
       )
-    ).filter((row): row is ClientsIndexContent["cards"][number] => Boolean(row));
+    )
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .sort((a, b) => a.order - b.order)
+      .map(({ order: _order, ...card }) => card);
 
     return {
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
       heading: text(doc.heading, fallback.heading),
       cards: cards.length ? cards : fallback.cards,
     };
+
   } catch (error) {
     console.warn("[cms] clients page fallback", error);
     return fallback;

@@ -444,16 +444,18 @@ export const getFeaturedProjects = cache(async (): Promise<FeaturedProject[]> =>
     if (!result.docs.length) return fallbackProjects;
     const mapped = (
       await Promise.all(
-        result.docs.map(async (doc) => {
-          const src = safeMediaUrl(doc.image);
-          if (!src) return null;
+        result.docs.map(async (doc, index) => {
+          const src =
+            safeMediaUrl(doc.image) ||
+            fallbackProjects[index % fallbackProjects.length]?.image ||
+            fallbackProjects[0].image;
           return {
             name: String(doc.name),
             description: String(doc.description),
-            metric: String(doc.metric),
-            metricLabel: String(doc.metricLabel),
+            metric: String(doc.metric || ""),
+            metricLabel: String(doc.metricLabel || ""),
             image: src,
-            alt: String(doc.alt || resolveMediaAlt(doc.image) || ""),
+            alt: String(doc.alt || resolveMediaAlt(doc.image) || `${doc.name} preview`),
             href: await hrefFromClientField(
               payload,
               doc.client,
@@ -484,14 +486,16 @@ export const getPortfolioItems = cache(async (): Promise<PortfolioItem[]> => {
     if (!result.docs.length) return fallbackPortfolio;
     const mapped = (
       await Promise.all(
-        result.docs.map(async (doc) => {
-          const src = safeMediaUrl(doc.image);
-          if (!src) return null;
+        result.docs.map(async (doc, index) => {
+          const src =
+            safeMediaUrl(doc.image) ||
+            fallbackPortfolio[index % fallbackPortfolio.length]?.image ||
+            fallbackPortfolio[0].image;
           return {
             name: String(doc.name),
-            category: String(doc.category),
+            category: String(doc.category || "Brand Strategy"),
             image: src,
-            alt: String(doc.alt || resolveMediaAlt(doc.image) || ""),
+            alt: String(doc.alt || resolveMediaAlt(doc.image) || `${doc.name} visual`),
             href: await hrefFromClientField(
               payload,
               doc.client,
@@ -501,6 +505,7 @@ export const getPortfolioItems = cache(async (): Promise<PortfolioItem[]> => {
         }),
       )
     ).filter((row): row is PortfolioItem => Boolean(row));
+
     return mapped.length ? mapped : fallbackPortfolio;
   } catch (error) {
     console.warn("[cms] portfolio fallback", error);
@@ -721,18 +726,31 @@ export const getHomepageCaseStudies = cache(async (): Promise<CaseStudy[]> => {
     });
     if (!result.docs.length) return fallbackCaseStudies;
     return Promise.all(
-      result.docs.map(async (doc) => ({
-        number: String(doc.number),
-        name: String(doc.name),
-        description: String(doc.description),
-        tags: labels(doc.tags as LabelRow[]),
-        href: await hrefFromStudyField(
-          payload,
-          doc.caseStudy,
-          "/clients/sevenloop/case-study",
-        ),
-      })),
+      result.docs.map(async (doc) => {
+        let href = "/clients/sevenloop/case-study";
+        if (doc.caseStudy) {
+          href = await hrefFromStudyField(
+            payload,
+            doc.caseStudy,
+            "/clients/sevenloop/case-study",
+          );
+        } else if ((doc as { client?: unknown }).client) {
+          href = await hrefFromClientField(
+            payload,
+            (doc as { client?: unknown }).client,
+            "/clients/sevenloop",
+          );
+        }
+        return {
+          number: String(doc.number),
+          name: String(doc.name),
+          description: String(doc.description),
+          tags: labels(doc.tags as LabelRow[]),
+          href,
+        };
+      }),
     );
+
   } catch (error) {
     console.warn("[cms] homepage case studies fallback", error);
     return fallbackCaseStudies;
@@ -819,14 +837,43 @@ const FOOTER_LISTS = {
   Studio: "studio",
 } as const;
 
-type FooterListRow = { label?: string | null; href?: string | null };
+type LinkedPage = { title?: string | null; slug?: string | null } | string | null | undefined;
+
+type FooterListRow = {
+  label?: string | null;
+  href?: string | null;
+  industryPage?: LinkedPage;
+  servicePage?: LinkedPage;
+};
+
+function resolvePageSlug(page: LinkedPage): { title: string; slug: string } | null {
+  if (page && typeof page === "object" && page.slug) {
+    return {
+      title: page.title?.trim() || "",
+      slug: page.slug.replace(/^\/+|\/+$/g, "").trim(),
+    };
+  }
+  return null;
+}
 
 function footerList(rows: FooterListRow[] | null | undefined): FooterLink[] | null {
   if (!rows?.length) return null;
   const links = rows.flatMap((row) => {
-    const label = row?.label?.trim() || "";
+    const linkedIndustry = resolvePageSlug(row?.industryPage);
+    const linkedService = resolvePageSlug(row?.servicePage);
+
+    const defaultLabel = linkedIndustry?.title || linkedService?.title || "";
+    const defaultHref = linkedIndustry
+      ? `/industries/${linkedIndustry.slug}`
+      : linkedService
+        ? `/services/${linkedService.slug}`
+        : "";
+
+    const label = row?.label?.trim() || defaultLabel;
     if (!label) return [];
-    return [{ label, href: row?.href?.trim() || footerLinkHref(label) }];
+
+    const href = row?.href?.trim() || defaultHref || footerLinkHref(label);
+    return [{ label, href }];
   });
   return links.length ? links : null;
 }
@@ -842,7 +889,7 @@ export const getFooter = cache(async (): Promise<FooterContent> => {
   try {
     const global = (await payload.findGlobal({
       slug: "site-footer",
-      depth: 0,
+      depth: 1,
     })) as Partial<Record<(typeof FOOTER_LISTS)[keyof typeof FOOTER_LISTS], FooterListRow[] | null>>;
     const columns = fallbackFooterColumns.map((column) => {
       const key = FOOTER_LISTS[column.title as keyof typeof FOOTER_LISTS];

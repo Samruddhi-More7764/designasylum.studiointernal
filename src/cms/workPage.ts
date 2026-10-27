@@ -57,8 +57,10 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
         service?: string | null;
         category?: string | null;
         href?: string | null;
+        order?: number | string | null;
       } | null> | null;
     };
+
 
     const filters = (doc.filters || [])
       .map((row) => {
@@ -215,6 +217,14 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
                 : "/assets/images/work/01.png";
           }
 
+          const rawOrder = row?.order;
+          const order =
+            typeof rawOrder === "number" && !isNaN(rawOrder)
+              ? rawOrder
+              : typeof rawOrder === "string" && /^\d+/.test(rawOrder)
+                ? parseInt(rawOrder, 10)
+                : index + 1;
+
           return {
             id: `work-${index}`,
             name,
@@ -222,10 +232,14 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
             image: imageSrc,
             category: category as Exclude<WorkFilterId, "all">,
             href: row?.href?.trim() || "#",
+            order,
           };
         }),
       )
-    ).filter((row): row is WorkContent["projects"][number] => Boolean(row));
+    )
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .sort((a, b) => a.order - b.order)
+      .map(({ order: _order, ...proj }) => proj);
 
     return {
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
@@ -233,6 +247,7 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
       filters: filters.length ? filters : fallback.filters,
       projects: projects.length ? projects : fallback.projects,
     };
+
   } catch (error) {
     console.warn("[cms] work page fallback", error);
     return fallback;

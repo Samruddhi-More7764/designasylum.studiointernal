@@ -12,7 +12,7 @@ import { IndustryPager } from "@/components/branding-agency/IndustryPager";
 import { FAQ } from "@/components/sections/14-FAQ";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
-import { getManufacturingIndustry } from "@/cms/manufacturingIndustry";
+import { getIndustryPageBySlug } from "@/cms/industryPages";
 import {
   manufacturingBreadcrumbs,
   RIGHT_TO_WIN_ID,
@@ -28,9 +28,13 @@ export const metadata: Metadata = {
 
 export default async function ManufacturingIndustryPage() {
   const [page, footer] = await Promise.all([
-    getManufacturingIndustry(),
+    getIndustryPageBySlug("manufacturing"),
     getFooter(),
   ]);
+
+  if (!page) {
+    return null;
+  }
 
   return (
     <>

@@ -290,6 +290,16 @@ export const clientPlacementsFields: Field[] = [
               condition: placementToggled("enabled"),
             },
           },
+          {
+            name: "order",
+            type: "number",
+            label: "Display order",
+            defaultValue: 0,
+            admin: {
+              condition: placementToggled("enabled"),
+              description: "Controls the position on /clients. Lower numbers appear first (e.g. 1, 2, 10).",
+            },
+          },
         ],
       },
       {
@@ -339,8 +349,19 @@ export const clientPlacementsFields: Field[] = [
               condition: placementToggled("enabled"),
             },
           },
+          {
+            name: "order",
+            type: "number",
+            label: "Display order",
+            defaultValue: 0,
+            admin: {
+              condition: placementToggled("enabled"),
+              description: "Controls the position on /work. Lower numbers appear first (e.g. 1, 2, 10).",
+            },
+          },
         ],
       },
+
     ],
   },
 ];

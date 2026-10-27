@@ -21,6 +21,16 @@ function extractId(value: unknown): number | null {
   return null;
 }
 
+function parseOrder(value: unknown, defaultVal = 0): number {
+  if (typeof value === "number" && !isNaN(value)) return value;
+  if (typeof value === "string") {
+    const cleaned = value.trim().replace(/[^0-9-]/g, "");
+    const parsed = parseInt(cleaned, 10);
+    return Number.isFinite(parsed) ? parsed : defaultVal;
+  }
+  return defaultVal;
+}
+
 /**
  * Triggered after a Client document changes.
  * Syncs the configured placements to their respective collections & globals.
@@ -100,14 +110,25 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const fpDoc = existingFP.docs[0];
 
     if (fpConfig?.enabled) {
-      const imgId = extractId(fpConfig.image) || defaultHeroImageId;
+      let imgId = extractId(fpConfig.image) || defaultHeroImageId;
+      if (!imgId) {
+        try {
+          const anyMedia = await req.payload.find({
+            collection: "media",
+            limit: 1,
+            depth: 0,
+          });
+          if (anyMedia.docs[0]) imgId = anyMedia.docs[0].id;
+        } catch {}
+      }
+
       const data: Record<string, unknown> = {
         name: clientName,
-        description: fpConfig.description || "",
+        description: fpConfig.description || defaultHeroHeading || `${clientName} project`,
         metric: fpConfig.metric || "",
         metricLabel: fpConfig.metricLabel || "",
         alt: fpConfig.alt || `${clientName} preview`,
-        order: typeof fpConfig.order === "number" ? fpConfig.order : 0,
+        order: parseOrder(fpConfig.order, 0),
         client: clientId,
       };
       if (imgId != null) {
@@ -121,7 +142,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           data: data as never,
           context: { skipSync: true },
         });
-      } else if (imgId != null) {
+      } else {
         await req.payload.create({
           collection: "featured-projects",
           data: data as never,
@@ -154,12 +175,23 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const piDoc = existingPI.docs[0];
 
     if (piConfig?.enabled) {
-      const imgId = extractId(piConfig.image) || defaultHeroImageId;
+      let imgId = extractId(piConfig.image) || defaultHeroImageId;
+      if (!imgId) {
+        try {
+          const anyMedia = await req.payload.find({
+            collection: "media",
+            limit: 1,
+            depth: 0,
+          });
+          if (anyMedia.docs[0]) imgId = anyMedia.docs[0].id;
+        } catch {}
+      }
+
       const data: Record<string, unknown> = {
         name: clientName,
         category: piConfig.category || "Brand & Web",
         alt: piConfig.alt || `${clientName} portfolio visual`,
-        order: typeof piConfig.order === "number" ? piConfig.order : 0,
+        order: parseOrder(piConfig.order, 0),
         client: clientId,
       };
       if (imgId != null) {
@@ -173,7 +205,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           data: data as never,
           context: { skipSync: true },
         });
-      } else if (imgId != null) {
+      } else {
         await req.payload.create({
           collection: "portfolio-items",
           data: data as never,
@@ -208,9 +240,9 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     if (ppConfig?.enabled) {
       const data = {
         tag: ppConfig.tag || clientName,
-        quote: ppConfig.quote || "",
-        resolution: ppConfig.resolution || "",
-        order: typeof ppConfig.order === "number" ? ppConfig.order : 0,
+        quote: ppConfig.quote || defaultHeroHeading || `${clientName} challenge`,
+        resolution: ppConfig.resolution || "Complete brand & digital system built by Design Asylum.",
+        order: parseOrder(ppConfig.order, 0),
         client: clientId,
       };
 
@@ -221,7 +253,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           data,
           context: { skipSync: true },
         });
-      } else if (data.quote && data.resolution) {
+      } else {
         await req.payload.create({
           collection: "pain-points",
           data: data as never,
@@ -242,52 +274,58 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     });
   }
 
-  // 4. Homepage Case Studies Sync
+  // 4. Homepage Case Studies Sync (Diverse)
   try {
     const hcsConfig = placements.homepageCaseStudy;
     const targetStudyId =
       extractId(hcsConfig?.caseStudy) || extractId(doc.featuredStudy);
 
-    if (targetStudyId) {
-      const existingHCS = await req.payload.find({
-        collection: "homepage-case-studies",
-        where: { caseStudy: { equals: targetStudyId } },
-        limit: 1,
-        depth: 0,
-      });
-      const hcsDoc = existingHCS.docs[0];
+    const existingHCS = await req.payload.find({
+      collection: "homepage-case-studies",
+      where: {
+        or: [
+          { client: { equals: clientId } },
+          ...(targetStudyId ? [{ caseStudy: { equals: targetStudyId } }] : []),
+        ],
+      },
+      limit: 1,
+      depth: 0,
+    });
+    const hcsDoc = existingHCS.docs[0];
 
-      if (hcsConfig?.enabled) {
-        const data = {
-          number: hcsConfig.number || "01",
-          name: clientName,
-          description: hcsConfig.description || "",
-          tags: Array.isArray(hcsConfig.tags) ? hcsConfig.tags : [],
-          order: typeof hcsConfig.order === "number" ? hcsConfig.order : 0,
-          caseStudy: targetStudyId,
-        };
+    if (hcsConfig?.enabled) {
+      const data: Record<string, unknown> = {
+        number: hcsConfig.number || "01",
+        name: clientName,
+        description: hcsConfig.description || defaultHeroHeading || "",
+        tags: Array.isArray(hcsConfig.tags) ? hcsConfig.tags : [],
+        order: parseOrder(hcsConfig.order, 0),
+        client: clientId,
+      };
+      if (targetStudyId) {
+        data.caseStudy = targetStudyId;
+      }
 
-        if (hcsDoc) {
-          await req.payload.update({
-            collection: "homepage-case-studies",
-            id: hcsDoc.id,
-            data: data as never,
-            context: { skipSync: true },
-          });
-        } else {
-          await req.payload.create({
-            collection: "homepage-case-studies",
-            data: data as never,
-            context: { skipSync: true },
-          });
-        }
-      } else if (hcsDoc) {
-        await req.payload.delete({
+      if (hcsDoc) {
+        await req.payload.update({
           collection: "homepage-case-studies",
           id: hcsDoc.id,
+          data: data as never,
+          context: { skipSync: true },
+        });
+      } else {
+        await req.payload.create({
+          collection: "homepage-case-studies",
+          data: data as never,
           context: { skipSync: true },
         });
       }
+    } else if (hcsDoc) {
+      await req.payload.delete({
+        collection: "homepage-case-studies",
+        id: hcsDoc.id,
+        context: { skipSync: true },
+      });
     }
   } catch (err) {
     req.payload.logger.error({
@@ -296,7 +334,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     });
   }
 
-  // 5. Clients Page Global Sync
+  // 5. Clients Page Global Sync (/clients)
   try {
     const cpConfig = placements.clientsPage;
     const globalClients = (await req.payload.findGlobal({
@@ -304,7 +342,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       depth: 0,
     })) as { cards?: Array<Record<string, unknown>> };
 
-    const currentCards = Array.isArray(globalClients?.cards)
+    let currentCards = Array.isArray(globalClients?.cards)
       ? [...globalClients.cards]
       : [];
 
@@ -319,11 +357,13 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
 
     if (cpConfig?.enabled) {
       const cardImageId = extractId(cpConfig.image) || defaultHeroImageId;
+      const cardOrder = parseOrder(cpConfig.order, 0);
       const cardData = {
         name: clientName,
         service: cpConfig.service || defaultHeroHeading || "",
-        image: cardImageId,
+        image: cardImageId || null,
         href: clientPath || "#",
+        order: cardOrder,
       };
 
       const matchIndex = currentCards.findIndex(isMatch);
@@ -331,11 +371,24 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
         currentCards[matchIndex] = {
           ...currentCards[matchIndex],
           ...cardData,
-          image: cardImageId || null,
         };
       } else {
         currentCards.push(cardData);
       }
+
+      // Ensure any legacy cards without explicit order get an order matching their 1-based index
+      currentCards = currentCards.map((card, idx) => ({
+        ...card,
+        order:
+          typeof card.order === "number" && card.order !== 0
+            ? card.order
+            : card.order === 0
+              ? 0
+              : idx + 1,
+      }));
+
+      // Sort by display order ascending
+      currentCards.sort((a, b) => parseOrder(a.order) - parseOrder(b.order));
 
       await req.payload.updateGlobal({
         slug: "clients-index",
@@ -359,7 +412,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     });
   }
 
-  // 6. Work Page Global Sync
+  // 6. Work Page Global Sync (/work)
   try {
     const wpConfig = placements.workPage;
     const globalWork = (await req.payload.findGlobal({
@@ -367,7 +420,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       depth: 0,
     })) as { projects?: Array<Record<string, unknown>> };
 
-    const currentProjects = Array.isArray(globalWork?.projects)
+    let currentProjects = Array.isArray(globalWork?.projects)
       ? [...globalWork.projects]
       : [];
 
@@ -382,12 +435,14 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
 
     if (wpConfig?.enabled) {
       const projectImageId = extractId(wpConfig.image) || defaultHeroImageId;
+      const projectOrder = parseOrder(wpConfig.order, 0);
       const projectData = {
         name: clientName,
         service: wpConfig.service || defaultHeroHeading || "",
         category: wpConfig.category || "technology",
-        image: projectImageId,
+        image: projectImageId || null,
         href: clientPath || "#",
+        order: projectOrder,
       };
 
       const matchIndex = currentProjects.findIndex(isMatch);
@@ -395,11 +450,24 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
         currentProjects[matchIndex] = {
           ...currentProjects[matchIndex],
           ...projectData,
-          image: projectImageId || null,
         };
       } else {
         currentProjects.push(projectData);
       }
+
+      // Ensure any legacy projects without explicit order get an order matching their 1-based index
+      currentProjects = currentProjects.map((proj, idx) => ({
+        ...proj,
+        order:
+          typeof proj.order === "number" && proj.order !== 0
+            ? proj.order
+            : proj.order === 0
+              ? 0
+              : idx + 1,
+      }));
+
+      // Sort by display order ascending
+      currentProjects.sort((a, b) => parseOrder(a.order) - parseOrder(b.order));
 
       await req.payload.updateGlobal({
         slug: "work-page",
@@ -425,6 +493,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
 
   return doc;
 };
+
 
 /**
  * Reverse sync: Updates the parent Client record when Featured Projects is changed.
@@ -705,17 +774,21 @@ export const syncHomepageCaseStudyToClient: CollectionAfterChangeHook = async ({
 }) => {
   if (context?.skipSync) return doc;
   const studyId = extractId(doc.caseStudy);
-  if (!studyId) return doc;
+  let clientId = extractId(doc.client);
+
+  if (!clientId && studyId) {
+    try {
+      const study = await req.payload.findByID({
+        collection: "case-studies",
+        id: studyId,
+        depth: 0,
+      });
+      clientId = extractId(study?.client);
+    } catch {}
+  }
+  if (!clientId) return doc;
 
   try {
-    const study = await req.payload.findByID({
-      collection: "case-studies",
-      id: studyId,
-      depth: 0,
-    });
-    const clientId = extractId(study?.client);
-    if (!clientId) return doc;
-
     const client = await req.payload.findByID({
       collection: "clients",
       id: clientId,
@@ -732,11 +805,11 @@ export const syncHomepageCaseStudyToClient: CollectionAfterChangeHook = async ({
           ...placements,
           homepageCaseStudy: {
             enabled: true,
-            caseStudy: studyId,
+            caseStudy: studyId || null,
             number: doc.number || "",
             description: doc.description || "",
             tags: doc.tags || [],
-            order: typeof doc.order === "number" ? doc.order : 0,
+            order: parseOrder(doc.order, 0),
           },
         },
       } as never,
@@ -758,23 +831,28 @@ export const syncHomepageCaseStudyDeleteToClient: CollectionAfterDeleteHook = as
 }) => {
   if (context?.skipSync) return doc;
   const studyId = extractId(doc?.caseStudy);
-  if (!studyId) return doc;
+  let clientId = extractId(doc?.client);
+
+  if (!clientId && studyId) {
+    try {
+      const study = await req.payload.findByID({
+        collection: "case-studies",
+        id: studyId,
+        depth: 0,
+      });
+      clientId = extractId(study?.client);
+    } catch {}
+  }
+  if (!clientId) return doc;
 
   try {
-    const study = await req.payload.findByID({
-      collection: "case-studies",
-      id: studyId,
-      depth: 0,
-    });
-    const clientId = extractId(study?.client);
-    if (!clientId) return doc;
-
     const client = await req.payload.findByID({
       collection: "clients",
       id: clientId,
       depth: 0,
     });
     if (!client) return doc;
+
 
     const placements = (client.placements as Record<string, unknown>) || {};
     const existingHCS =

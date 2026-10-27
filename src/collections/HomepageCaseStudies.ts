@@ -54,6 +54,15 @@ export const HomepageCaseStudies: CollectionConfig = {
       ],
     },
     homepageStudyLink,
+    {
+      name: "client",
+      type: "relationship",
+      relationTo: "clients",
+      admin: {
+        description: "Parent client brand for this homepage item.",
+      },
+    },
     { name: "order", type: "number", required: true, defaultValue: 0 },
+
   ],
 };

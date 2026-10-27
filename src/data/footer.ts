@@ -25,7 +25,7 @@ const FOOTER_HREFS: Record<string, string> = {
   Studio: "/studio",
   FAQs: "/faq",
   Manufacturing: "/industries/manufacturing",
-  "Brand Systems": "/blogs/branding-agency-in-pune",
+  "Brand Systems": "/services/brand-systems",
 };
 
 export function footerLinkHref(label: string): string {
