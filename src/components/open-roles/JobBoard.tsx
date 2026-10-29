@@ -78,7 +78,7 @@ function JobCard({ role }: { role: JobRole }) {
   ].filter((pill) => pill.label);
 
   return (
-    <article className="flex flex-col gap-6 border-b border-black/30 pb-8 lg:flex-row lg:items-start lg:justify-between lg:gap-8 lg:border-t lg:border-b-0 lg:border-[#e5e5e5] lg:py-6">
+    <article className="flex flex-col gap-6 border-t border-black/30 pt-[33px] pb-8 lg:flex-row lg:items-start lg:justify-between lg:gap-8 lg:border-[#e5e5e5] lg:py-6 lg:pt-[24px]">
       <div className="flex max-w-[623px] flex-col gap-3 lg:gap-4">
         <h2 className="font-figtree text-[24px] leading-[1.2] font-normal tracking-[-1.51px] text-black lg:text-[32px] lg:leading-[45px] lg:text-[#1f1f1f]">
           {role.title}

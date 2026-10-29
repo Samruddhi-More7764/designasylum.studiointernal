@@ -14,6 +14,56 @@ const COMPANY_TYPE_OPTIONS = [
   { label: "Agency", value: "agency" },
 ];
 
+const errorClass = "font-satoshi text-[14px] leading-5 tracking-[-0.07px] text-[#cc1010]";
+
+type FieldErrors = Partial<{
+  fullName: string;
+  workEmail: string;
+  mobileNumber: string;
+  companyType: string;
+  message: string;
+}>;
+
+function validName(value: string) {
+  const name = value.trim();
+  return name.length >= 2;
+}
+
+function validEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function validMobile(value: string) {
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 4 && digits.length <= 15;
+}
+
+function fieldErrors(data: FormData): FieldErrors {
+  const errors: FieldErrors = {};
+  const name = String(data.get("fullName") ?? "");
+  if (!name.trim()) errors.fullName = "Please enter your full name";
+  else if (!validName(name)) errors.fullName = "Please enter a valid name";
+
+  const email = String(data.get("workEmail") ?? "");
+  if (!email.trim()) errors.workEmail = "Please enter your email address";
+  else if (!validEmail(email)) errors.workEmail = "Please enter a valid email address";
+
+  const mobile = String(data.get("mobileNumber") ?? "");
+  if (!mobile.trim()) errors.mobileNumber = "Please enter your mobile number";
+  else if (!validMobile(mobile)) errors.mobileNumber = "Please enter a valid mobile number";
+
+  if (!String(data.get("companyType") ?? "").trim()) {
+    errors.companyType = "Please select your company type";
+  }
+
+  const message = String(data.get("message") ?? "");
+  if (!message.trim()) {
+    errors.message = "Please enter your message";
+  }
+
+  return errors;
+}
+
 interface FieldProps {
   label: string;
   htmlFor: string;
@@ -34,6 +84,19 @@ function Field({ label, htmlFor, children }: FieldProps) {
 const inputClasses =
   "h-12 w-full rounded-lg bg-input-bg px-4 font-satoshi text-sm text-black placeholder:text-black/40 outline-none";
 
+function controlClass(invalid: boolean) {
+  return `${inputClasses} border ${invalid ? "border-[#cc1010]" : "border-transparent"}`;
+}
+
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} className={errorClass} role="alert">
+      {message}
+    </p>
+  );
+}
+
 /**
  * "Let's talk about your brand" — Homepage bottom contact form
  * (left heading + right stacked fields). Posts to the same Google Sheet
@@ -48,11 +111,36 @@ export function TalkAboutBrand() {
   );
   const [message, setMessage] = useState("");
   const [companyType, setCompanyType] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+
+  function clearField(name: keyof FieldErrors) {
+    setStatus("idle");
+    setMessage("");
+    setErrors((current) => {
+      if (!current[name]) return current;
+      const next = { ...current };
+      delete next[name];
+      return next;
+    });
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
+    const nextErrors = fieldErrors(data);
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setStatus("idle");
+      setMessage("");
+      const firstInvalid = form.querySelector<HTMLElement>("[aria-invalid='true']");
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstInvalid.focus?.();
+      }
+      return;
+    }
 
     setStatus("submitting");
     setMessage("");
@@ -75,6 +163,7 @@ export function TalkAboutBrand() {
 
       form.reset();
       setCompanyType("");
+      setErrors({});
       setStatus("success");
       setMessage("Thanks — we will be in touch.");
     } catch {
@@ -99,17 +188,20 @@ export function TalkAboutBrand() {
           </p>
         </div>
 
-        <form className="flex flex-col gap-5" onSubmit={onSubmit}>
+        <form className="flex flex-col gap-5" noValidate onSubmit={onSubmit}>
           <Field label="Full Name*" htmlFor="talk-name">
             <input
               id="talk-name"
               name="fullName"
               type="text"
-              required
               autoComplete="name"
               placeholder="Your Full Name"
-              className={inputClasses}
+              aria-invalid={Boolean(errors.fullName)}
+              aria-describedby={errors.fullName ? "talk-name-error" : undefined}
+              onChange={() => clearField("fullName")}
+              className={controlClass(Boolean(errors.fullName))}
             />
+            <FieldError id="talk-name-error" message={errors.fullName} />
           </Field>
 
           <Field label="Work Email*" htmlFor="talk-email">
@@ -117,26 +209,34 @@ export function TalkAboutBrand() {
               id="talk-email"
               name="workEmail"
               type="email"
-              required
               autoComplete="email"
               placeholder="JonDoe@gmail.com"
-              className={inputClasses}
+              aria-invalid={Boolean(errors.workEmail)}
+              aria-describedby={errors.workEmail ? "talk-email-error" : undefined}
+              onChange={() => clearField("workEmail")}
+              className={controlClass(Boolean(errors.workEmail))}
             />
+            <FieldError id="talk-email-error" message={errors.workEmail} />
           </Field>
 
           <Field label="Mobile Number*" htmlFor="talk-phone">
-            <CountryCodeSelect triggerClassName="flex h-12 w-[84px] shrink-0 items-center justify-center gap-0.5 rounded-lg bg-input-bg px-2 font-satoshi text-sm text-black">
+            <CountryCodeSelect
+              triggerClassName={`flex h-12 w-[84px] shrink-0 items-center justify-center gap-0.5 rounded-lg border bg-input-bg px-2 font-satoshi text-sm text-black ${errors.mobileNumber ? "border-[#cc1010]" : "border-transparent"}`}
+            >
               <input
                 id="talk-phone"
                 name="mobileNumber"
                 type="tel"
-                required
                 inputMode="numeric"
                 autoComplete="tel-national"
                 placeholder="1234567890"
-                className={`${inputClasses} min-w-0 flex-1`}
+                aria-invalid={Boolean(errors.mobileNumber)}
+                aria-describedby={errors.mobileNumber ? "talk-mobile-error" : undefined}
+                onChange={() => clearField("mobileNumber")}
+                className={`${controlClass(Boolean(errors.mobileNumber))} min-w-0 flex-1`}
               />
             </CountryCodeSelect>
+            <FieldError id="talk-mobile-error" message={errors.mobileNumber} />
           </Field>
 
           <Field label="Company Type*" htmlFor="talk-company">
@@ -144,11 +244,16 @@ export function TalkAboutBrand() {
               id="talk-company"
               name="companyType"
               value={companyType}
-              onChange={setCompanyType}
+              onChange={(val) => {
+                setCompanyType(val);
+                clearField("companyType");
+              }}
               options={COMPANY_TYPE_OPTIONS}
               placeholder="- Select -"
-              required
+              invalid={Boolean(errors.companyType)}
+              aria-describedby={errors.companyType ? "talk-company-error" : undefined}
             />
+            <FieldError id="talk-company-error" message={errors.companyType} />
           </Field>
 
           <Field
@@ -159,14 +264,17 @@ export function TalkAboutBrand() {
               id="talk-message"
               name="message"
               rows={5}
-              required
               placeholder="Your message"
-              className="w-full resize-none rounded-lg bg-input-bg px-4 py-3 font-satoshi text-sm text-black placeholder:text-black/40 outline-none"
+              aria-invalid={Boolean(errors.message)}
+              aria-describedby={errors.message ? "talk-message-error" : undefined}
+              onChange={() => clearField("message")}
+              className={`w-full resize-none rounded-lg bg-input-bg px-4 py-3 font-satoshi text-sm text-black placeholder:text-black/40 outline-none border ${errors.message ? "border-[#cc1010]" : "border-transparent"}`}
             />
+            <FieldError id="talk-message-error" message={errors.message} />
           </Field>
 
           {status === "error" && message ? (
-            <p className="font-satoshi text-sm text-[#FF3838]" aria-live="polite">
+            <p className="font-satoshi text-sm text-[#cc1010]" aria-live="polite">
               {message}
             </p>
           ) : null}
