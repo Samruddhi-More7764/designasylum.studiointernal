@@ -157,13 +157,27 @@ export const caseStudyFields: Field[] = [
     fields: [
       { name: "quote", type: "textarea", required: true },
       {
+        name: "logoShape",
+        label: "Logo shape",
+        type: "select",
+        defaultValue: "circle",
+        options: [
+          { label: "Circular", value: "circle" },
+          { label: "Rectangular", value: "rectangle" },
+        ],
+        admin: {
+          description:
+            "Select 'Circular' to display a 54×54 circular logo, or 'Rectangular' to display a 114×57 rectangular logo.",
+        },
+      },
+      {
         name: "logo",
         label: "Logo under the quote",
         type: "upload",
         relationTo: "media",
         admin: {
           description:
-            "Shown in the 54×54 circle under the quote. Choosing a file updates the live case study — refresh that page to see it. Clear the file to bring the orange mark back.",
+            "Shown under the quote (54×54 if circular, 114×57 if rectangular). Choosing a file updates the live case study — refresh that page to see it. Clear the file to bring the orange mark back.",
           components: {
             afterInput: ["./components/admin/PersistQuoteLogo#PersistQuoteLogo"],
           },

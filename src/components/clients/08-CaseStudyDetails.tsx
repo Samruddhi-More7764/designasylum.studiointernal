@@ -28,6 +28,7 @@ export async function CaseStudyDetails({
           <CaseStudyQuoteLogo
             src={details.logo?.src}
             alt={details.logo?.alt}
+            shape={details.logoShape}
           />
         </div>
 

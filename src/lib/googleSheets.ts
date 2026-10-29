@@ -13,6 +13,12 @@ const COMPANY_LABELS: Record<string, string> = {
   agency: "Agency",
 };
 
+export function formatCompanyType(value: string): string {
+  const trimmed = value.trim();
+  const normalized = trimmed.toLowerCase();
+  return COMPANY_LABELS[normalized] ?? COMPANY_LABELS[trimmed] ?? trimmed;
+}
+
 export type ContactLead = {
   fullName: string;
   workEmail: string;
@@ -65,20 +71,20 @@ function sheetsConfig() {
 }
 
 export function validateContactLead(
-  input: Partial<ContactLead>,
+  input: Partial<ContactLead> & { interest?: string },
 ): ContactLeadResult {
   const fullName = input.fullName?.trim() ?? "";
   const workEmail = input.workEmail?.trim() ?? "";
   const countryCode = input.countryCode?.trim() ?? "";
   const mobileNumber = input.mobileNumber?.trim() ?? "";
-  const companyType = input.companyType?.trim() ?? "";
+  const companyType = (input.companyType ?? input.interest)?.trim() ?? "";
   const message = input.message?.trim() ?? "";
 
-  if (!fullName || !workEmail || !mobileNumber || !companyType || !message) {
-    return { ok: false, error: "Please fill in every field.", status: 400 };
+  if (!fullName || !workEmail || !mobileNumber || !companyType) {
+    return { ok: false, error: "Please fill in every required field.", status: 400 };
   }
 
-  if (fullName.length > 120 || workEmail.length > 254 || message.length > 4000) {
+  if (fullName.length > 120 || workEmail.length > 254 || companyType.length > 120 || message.length > 4000) {
     return { ok: false, error: "One of the fields is too long.", status: 400 };
   }
 
@@ -95,9 +101,7 @@ export function validateContactLead(
     return { ok: false, error: "Enter a valid mobile number.", status: 400 };
   }
 
-  if (!COMPANY_LABELS[companyType]) {
-    return { ok: false, error: "Select a company type.", status: 400 };
-  }
+  const formattedCompanyType = formatCompanyType(companyType);
 
   return {
     ok: true,
@@ -106,7 +110,7 @@ export function validateContactLead(
       workEmail,
       countryCode,
       mobileNumber: digits,
-      companyType,
+      companyType: formattedCompanyType,
       message,
     },
   };
@@ -146,7 +150,7 @@ export async function appendContactLead(lead: ContactLead): Promise<void> {
           lead.fullName,
           lead.workEmail,
           `${lead.countryCode} ${lead.mobileNumber}`,
-          COMPANY_LABELS[lead.companyType],
+          formatCompanyType(lead.companyType),
           lead.message,
         ],
       ],

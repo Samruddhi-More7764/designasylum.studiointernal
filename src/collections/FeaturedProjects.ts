@@ -21,8 +21,8 @@ export const FeaturedProjects: CollectionConfig = {
   fields: [
     { name: "name", type: "text", required: true },
     { name: "description", type: "textarea", required: true },
-    { name: "metric", type: "text", required: true },
-    { name: "metricLabel", type: "text", required: true },
+    { name: "metric", type: "text" },
+    { name: "metricLabel", type: "text" },
     {
       name: "image",
       type: "upload",

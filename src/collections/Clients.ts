@@ -40,6 +40,7 @@ const computeClientAdminTitle: CollectionBeforeValidateHook = async ({ data, req
         collection: "case-studies",
         id: studyId,
         depth: 0,
+        req,
       });
       studyTitle = String(study?.title || study?.slug || "").trim();
     } catch {}
@@ -116,6 +117,7 @@ function extractMediaId(value: unknown): number | null {
           collection: "case-studies",
           id: studyId,
           depth: 0,
+          req,
         })) as unknown as Record<string, unknown>;
       }
       if (!study && clientId) {
@@ -124,6 +126,7 @@ function extractMediaId(value: unknown): number | null {
           where: { client: { equals: clientId } },
           limit: 1,
           depth: 0,
+          req,
         });
         study = (found.docs[0] as unknown as Record<string, unknown>) || null;
       }

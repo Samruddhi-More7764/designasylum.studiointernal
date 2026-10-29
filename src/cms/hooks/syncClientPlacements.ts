@@ -37,6 +37,7 @@ function parseOrder(value: unknown, defaultVal = 0): number {
  */
 export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async ({
   doc,
+  previousDoc,
   req,
   context,
 }) => {
@@ -49,6 +50,32 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
   const clientName = String(doc.name || "");
   const clientSlug = String(doc.slug || "");
   const clientPath = clientSlug ? `/clients/${clientSlug}` : "";
+
+  // If this is an update and none of the fields affecting placements changed, skip completely.
+  if (previousDoc) {
+    const prevPlacements = previousDoc.placements || {};
+    const prevName = String(previousDoc.name || "");
+    const prevSlug = String(previousDoc.slug || "");
+    const prevHeroImageId = extractId(previousDoc.hero?.image);
+    const prevHeroHeading = String(previousDoc.hero?.heading || "").trim();
+    const prevFeaturedStudy = extractId(previousDoc.featuredStudy);
+
+    const currHeroImageId = extractId(doc.hero?.image);
+    const currHeroHeading = String(doc.hero?.heading || "").trim();
+    const currFeaturedStudy = extractId(doc.featuredStudy);
+
+    const placementsEqual = JSON.stringify(placements) === JSON.stringify(prevPlacements);
+    const identifiersEqual =
+      clientName === prevName &&
+      clientSlug === prevSlug &&
+      currHeroImageId === prevHeroImageId &&
+      currHeroHeading === prevHeroHeading &&
+      currFeaturedStudy === prevFeaturedStudy;
+
+    if (placementsEqual && identifiersEqual) {
+      return doc;
+    }
+  }
 
   // Resolve hero image fallback from Client Hub or associated Case Study
   let defaultHeroImageId = extractId(doc.hero?.image);
@@ -63,6 +90,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           collection: "case-studies",
           id: studyId,
           depth: 0,
+          req,
         })) as unknown as Record<string, unknown>;
       } catch {}
     }
@@ -73,6 +101,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           where: { client: { equals: clientId } },
           limit: 1,
           depth: 0,
+          req,
         });
         studyDoc = (found.docs[0] as unknown as Record<string, unknown>) || null;
       } catch {}
@@ -98,6 +127,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     }
   }
 
+  // Execute sync operations sequentially inside the same transaction
   // 1. Featured Projects Sync
   try {
     const fpConfig = placements.featuredProject;
@@ -106,6 +136,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       where: { client: { equals: clientId } },
       limit: 1,
       depth: 0,
+      req,
     });
     const fpDoc = existingFP.docs[0];
 
@@ -117,6 +148,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
             collection: "media",
             limit: 1,
             depth: 0,
+            req,
           });
           if (anyMedia.docs[0]) imgId = anyMedia.docs[0].id;
         } catch {}
@@ -125,8 +157,8 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       const data: Record<string, unknown> = {
         name: clientName,
         description: fpConfig.description || defaultHeroHeading || `${clientName} project`,
-        metric: fpConfig.metric || "",
-        metricLabel: fpConfig.metricLabel || "",
+        metric: fpConfig.metric?.trim() || "—",
+        metricLabel: fpConfig.metricLabel?.trim() || "Featured Project",
         alt: fpConfig.alt || `${clientName} preview`,
         order: parseOrder(fpConfig.order, 0),
         client: clientId,
@@ -140,20 +172,23 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           collection: "featured-projects",
           id: fpDoc.id,
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       } else {
         await req.payload.create({
           collection: "featured-projects",
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       }
     } else if (fpDoc) {
       await req.payload.delete({
         collection: "featured-projects",
         id: fpDoc.id,
-        context: { skipSync: true },
+        context: { skipSync: true, skipRevalidation: true },
+        req,
       });
     }
   } catch (err) {
@@ -171,6 +206,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       where: { client: { equals: clientId } },
       limit: 1,
       depth: 0,
+      req,
     });
     const piDoc = existingPI.docs[0];
 
@@ -182,6 +218,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
             collection: "media",
             limit: 1,
             depth: 0,
+            req,
           });
           if (anyMedia.docs[0]) imgId = anyMedia.docs[0].id;
         } catch {}
@@ -203,20 +240,23 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           collection: "portfolio-items",
           id: piDoc.id,
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       } else {
         await req.payload.create({
           collection: "portfolio-items",
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       }
     } else if (piDoc) {
       await req.payload.delete({
         collection: "portfolio-items",
         id: piDoc.id,
-        context: { skipSync: true },
+        context: { skipSync: true, skipRevalidation: true },
+        req,
       });
     }
   } catch (err) {
@@ -234,6 +274,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       where: { client: { equals: clientId } },
       limit: 1,
       depth: 0,
+      req,
     });
     const ppDoc = existingPP.docs[0];
 
@@ -251,20 +292,23 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           collection: "pain-points",
           id: ppDoc.id,
           data,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       } else {
         await req.payload.create({
           collection: "pain-points",
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       }
     } else if (ppDoc) {
       await req.payload.delete({
         collection: "pain-points",
         id: ppDoc.id,
-        context: { skipSync: true },
+        context: { skipSync: true, skipRevalidation: true },
+        req,
       });
     }
   } catch (err) {
@@ -290,6 +334,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       },
       limit: 1,
       depth: 0,
+      req,
     });
     const hcsDoc = existingHCS.docs[0];
 
@@ -311,20 +356,23 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           collection: "homepage-case-studies",
           id: hcsDoc.id,
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       } else {
         await req.payload.create({
           collection: "homepage-case-studies",
           data: data as never,
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       }
     } else if (hcsDoc) {
       await req.payload.delete({
         collection: "homepage-case-studies",
         id: hcsDoc.id,
-        context: { skipSync: true },
+        context: { skipSync: true, skipRevalidation: true },
+        req,
       });
     }
   } catch (err) {
@@ -340,6 +388,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const globalClients = (await req.payload.findGlobal({
       slug: "clients-index",
       depth: 0,
+      req,
     })) as { cards?: Array<Record<string, unknown>> };
 
     let currentCards = Array.isArray(globalClients?.cards)
@@ -376,7 +425,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
         currentCards.push(cardData);
       }
 
-      // Ensure any legacy cards without explicit order get an order matching their 1-based index
       currentCards = currentCards.map((card, idx) => ({
         ...card,
         order:
@@ -387,21 +435,25 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
               : idx + 1,
       }));
 
-      // Sort by display order ascending
       currentCards.sort((a, b) => parseOrder(a.order) - parseOrder(b.order));
 
-      await req.payload.updateGlobal({
-        slug: "clients-index",
-        data: { cards: currentCards },
-        context: { skipSync: true },
-      });
+      const cardsChanged = JSON.stringify(currentCards) !== JSON.stringify(globalClients?.cards || []);
+      if (cardsChanged) {
+        await req.payload.updateGlobal({
+          slug: "clients-index",
+          data: { cards: currentCards },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
+        });
+      }
     } else {
       const filtered = currentCards.filter((card) => !isMatch(card));
       if (filtered.length !== currentCards.length) {
         await req.payload.updateGlobal({
           slug: "clients-index",
           data: { cards: filtered },
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       }
     }
@@ -418,6 +470,7 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const globalWork = (await req.payload.findGlobal({
       slug: "work-page",
       depth: 0,
+      req,
     })) as { projects?: Array<Record<string, unknown>> };
 
     let currentProjects = Array.isArray(globalWork?.projects)
@@ -455,7 +508,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
         currentProjects.push(projectData);
       }
 
-      // Ensure any legacy projects without explicit order get an order matching their 1-based index
       currentProjects = currentProjects.map((proj, idx) => ({
         ...proj,
         order:
@@ -466,21 +518,25 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
               : idx + 1,
       }));
 
-      // Sort by display order ascending
       currentProjects.sort((a, b) => parseOrder(a.order) - parseOrder(b.order));
 
-      await req.payload.updateGlobal({
-        slug: "work-page",
-        data: { projects: currentProjects },
-        context: { skipSync: true },
-      });
+      const projectsChanged = JSON.stringify(currentProjects) !== JSON.stringify(globalWork?.projects || []);
+      if (projectsChanged) {
+        await req.payload.updateGlobal({
+          slug: "work-page",
+          data: { projects: currentProjects },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
+        });
+      }
     } else {
       const filtered = currentProjects.filter((proj) => !isMatch(proj));
       if (filtered.length !== currentProjects.length) {
         await req.payload.updateGlobal({
           slug: "work-page",
           data: { projects: filtered },
-          context: { skipSync: true },
+          context: { skipSync: true, skipRevalidation: true },
+          req,
         });
       }
     }
@@ -512,6 +568,7 @@ export const syncFeaturedProjectToClient: CollectionAfterChangeHook = async ({
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -533,7 +590,8 @@ export const syncFeaturedProjectToClient: CollectionAfterChangeHook = async ({
           },
         },
       } as never,
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -558,6 +616,7 @@ export const syncFeaturedProjectDeleteToClient: CollectionAfterDeleteHook = asyn
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -575,7 +634,8 @@ export const syncFeaturedProjectDeleteToClient: CollectionAfterDeleteHook = asyn
           },
         },
       },
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -603,6 +663,7 @@ export const syncPortfolioItemToClient: CollectionAfterChangeHook = async ({
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -622,7 +683,8 @@ export const syncPortfolioItemToClient: CollectionAfterChangeHook = async ({
           },
         },
       } as never,
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -647,6 +709,7 @@ export const syncPortfolioItemDeleteToClient: CollectionAfterDeleteHook = async 
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -664,7 +727,8 @@ export const syncPortfolioItemDeleteToClient: CollectionAfterDeleteHook = async 
           },
         },
       },
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -692,6 +756,7 @@ export const syncPainPointToClient: CollectionAfterChangeHook = async ({
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -711,7 +776,8 @@ export const syncPainPointToClient: CollectionAfterChangeHook = async ({
           },
         },
       },
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -736,6 +802,7 @@ export const syncPainPointDeleteToClient: CollectionAfterDeleteHook = async ({
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -753,7 +820,8 @@ export const syncPainPointDeleteToClient: CollectionAfterDeleteHook = async ({
           },
         },
       },
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -782,6 +850,7 @@ export const syncHomepageCaseStudyToClient: CollectionAfterChangeHook = async ({
         collection: "case-studies",
         id: studyId,
         depth: 0,
+        req,
       });
       clientId = extractId(study?.client);
     } catch {}
@@ -793,6 +862,7 @@ export const syncHomepageCaseStudyToClient: CollectionAfterChangeHook = async ({
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -813,7 +883,8 @@ export const syncHomepageCaseStudyToClient: CollectionAfterChangeHook = async ({
           },
         },
       } as never,
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({
@@ -839,6 +910,7 @@ export const syncHomepageCaseStudyDeleteToClient: CollectionAfterDeleteHook = as
         collection: "case-studies",
         id: studyId,
         depth: 0,
+        req,
       });
       clientId = extractId(study?.client);
     } catch {}
@@ -850,9 +922,9 @@ export const syncHomepageCaseStudyDeleteToClient: CollectionAfterDeleteHook = as
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
-
 
     const placements = (client.placements as Record<string, unknown>) || {};
     const existingHCS =
@@ -869,7 +941,8 @@ export const syncHomepageCaseStudyDeleteToClient: CollectionAfterDeleteHook = as
           },
         },
       },
-      context: { skipSync: true },
+      context: { skipSync: true, skipRevalidation: true },
+      req,
     });
   } catch (err) {
     req.payload.logger.error({

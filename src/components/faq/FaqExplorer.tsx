@@ -79,7 +79,11 @@ export function FaqExplorer({
         <button
           type="submit"
           aria-label="Search"
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-black/20 text-white transition-colors hover:bg-[#FE5A28] focus-visible:bg-[#FE5A28] active:bg-[#FE5A28] lg:size-[39px]"
+          className={`flex size-8 shrink-0 items-center justify-center rounded-lg text-white transition-colors lg:size-[39px] ${
+            query.trim().length > 0
+              ? "bg-[#FE5A28]"
+              : "bg-black/20 hover:bg-[#FE5A28] focus-visible:bg-[#FE5A28] active:bg-[#FE5A28]"
+          }`}
         >
           <ArrowRight className="size-4 lg:size-5" aria-hidden="true" />
         </button>

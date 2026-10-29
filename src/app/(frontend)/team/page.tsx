@@ -78,7 +78,7 @@ export default async function TeamPage() {
               </p>
             </div>
 
-            <div className="mt-[120px] flex w-full flex-col items-center gap-8 lg:mt-[90px] lg:gap-20">
+            <div className="mt-[32px] flex w-full flex-col items-center gap-8 lg:mt-[90px] lg:gap-20">
               <h2 className="font-figtree text-[32px] leading-[1.2] font-normal tracking-[-2.0865px] text-[#05201f] lg:text-[44px] lg:leading-[62.596px]">
                 {page.leadershipHeading}
               </h2>

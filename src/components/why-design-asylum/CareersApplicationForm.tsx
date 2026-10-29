@@ -155,6 +155,8 @@ export function CareersApplicationForm({
   }, [isCvUploading, uploadingCvFile]);
 
   function clearField(name: keyof FieldErrors) {
+    setStatus("idle");
+    setMessage("");
     setErrors((current) => {
       if (!current[name]) return current;
       const next = { ...current };
@@ -188,6 +190,11 @@ export function CareersApplicationForm({
     if (Object.keys(nextErrors).length > 0) {
       setStatus("idle");
       setMessage("");
+      const firstInvalid = form.querySelector<HTMLElement>("[aria-invalid='true']");
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+        firstInvalid.focus?.();
+      }
       return;
     }
 
@@ -212,6 +219,7 @@ export function CareersApplicationForm({
         countryCode: data.get("countryCode"),
         mobileNumber: data.get("mobileNumber"),
         companyType: data.get("interest"),
+        interest: data.get("interest"),
         message: note,
       });
 
@@ -420,7 +428,7 @@ export function CareersApplicationForm({
           </label>
 
           {status === "error" && message ? (
-            <p className="font-satoshi text-sm text-[#FF3838]" aria-live="polite">
+            <p className={`${errorClass} text-center lg:text-left`} aria-live="polite">
               {message}
             </p>
           ) : null}

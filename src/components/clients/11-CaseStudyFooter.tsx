@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/SocialIcons";
 import { FitWordmark } from "@/components/ui/FitWordmark";
 import { AiSummaryLinks } from "@/components/ui/AiSummaryLinks";
-import { FOOTER_COLUMNS, AI_LINKS, footerLinkHref, type FooterColumn } from "@/data/footer";
+import { FOOTER_COLUMNS, AI_LINKS, FOOTER_SOCIAL_LINKS, footerLinkHref, type FooterColumn } from "@/data/footer";
 
 /**
  * Case study — footer: same gradient background, wordmark and copyright
@@ -76,13 +76,28 @@ export function CaseStudyFooter({
 
           <div className="flex flex-col gap-5">
             <div className="flex gap-6 text-[#1D1D1D]">
-              <a href="#" aria-label="LinkedIn">
+              <a
+                href={FOOTER_SOCIAL_LINKS.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
                 <SocialLinkedIn className="h-6 w-6" />
               </a>
-              <a href="#" aria-label="Instagram">
+              <a
+                href={FOOTER_SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
                 <SocialInstagram className="h-6 w-6" />
               </a>
-              <a href="#" aria-label="YouTube">
+              <a
+                href={FOOTER_SOCIAL_LINKS.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
                 <SocialYouTube className="h-6 w-6" />
               </a>
             </div>

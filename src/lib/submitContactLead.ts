@@ -3,7 +3,8 @@ export type ContactLeadPayload = {
   workEmail: FormDataEntryValue | null;
   countryCode: FormDataEntryValue | null;
   mobileNumber: FormDataEntryValue | null;
-  companyType: FormDataEntryValue | null;
+  companyType?: FormDataEntryValue | null;
+  interest?: FormDataEntryValue | null;
   message: FormDataEntryValue | null;
 };
 

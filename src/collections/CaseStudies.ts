@@ -42,6 +42,7 @@ const computeCaseStudyAdminTitle: CollectionBeforeValidateHook = async ({ data, 
         collection: "clients",
         id: clientId,
         depth: 0,
+        req,
       });
       clientName = String(client?.name || client?.slug || "").trim();
     } catch {}
@@ -78,6 +79,7 @@ const uniqueSlugPerClient: CollectionBeforeValidateHook = async ({
     },
     limit: 1,
     depth: 0,
+    req,
   });
   if (existing.docs.length) {
     throw new APIError("This client already has a case study with that slug.", 400);
@@ -156,6 +158,7 @@ const revalidatePublishedStudy: CollectionAfterChangeHook = async ({ doc, req })
         collection: "clients",
         id: clientId,
         depth: 0,
+        req,
       });
       clientSlug = client.slug;
     }
@@ -186,6 +189,7 @@ const attachAsFeaturedIfNeeded: CollectionAfterChangeHook = async ({
     collection: "clients",
     id: clientId,
     depth: 0,
+    req,
   });
   if (client.projectType !== "direct" || client.featuredStudy) return doc;
 
@@ -239,6 +243,7 @@ const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
       collection: "clients",
       id: clientId,
       depth: 0,
+      req,
     });
     if (!client) return doc;
 
@@ -283,7 +288,8 @@ const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
         collection: "clients",
         id: clientId,
         data: { placements } as never,
-        context: { skipHeroSync: true },
+        context: { skipHeroSync: true, skipRevalidation: true },
+        req,
       });
     }
   } catch (err) {

@@ -25,6 +25,41 @@ type Props = {
   params: Promise<{ filename: string[] }>;
 };
 
+function isInternalMediaUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (trimmed.includes("/api/media/file/") || trimmed.startsWith("/api/media/file/")) {
+    return true;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.pathname.includes("/api/media/file/")) {
+      return true;
+    }
+  } catch {
+    return true;
+  }
+  return false;
+}
+
+async function serveLocalFile(filePath: string, label: string) {
+  const fileStat = await stat(filePath);
+  const ext = path.extname(filePath).toLowerCase();
+  const contentType = MIME_TYPES[ext] || "application/octet-stream";
+
+  const nodeStream = createReadStream(filePath);
+  const webStream = Readable.toWeb(nodeStream) as ReadableStream;
+
+  console.log(`[media-route] serving from ${label}: ${path.basename(filePath)}`);
+  return new NextResponse(webStream, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Length": fileStat.size.toString(),
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
+}
+
 export async function GET(request: Request, { params }: Props) {
   const resolved = await params;
   const rawSegments = resolved.filename || [];
@@ -44,26 +79,19 @@ export async function GET(request: Request, { params }: Props) {
 
   // 1. Check local disk (for local development or seeded media files)
   const onDiskName = path.basename(filename);
-  const localFilePath = path.join(process.cwd(), "media", onDiskName);
+  let localFilePath = path.join(process.cwd(), "media", onDiskName);
+
+  if (!existsSync(localFilePath) && /-\d+\.[^.]+$/.test(onDiskName)) {
+    const baseName = onDiskName.replace(/-\d+(\.[^.]+)$/, "$1");
+    const baseFilePath = path.join(process.cwd(), "media", baseName);
+    if (existsSync(baseFilePath)) {
+      localFilePath = baseFilePath;
+    }
+  }
 
   if (existsSync(localFilePath)) {
     try {
-      const fileStat = await stat(localFilePath);
-      const ext = path.extname(localFilePath).toLowerCase();
-      const contentType = MIME_TYPES[ext] || "application/octet-stream";
-
-      const nodeStream = createReadStream(localFilePath);
-      const webStream = Readable.toWeb(nodeStream) as ReadableStream;
-
-      console.log(`[media-route] serving from local disk: ${onDiskName}`);
-      return new NextResponse(webStream, {
-        status: 200,
-        headers: {
-          "Content-Type": contentType,
-          "Content-Length": fileStat.size.toString(),
-          "Cache-Control": "public, max-age=31536000, immutable",
-        },
-      });
+      return await serveLocalFile(localFilePath, "local disk");
     } catch {
       // Fall through to Blob resolution on stream failure
     }
@@ -74,7 +102,7 @@ export async function GET(request: Request, { params }: Props) {
   if (blobUrl) {
     console.log(`[media-route] resolving blob CDN: ${blobUrl.slice(0, 80)}`);
     try {
-      let blobRes = await fetch(blobUrl);
+      let blobRes = await fetch(blobUrl, { signal: AbortSignal.timeout(5000) });
 
       // If the file returned 404 and has a Payload de-duplication suffix like image-1.png or image-6.png,
       // try the base filename (image.png) in Blob storage.
@@ -82,7 +110,7 @@ export async function GET(request: Request, { params }: Props) {
         const baseFilename = filename.replace(/-\d+(\.[^.]+)$/, "$1");
         const fallbackUrl = publicBlobUrl(baseFilename);
         if (fallbackUrl) {
-          const fallbackRes = await fetch(fallbackUrl);
+          const fallbackRes = await fetch(fallbackUrl, { signal: AbortSignal.timeout(5000) });
           if (fallbackRes.ok && fallbackRes.body) {
             blobUrl = fallbackUrl;
             blobRes = fallbackRes;
@@ -122,27 +150,55 @@ export async function GET(request: Request, { params }: Props) {
         limit: 1,
         depth: 0,
       });
-      const storedUrl = mediaResult.docs[0]?.url;
-      if (storedUrl && (storedUrl.startsWith("http://") || storedUrl.startsWith("https://"))) {
-        console.log(`[media-route] found stored CDN URL in DB: ${storedUrl.slice(0, 80)}`);
-        const dbRes = await fetch(storedUrl);
-        if (dbRes.ok && dbRes.body) {
-          const headers = new Headers();
-          headers.set(
-            "Content-Type",
-            dbRes.headers.get("Content-Type") ||
-              MIME_TYPES[path.extname(filename).toLowerCase()] ||
-              "application/octet-stream",
-          );
-          const len = dbRes.headers.get("Content-Length");
-          if (len) headers.set("Content-Length", len);
-          headers.set("Cache-Control", "public, max-age=31536000, immutable");
-          return new NextResponse(dbRes.body as ReadableStream, {
-            status: 200,
-            headers,
-          });
+      const doc = mediaResult.docs[0];
+      if (doc) {
+        // If the record has a sourcePath pointing to a bundled file in public/, serve it.
+        const sourcePath =
+          "sourcePath" in doc && typeof doc.sourcePath === "string"
+            ? doc.sourcePath.trim()
+            : null;
+        if (sourcePath?.startsWith("/")) {
+          const publicFilePath = path.join(process.cwd(), "public", sourcePath.replace(/^\//, ""));
+          if (existsSync(publicFilePath)) {
+            try {
+              return await serveLocalFile(publicFilePath, "public asset (sourcePath)");
+            } catch {
+              // Fall through
+            }
+          }
         }
-        return NextResponse.redirect(storedUrl, 307);
+
+        const storedUrl = doc.url;
+        // Only fetch or redirect if storedUrl is a genuine external CDN (NOT our own /api/media/file/ route).
+        if (
+          storedUrl &&
+          (storedUrl.startsWith("http://") || storedUrl.startsWith("https://")) &&
+          !isInternalMediaUrl(storedUrl)
+        ) {
+          console.log(`[media-route] found remote CDN URL in DB: ${storedUrl.slice(0, 80)}`);
+          try {
+            const dbRes = await fetch(storedUrl, { signal: AbortSignal.timeout(5000) });
+            if (dbRes.ok && dbRes.body) {
+              const headers = new Headers();
+              headers.set(
+                "Content-Type",
+                dbRes.headers.get("Content-Type") ||
+                  MIME_TYPES[path.extname(filename).toLowerCase()] ||
+                  "application/octet-stream",
+              );
+              const len = dbRes.headers.get("Content-Length");
+              if (len) headers.set("Content-Length", len);
+              headers.set("Cache-Control", "public, max-age=31536000, immutable");
+              return new NextResponse(dbRes.body as ReadableStream, {
+                status: 200,
+                headers,
+              });
+            }
+            return NextResponse.redirect(storedUrl, 307);
+          } catch (fetchErr) {
+            console.warn(`[media-route] remote CDN fetch failed for ${filename}:`, fetchErr);
+          }
+        }
       }
     }
   } catch (dbErr) {

@@ -28,7 +28,7 @@ type FieldErrors = Partial<{
 
 function validName(value: string) {
   const name = value.trim();
-  return name.length >= 2 && /^[\p{L}][\p{L}\s.'’-]*$/u.test(name);
+  return name.length >= 2;
 }
 
 function validEmail(value: string) {
@@ -37,7 +37,7 @@ function validEmail(value: string) {
 
 function validMobile(value: string) {
   const digits = value.replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15;
+  return digits.length >= 4 && digits.length <= 15;
 }
 
 function fieldErrors(data: FormData): FieldErrors {

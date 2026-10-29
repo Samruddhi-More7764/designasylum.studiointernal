@@ -6,11 +6,11 @@ import { revalidatePath } from "next/cache";
  */
 export function revalidateMarketingPages(slug?: string) {
   try {
-    revalidatePath("/", "layout");
+    revalidatePath("/");
     revalidatePath("/studio");
-    revalidatePath("/team", "layout");
-    revalidatePath("/clients", "layout");
-    revalidatePath("/work", "layout");
+    revalidatePath("/team");
+    revalidatePath("/clients");
+    revalidatePath("/work");
     revalidatePath("/contact");
     revalidatePath("/why-design-asylum");
 
@@ -21,6 +21,8 @@ export function revalidateMarketingPages(slug?: string) {
       revalidatePath(`/blog/${cleanSlug}`);
       revalidatePath(`/industries/${cleanSlug}`);
       revalidatePath(`/services/${cleanSlug}`);
+      revalidatePath(`/solutions/${cleanSlug}`);
+      revalidatePath(`/work/${cleanSlug}`);
     }
   } catch (error) {
     // If called outside of request context (e.g. during CLI scripts), safely ignore

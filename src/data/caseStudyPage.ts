@@ -32,6 +32,7 @@ export const sevenloopCaseStudyHero = {
 export const sevenloopCaseStudyDetails = {
   quote:
     "We wrote four thousand words on how that film actually got made. The brief, the dead ends, the bit we’d never do again. Worth a read.",
+  logoShape: "circle" as "circle" | "rectangle",
   logo: null as { src: string; alt: string } | null,
   tableHeading: "Details",
   rows: [

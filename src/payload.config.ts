@@ -25,6 +25,8 @@ import { TeamMembers } from "./collections/TeamMembers";
 import { BlogPosts } from "./collections/BlogPosts";
 import { IndustryPages } from "./collections/IndustryPages";
 import { ServicePages } from "./collections/ServicePages";
+import { SolutionPages } from "./collections/SolutionPages";
+import { WorkServicePages } from "./collections/WorkServicePages";
 import { SiteFooter } from "./globals/SiteFooter";
 import { AhmedabadLocation } from "./globals/AhmedabadLocation";
 import { BlogIndex } from "./globals/BlogIndex";
@@ -54,7 +56,8 @@ function withRevalidation(collection: CollectionConfig): CollectionConfig {
       ...collection.hooks,
       afterChange: [
         ...(collection.hooks?.afterChange || []),
-        ({ doc }) => {
+        ({ doc, context }) => {
+          if (context?.skipRevalidation || context?.skipSync) return doc;
           const slug =
             doc && typeof doc === "object" && "slug" in doc && typeof doc.slug === "string"
               ? doc.slug
@@ -65,7 +68,8 @@ function withRevalidation(collection: CollectionConfig): CollectionConfig {
       ],
       afterDelete: [
         ...(collection.hooks?.afterDelete || []),
-        ({ doc }) => {
+        ({ doc, context }) => {
+          if (context?.skipRevalidation || context?.skipSync) return doc;
           const slug =
             doc && typeof doc === "object" && "slug" in doc && typeof doc.slug === "string"
               ? doc.slug
@@ -85,7 +89,8 @@ function withGlobalRevalidation(global: GlobalConfig): GlobalConfig {
       ...global.hooks,
       afterChange: [
         ...(global.hooks?.afterChange || []),
-        ({ doc }) => {
+        ({ doc, context }) => {
+          if (context?.skipRevalidation || context?.skipSync) return doc;
           revalidateMarketingPages();
           return doc;
         },
@@ -126,6 +131,8 @@ export default buildConfig({
     withRevalidation(BlogPosts),
     withRevalidation(IndustryPages),
     withRevalidation(ServicePages),
+    withRevalidation(SolutionPages),
+    withRevalidation(WorkServicePages),
   ],
   globals: [
     SiteFooter,

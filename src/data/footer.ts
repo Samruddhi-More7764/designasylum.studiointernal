@@ -14,6 +14,12 @@ export interface FooterColumn {
   links: FooterLink[];
 }
 
+export const FOOTER_SOCIAL_LINKS = {
+  linkedin: "https://www.linkedin.com/company/design-asylum-studio/posts/?feedView=all",
+  instagram: "https://www.instagram.com/designasylum.studio?utm_source=ig_web_button_share_sheet&srtk=ZDNlZDc0MzIxNw==",
+  youtube: "https://www.youtube.com/@DesignAsylumStudio",
+};
+
 const FOOTER_HREFS: Record<string, string> = {
   "Why Design Asylum": "/why-design-asylum",
   Work: "/work",

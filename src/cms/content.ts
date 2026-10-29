@@ -844,6 +844,8 @@ type FooterListRow = {
   href?: string | null;
   industryPage?: LinkedPage;
   servicePage?: LinkedPage;
+  solutionPage?: LinkedPage;
+  workServicePage?: LinkedPage;
 };
 
 function resolvePageSlug(page: LinkedPage): { title: string; slug: string } | null {
@@ -861,13 +863,24 @@ function footerList(rows: FooterListRow[] | null | undefined): FooterLink[] | nu
   const links = rows.flatMap((row) => {
     const linkedIndustry = resolvePageSlug(row?.industryPage);
     const linkedService = resolvePageSlug(row?.servicePage);
+    const linkedSolution = resolvePageSlug(row?.solutionPage);
+    const linkedWork = resolvePageSlug(row?.workServicePage);
 
-    const defaultLabel = linkedIndustry?.title || linkedService?.title || "";
+    const defaultLabel =
+      linkedIndustry?.title ||
+      linkedService?.title ||
+      linkedSolution?.title ||
+      linkedWork?.title ||
+      "";
     const defaultHref = linkedIndustry
       ? `/industries/${linkedIndustry.slug}`
       : linkedService
         ? `/services/${linkedService.slug}`
-        : "";
+        : linkedSolution
+          ? `/solutions/${linkedSolution.slug}`
+          : linkedWork
+            ? `/work/${linkedWork.slug}`
+            : "";
 
     const label = row?.label?.trim() || defaultLabel;
     if (!label) return [];
@@ -1350,6 +1363,7 @@ export const getCaseStudyPage = cache(
         },
         details: {
           quote: g.details?.quote || fallbackCaseStudyPage.details.quote,
+          logoShape: (g.details?.logoShape === "rectangle" ? "rectangle" : "circle") as "circle" | "rectangle",
           logo: still({ image: g.details?.logo, alt: null }, null),
           tableHeading:
             g.details?.tableHeading || fallbackCaseStudyPage.details.tableHeading,

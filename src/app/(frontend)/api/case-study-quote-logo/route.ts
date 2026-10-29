@@ -29,9 +29,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { id?: unknown; logo?: unknown };
+  let body: { id?: unknown; logo?: unknown; logoShape?: unknown };
   try {
-    body = (await request.json()) as { id?: unknown; logo?: unknown };
+    body = (await request.json()) as { id?: unknown; logo?: unknown; logoShape?: unknown };
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
   }
@@ -77,11 +77,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Case study not found." }, { status: 404 });
   }
 
-  await db.drizzle.execute(sql`
-    UPDATE case_studies
-    SET details_logo_id = ${logo}, updated_at = NOW()
-    WHERE id = ${studyId}
-  `);
+  const logoShape =
+    body.logoShape === "rectangle" || body.logoShape === "circle"
+      ? body.logoShape
+      : undefined;
+
+  if (logoShape !== undefined) {
+    await db.drizzle.execute(sql`
+      UPDATE case_studies
+      SET details_logo_id = ${logo}, details_logo_shape = ${logoShape}, updated_at = NOW()
+      WHERE id = ${studyId}
+    `);
+  } else {
+    await db.drizzle.execute(sql`
+      UPDATE case_studies
+      SET details_logo_id = ${logo}, updated_at = NOW()
+      WHERE id = ${studyId}
+    `);
+  }
 
   revalidatePath(`/clients/${clientSlug}/${studySlug}`);
   return NextResponse.json({ ok: true });

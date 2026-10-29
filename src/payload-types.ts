@@ -83,6 +83,8 @@ export interface Config {
     'blog-posts': BlogPost;
     'industry-pages': IndustryPage;
     'service-pages': ServicePage;
+    'solution-pages': SolutionPage;
+    'work-service-pages': WorkServicePage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -106,6 +108,8 @@ export interface Config {
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
     'industry-pages': IndustryPagesSelect<false> | IndustryPagesSelect<true>;
     'service-pages': ServicePagesSelect<false> | ServicePagesSelect<true>;
+    'solution-pages': SolutionPagesSelect<false> | SolutionPagesSelect<true>;
+    'work-service-pages': WorkServicePagesSelect<false> | WorkServicePagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -248,8 +252,8 @@ export interface FeaturedProject {
   id: number;
   name: string;
   description: string;
-  metric: string;
-  metricLabel: string;
+  metric?: string | null;
+  metricLabel?: string | null;
   image: number | Media;
   alt: string;
   /**
@@ -697,7 +701,11 @@ export interface CaseStudy {
   details: {
     quote: string;
     /**
-     * Shown in the 54×54 circle under the quote. Choosing a file updates the live case study — refresh that page to see it. Clear the file to bring the orange mark back.
+     * Select 'Circular' to display a 54×54 circular logo, or 'Rectangular' to display a 114×57 rectangular logo.
+     */
+    logoShape?: ('circle' | 'rectangle') | null;
+    /**
+     * Shown under the quote (54×54 if circular, 114×57 if rectangular). Choosing a file updates the live case study — refresh that page to see it. Clear the file to bring the orange mark back.
      */
     logo?: (number | null) | Media;
     /**
@@ -1454,6 +1462,406 @@ export interface ServicePage {
   createdAt: string;
 }
 /**
+ * Solution blueprint pages accessible at /solutions/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "solution-pages".
+ */
+export interface SolutionPage {
+  id: number;
+  /**
+   * e.g. 'B2B Branding', 'Brand Strategy', 'Rebrand', 'Naming'. Used as default footer link label.
+   */
+  title: string;
+  /**
+   * URL slug, e.g. 'b2b-branding' (accessible at /solutions/b2b-branding).
+   */
+  slug: string;
+  /**
+   * Leave empty to use the Solution Name.
+   */
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * The large paragraph above the first section.
+   */
+  lead?: string | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example definitive-guide.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        pointers?:
+          | {
+              term?: string | null;
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        closing?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        highlightTitle?: string | null;
+        highlightBody?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Logos on this solution page only. They do not change the homepage.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside card, in pixels. Default 48.
+         */
+        height?: number | null;
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Clients we did'
+   */
+  clientsBefore?: string | null;
+  /**
+   * e.g. 'branding'
+   */
+  clientsAccent?: string | null;
+  /**
+   * e.g. 'for'
+   */
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        /**
+         * Select from clients list to automatically pull name, image, and link.
+         */
+        client?: (number | null) | Client;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use client name.
+         */
+        name?: string | null;
+        /**
+         * Project summary or case study highlights.
+         */
+        description?: string | null;
+        /**
+         * Leave empty to link directly to the client page.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show on all tabs.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Branding'
+   */
+  expertsBefore?: string | null;
+  /**
+   * e.g. 'experts'
+   */
+  expertsAccent?: string | null;
+  expertsSubheading?: string | null;
+  experts?:
+    | {
+        /**
+         * Select from team members (leadership or team member) to automatically link profile.
+         */
+        member?: (number | null) | TeamMember;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use member name.
+         */
+        name?: string | null;
+        /**
+         * Leave empty to use member role.
+         */
+        role?: string | null;
+        /**
+         * Leave empty to automatically link to /team/[slug].
+         */
+        readMoreUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Related'
+   */
+  relatedBefore?: string | null;
+  /**
+   * e.g. 'blogs'
+   */
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        /**
+         * Select from all blogs list to automatically pull title, image, date, and link.
+         */
+        post?: (number | null) | BlogPost;
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        /**
+         * Leave empty to use blog post title.
+         */
+        title?: string | null;
+        /**
+         * Leave empty to use blog post link.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Work service blueprint pages accessible at /work/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "work-service-pages".
+ */
+export interface WorkServicePage {
+  id: number;
+  /**
+   * e.g. 'B2B Website Design', 'Website Projects', '3D & Motion', 'Thinking'. Used as default footer link label.
+   */
+  title: string;
+  /**
+   * URL slug, e.g. 'b2b-website-design' (accessible at /work/b2b-website-design).
+   */
+  slug: string;
+  /**
+   * Leave empty to use the Work Service Name.
+   */
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * The large paragraph above the first section.
+   */
+  lead?: string | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable id, for example definitive-guide.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        pointers?:
+          | {
+              term?: string | null;
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        closing?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        highlightTitle?: string | null;
+        highlightBody?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Logos on this work service page only. They do not change the homepage.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Width inside card, in pixels. Default 160.
+         */
+        width?: number | null;
+        /**
+         * Height inside card, in pixels. Default 48.
+         */
+        height?: number | null;
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Clients we did'
+   */
+  clientsBefore?: string | null;
+  /**
+   * e.g. 'branding'
+   */
+  clientsAccent?: string | null;
+  /**
+   * e.g. 'for'
+   */
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        /**
+         * Select from clients list to automatically pull name, image, and link.
+         */
+        client?: (number | null) | Client;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use client name.
+         */
+        name?: string | null;
+        /**
+         * Project summary or case study highlights.
+         */
+        description?: string | null;
+        /**
+         * Leave empty to link directly to the client page.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show on all tabs.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Branding'
+   */
+  expertsBefore?: string | null;
+  /**
+   * e.g. 'experts'
+   */
+  expertsAccent?: string | null;
+  expertsSubheading?: string | null;
+  experts?:
+    | {
+        /**
+         * Select from team members (leadership or team member) to automatically link profile.
+         */
+        member?: (number | null) | TeamMember;
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use member name.
+         */
+        name?: string | null;
+        /**
+         * Leave empty to use member role.
+         */
+        role?: string | null;
+        /**
+         * Leave empty to automatically link to /team/[slug].
+         */
+        readMoreUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g. 'Related'
+   */
+  relatedBefore?: string | null;
+  /**
+   * e.g. 'blogs'
+   */
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        /**
+         * Select from all blogs list to automatically pull title, image, date, and link.
+         */
+        post?: (number | null) | BlogPost;
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        /**
+         * Leave empty to use blog post title.
+         */
+        title?: string | null;
+        /**
+         * Leave empty to use blog post link.
+         */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1540,6 +1948,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'service-pages';
         value: number | ServicePage;
+      } | null)
+    | ({
+        relationTo: 'solution-pages';
+        value: number | SolutionPage;
+      } | null)
+    | ({
+        relationTo: 'work-service-pages';
+        value: number | WorkServicePage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2022,6 +2438,7 @@ export interface CaseStudiesSelect<T extends boolean = true> {
     | T
     | {
         quote?: T;
+        logoShape?: T;
         logo?: T;
         tableHeading?: T;
         rows?:
@@ -2388,6 +2805,226 @@ export interface ServicePagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "solution-pages_select".
+ */
+export interface SolutionPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        pointers?:
+          | T
+          | {
+              term?: T;
+              text?: T;
+              id?: T;
+            };
+        closing?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        highlightTitle?: T;
+        highlightBody?: T;
+        id?: T;
+      };
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        client?: T;
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  expertsBefore?: T;
+  expertsAccent?: T;
+  expertsSubheading?: T;
+  experts?:
+    | T
+    | {
+        member?: T;
+        image?: T;
+        name?: T;
+        role?: T;
+        readMoreUrl?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        post?: T;
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "work-service-pages_select".
+ */
+export interface WorkServicePagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        pointers?:
+          | T
+          | {
+              term?: T;
+              text?: T;
+              id?: T;
+            };
+        closing?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        highlightTitle?: T;
+        highlightBody?: T;
+        id?: T;
+      };
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        width?: T;
+        height?: T;
+        row?: T;
+        id?: T;
+      };
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        client?: T;
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  expertsBefore?: T;
+  expertsAccent?: T;
+  expertsSubheading?: T;
+  experts?:
+    | T
+    | {
+        member?: T;
+        image?: T;
+        name?: T;
+        role?: T;
+        readMoreUrl?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        post?: T;
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2451,11 +3088,18 @@ export interface SiteFooter {
       }[]
     | null;
   /**
-   * Links under Work.
+   * Links under Work. Select a Work Service Page created in CMS (auto-routes to /work/[slug] and uses page name).
    */
   work?:
     | {
-        label: string;
+        /**
+         * Select a work service page created in CMS. Routing and name are managed automatically.
+         */
+        workServicePage?: (number | null) | WorkServicePage;
+        /**
+         * Link name. If a Work Service Page is selected above, leave empty to automatically use the page's name.
+         */
+        label?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -2469,11 +3113,18 @@ export interface SiteFooter {
       }[]
     | null;
   /**
-   * Links under Solutions.
+   * Links under Solutions. Select a Solution Page created in CMS (auto-routes to /solutions/[slug] and uses page name).
    */
   solutions?:
     | {
-        label: string;
+        /**
+         * Select a solution page created in CMS. Routing and name are managed automatically.
+         */
+        solutionPage?: (number | null) | SolutionPage;
+        /**
+         * Link name. If a Solution Page is selected above, leave empty to automatically use the page's name.
+         */
+        label?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3416,6 +4067,7 @@ export interface SiteFooterSelect<T extends boolean = true> {
   work?:
     | T
     | {
+        workServicePage?: T;
         label?: T;
         id?: T;
       };
@@ -3428,6 +4080,7 @@ export interface SiteFooterSelect<T extends boolean = true> {
   solutions?:
     | T
     | {
+        solutionPage?: T;
         label?: T;
         id?: T;
       };

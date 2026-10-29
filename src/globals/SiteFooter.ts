@@ -86,6 +86,76 @@ function serviceLinkList(): ArrayField {
   };
 }
 
+/** Solutions link list with direct Solution Page selection. */
+function solutionLinkList(): ArrayField {
+  return {
+    name: "solutions",
+    label: "Solutions",
+    type: "array",
+    labels: { singular: "Solution Link", plural: "Solutions" },
+    admin: {
+      description:
+        "Links under Solutions. Select a Solution Page created in CMS (auto-routes to /solutions/[slug] and uses page name).",
+    },
+    fields: [
+      {
+        name: "solutionPage",
+        label: "Select Solution Page",
+        type: "relationship",
+        relationTo: "solution-pages",
+        admin: {
+          description:
+            "Select a solution page created in CMS. Routing and name are managed automatically.",
+        },
+      },
+      {
+        name: "label",
+        label: "Label",
+        type: "text",
+        admin: {
+          description:
+            "Link name. If a Solution Page is selected above, leave empty to automatically use the page's name.",
+        },
+      },
+    ],
+  };
+}
+
+/** Work link list with direct Work Service Page selection. */
+function workServiceLinkList(): ArrayField {
+  return {
+    name: "work",
+    label: "Work",
+    type: "array",
+    labels: { singular: "Work Link", plural: "Work" },
+    admin: {
+      description:
+        "Links under Work. Select a Work Service Page created in CMS (auto-routes to /work/[slug] and uses page name).",
+    },
+    fields: [
+      {
+        name: "workServicePage",
+        label: "Select Work Service Page",
+        type: "relationship",
+        relationTo: "work-service-pages",
+        admin: {
+          description:
+            "Select a work service page created in CMS. Routing and name are managed automatically.",
+        },
+      },
+      {
+        name: "label",
+        label: "Label",
+        type: "text",
+        admin: {
+          description:
+            "Link name. If a Work Service Page is selected above, leave empty to automatically use the page's name.",
+        },
+      },
+    ],
+  };
+}
+
 /**
  * Site-wide footer. Only the six link lists are editable here.
  * Sales numbers, Follow Us, the email and phone, and the Ask AI pills
@@ -115,9 +185,9 @@ export const SiteFooter: GlobalConfig = {
       admin: { hidden: true },
       fields: [{ name: "label", type: "text", required: true }],
     },
-    linkList("work", "Work"),
+    workServiceLinkList(),
     linkList("company", "Company"),
-    linkList("solutions", "Solutions"),
+    solutionLinkList(),
     serviceLinkList(),
     industryLinkList(),
     linkList("studio", "Studio"),
