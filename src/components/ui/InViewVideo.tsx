@@ -7,12 +7,19 @@ type InViewVideoProps = {
   poster?: string;
   label: string;
   className?: string;
+  autoFit?: boolean;
 };
 
 /**
  * Muted looping video that only buffers and plays when scrolled near or into view.
  */
-export function InViewVideo({ src, poster, label, className = "" }: InViewVideoProps) {
+export function InViewVideo({
+  src,
+  poster,
+  label,
+  className = "",
+  autoFit = false,
+}: InViewVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -44,13 +51,17 @@ export function InViewVideo({ src, poster, label, className = "" }: InViewVideoP
     <div ref={wrapRef} className={`relative overflow-hidden bg-transparent ${className}`}>
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover [transform:translateZ(0)] [backface-visibility:hidden] [isolation:isolate]"
+        className={
+          autoFit
+            ? "block h-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] [isolation:isolate]"
+            : "absolute inset-0 h-full w-full object-cover [transform:translateZ(0)] [backface-visibility:hidden] [isolation:isolate]"
+        }
         src={inView ? src : undefined}
         poster={poster && !poster.match(/\.(mp4|webm|mov|m4v)(\?|$)/i) ? poster : undefined}
         muted
         playsInline
         loop
-        preload="none"
+        preload={autoFit ? "metadata" : "none"}
         aria-label={label}
       />
     </div>

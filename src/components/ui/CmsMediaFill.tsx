@@ -11,6 +11,7 @@ type CmsMediaFillProps = {
   alt: string;
   sizes: string;
   priority?: boolean;
+  autoFit?: boolean;
 };
 
 const DEFAULT_FALLBACK = "/assets/images/client-hub/case-study-hero.jpg";
@@ -25,6 +26,7 @@ export function CmsMediaFill({
   alt,
   sizes,
   priority = false,
+  autoFit = false,
 }: CmsMediaFillProps) {
   const videoSrc =
     (video && typeof video === "string" && isVideoSrc(video) && video.trim() ? video.trim() : null) ||
@@ -45,7 +47,8 @@ export function CmsMediaFill({
         src={videoSrc}
         poster={poster}
         label={alt}
-        className="absolute inset-0 h-full w-full"
+        autoFit={autoFit}
+        className={autoFit ? "w-full" : "absolute inset-0 h-full w-full"}
       />
     );
   }
@@ -74,7 +77,32 @@ export function CmsMediaFill({
       <img
         src={cleanPoster}
         alt={alt}
-        className="absolute inset-0 h-full w-full object-cover"
+        className={
+          autoFit
+            ? "block h-auto w-full object-contain"
+            : "absolute inset-0 h-full w-full object-cover"
+        }
+        style={autoFit ? { width: "100%", height: "auto" } : undefined}
+        onError={() => {
+          if (!hasError) {
+            setHasError(true);
+          }
+        }}
+      />
+    );
+  }
+
+  if (autoFit) {
+    return (
+      <Image
+        src={cleanPoster}
+        alt={alt}
+        width={0}
+        height={0}
+        priority={priority}
+        className="block h-auto w-full object-contain"
+        style={{ width: "100%", height: "auto" }}
+        sizes={sizes}
         onError={() => {
           if (!hasError) {
             setHasError(true);

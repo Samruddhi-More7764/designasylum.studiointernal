@@ -8,11 +8,13 @@ export function CaseStudyMedia({
   alt,
   priority = false,
   sizes,
+  autoFit = false,
 }: {
   src: string;
   alt: string;
   priority?: boolean;
   sizes: string;
+  autoFit?: boolean;
 }) {
   if (!src) return null;
   const video = isVideoSrc(src);
@@ -23,6 +25,7 @@ export function CaseStudyMedia({
       alt={alt}
       sizes={sizes}
       priority={priority && !video}
+      autoFit={autoFit}
     />
   );
 }
@@ -68,12 +71,13 @@ export function CaseStudyMediaFrame({
 
   return (
     <div className={shell}>
-      <div className={`${cell} aspect-[1316/740] lg:h-[740px]`}>
+      <div className={`${cell} w-full`}>
         <CaseStudyMedia
           src={frame.image.src}
           alt={frame.image.alt}
           priority={priority}
           sizes="(min-width: 1024px) 1316px, 100vw"
+          autoFit
         />
       </div>
     </div>
