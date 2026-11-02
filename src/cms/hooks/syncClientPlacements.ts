@@ -388,7 +388,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const globalClients = (await req.payload.findGlobal({
       slug: "clients-index",
       depth: 0,
-      req,
     })) as { cards?: Array<Record<string, unknown>> };
 
     let currentCards = Array.isArray(globalClients?.cards)
@@ -396,11 +395,13 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       : [];
 
     const isMatch = (card: Record<string, unknown>) => {
+      const cardClient = extractId(card.client);
       const cardHref = String(card.href || "");
       const cardName = String(card.name || "").toLowerCase();
       return (
+        (cardClient != null && cardClient === clientId) ||
         (clientPath && cardHref === clientPath) ||
-        cardName === clientName.toLowerCase()
+        (clientName && cardName === clientName.toLowerCase())
       );
     };
 
@@ -408,10 +409,10 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       const cardImageId = extractId(cpConfig.image) || defaultHeroImageId;
       const cardOrder = parseOrder(cpConfig.order, 0);
       const cardData = {
+        client: clientId,
         name: clientName,
         service: cpConfig.service || defaultHeroHeading || "",
         image: cardImageId || null,
-        href: clientPath || "#",
         order: cardOrder,
       };
 
@@ -443,7 +444,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           slug: "clients-index",
           data: { cards: currentCards },
           context: { skipSync: true, skipRevalidation: true },
-          req,
         });
       }
     } else {
@@ -453,7 +453,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           slug: "clients-index",
           data: { cards: filtered },
           context: { skipSync: true, skipRevalidation: true },
-          req,
         });
       }
     }
@@ -470,7 +469,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
     const globalWork = (await req.payload.findGlobal({
       slug: "work-page",
       depth: 0,
-      req,
     })) as { projects?: Array<Record<string, unknown>> };
 
     let currentProjects = Array.isArray(globalWork?.projects)
@@ -478,11 +476,13 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       : [];
 
     const isMatch = (proj: Record<string, unknown>) => {
+      const projClient = extractId(proj.client);
       const projHref = String(proj.href || "");
       const projName = String(proj.name || "").toLowerCase();
       return (
+        (projClient != null && projClient === clientId) ||
         (clientPath && projHref === clientPath) ||
-        projName === clientName.toLowerCase()
+        (clientName && projName === clientName.toLowerCase())
       );
     };
 
@@ -490,11 +490,11 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
       const projectImageId = extractId(wpConfig.image) || defaultHeroImageId;
       const projectOrder = parseOrder(wpConfig.order, 0);
       const projectData = {
+        client: clientId,
         name: clientName,
         service: wpConfig.service || defaultHeroHeading || "",
         category: wpConfig.category || "technology",
         image: projectImageId || null,
-        href: clientPath || "#",
         order: projectOrder,
       };
 
@@ -526,7 +526,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           slug: "work-page",
           data: { projects: currentProjects },
           context: { skipSync: true, skipRevalidation: true },
-          req,
         });
       }
     } else {
@@ -536,7 +535,6 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
           slug: "work-page",
           data: { projects: filtered },
           context: { skipSync: true, skipRevalidation: true },
-          req,
         });
       }
     }
@@ -548,6 +546,120 @@ export const syncClientPlacementsAfterChange: CollectionAfterChangeHook = async 
   }
 
   return doc;
+};
+
+/**
+ * Triggered after a Client document is deleted.
+ * Cleans up secondary placements and removes the client from globals.
+ */
+export const syncClientPlacementsAfterDelete: CollectionAfterDeleteHook = async ({
+  id,
+  req,
+}) => {
+  const clientId = extractId(id);
+  if (!clientId) return;
+
+  // 1. Delete associated Featured Project
+  try {
+    const existingFP = await req.payload.find({
+      collection: "featured-projects",
+      where: { client: { equals: clientId } },
+      limit: 10,
+      depth: 0,
+    });
+    for (const doc of existingFP.docs) {
+      await req.payload.delete({
+        collection: "featured-projects",
+        id: doc.id,
+        context: { skipSync: true, skipRevalidation: true },
+      });
+    }
+  } catch {}
+
+  // 2. Delete associated Portfolio Item
+  try {
+    const existingPI = await req.payload.find({
+      collection: "portfolio-items",
+      where: { client: { equals: clientId } },
+      limit: 10,
+      depth: 0,
+    });
+    for (const doc of existingPI.docs) {
+      await req.payload.delete({
+        collection: "portfolio-items",
+        id: doc.id,
+        context: { skipSync: true, skipRevalidation: true },
+      });
+    }
+  } catch {}
+
+  // 3. Delete associated Pain Point
+  try {
+    const existingPP = await req.payload.find({
+      collection: "pain-points",
+      where: { client: { equals: clientId } },
+      limit: 10,
+      depth: 0,
+    });
+    for (const doc of existingPP.docs) {
+      await req.payload.delete({
+        collection: "pain-points",
+        id: doc.id,
+        context: { skipSync: true, skipRevalidation: true },
+      });
+    }
+  } catch {}
+
+  // 4. Delete associated Homepage Case Study
+  try {
+    const existingHCS = await req.payload.find({
+      collection: "homepage-case-studies",
+      where: { client: { equals: clientId } },
+      limit: 10,
+      depth: 0,
+    });
+    for (const doc of existingHCS.docs) {
+      await req.payload.delete({
+        collection: "homepage-case-studies",
+        id: doc.id,
+        context: { skipSync: true, skipRevalidation: true },
+      });
+    }
+  } catch {}
+
+  // 5. Remove from Clients Page global
+  try {
+    const globalClients = (await req.payload.findGlobal({
+      slug: "clients-index",
+      depth: 0,
+    })) as { cards?: Array<Record<string, unknown>> };
+    const currentCards = Array.isArray(globalClients?.cards) ? globalClients.cards : [];
+    const filtered = currentCards.filter((card) => extractId(card.client) !== clientId);
+    if (filtered.length !== currentCards.length) {
+      await req.payload.updateGlobal({
+        slug: "clients-index",
+        data: { cards: filtered },
+        context: { skipSync: true, skipRevalidation: true },
+      });
+    }
+  } catch {}
+
+  // 6. Remove from Work Page global
+  try {
+    const globalWork = (await req.payload.findGlobal({
+      slug: "work-page",
+      depth: 0,
+    })) as { projects?: Array<Record<string, unknown>> };
+    const currentProjects = Array.isArray(globalWork?.projects) ? globalWork.projects : [];
+    const filtered = currentProjects.filter((proj) => extractId(proj.client) !== clientId);
+    if (filtered.length !== currentProjects.length) {
+      await req.payload.updateGlobal({
+        slug: "work-page",
+        data: { projects: filtered },
+        context: { skipSync: true, skipRevalidation: true },
+      });
+    }
+  } catch {}
 };
 
 

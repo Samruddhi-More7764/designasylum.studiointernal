@@ -185,16 +185,16 @@ const attachAsFeaturedIfNeeded: CollectionAfterChangeHook = async ({
       : clientRef;
   if (clientId == null) return doc;
 
-  const client = await req.payload.findByID({
-    collection: "clients",
-    id: clientId,
-    depth: 0,
-    req,
-  });
-  if (client.projectType !== "direct" || client.featuredStudy) return doc;
-
-  // Direct DB write — avoid nested payload.update() deadlock on uncommitted study.
   try {
+    const client = await req.payload.findByID({
+      collection: "clients",
+      id: clientId,
+      depth: 0,
+      req,
+    });
+    if (!client || client.projectType !== "direct" || client.featuredStudy) return doc;
+
+    // Direct DB write — avoid nested payload.update() deadlock on uncommitted study.
     await req.payload.db.updateOne({
       collection: "clients",
       id: clientId,
@@ -288,7 +288,7 @@ const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
         collection: "clients",
         id: clientId,
         data: { placements } as never,
-        context: { skipHeroSync: true, skipRevalidation: true },
+        context: { skipSync: true, skipHeroSync: true, skipRevalidation: true },
         req,
       });
     }

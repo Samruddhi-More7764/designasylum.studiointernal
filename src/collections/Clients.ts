@@ -5,7 +5,10 @@ import type {
 } from "payload";
 import { clientHubFields } from "../fields/clientHubFields";
 import { clientPlacementsFields } from "../fields/clientPlacementsFields";
-import { syncClientPlacementsAfterChange } from "../cms/hooks/syncClientPlacements";
+import {
+  syncClientPlacementsAfterChange,
+  syncClientPlacementsAfterDelete,
+} from "../cms/hooks/syncClientPlacements";
 
 const slugify = (value: string) =>
   value
@@ -198,6 +201,7 @@ export const Clients: CollectionConfig = {
     beforeValidate: [ensureSlug, computeClientAdminTitle],
     beforeChange: [autoPopulatePlacements],
     afterChange: [syncClientPlacementsAfterChange],
+    afterDelete: [syncClientPlacementsAfterDelete],
   },
   fields: [
     {
