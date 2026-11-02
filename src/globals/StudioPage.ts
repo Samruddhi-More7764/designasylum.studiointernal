@@ -83,14 +83,30 @@ export const StudioPage: GlobalConfig = {
               name: "projects",
               type: "array",
               fields: [
-                imageField(),
-                { name: "name", type: "text", required: true },
-                { name: "body", type: "textarea" },
                 {
-                  name: "href",
-                  label: "URL",
+                  name: "client",
+                  label: "Select Client",
+                  type: "relationship",
+                  relationTo: "clients",
+                  admin: {
+                    description:
+                      "Select a client from Collections > Clients. Routes to the client hub page (/clients/[slug]) or direct case study (/clients/[slug]/[study]). Name, image, and description will auto-populate if left empty.",
+                  },
+                },
+                imageField("image", "Image", "Leave empty to use client hero image."),
+                {
+                  name: "name",
                   type: "text",
-                  admin: { description: "Where View website goes. Leave empty until that page exists." },
+                  admin: {
+                    description: "Leave empty to use client name.",
+                  },
+                },
+                {
+                  name: "body",
+                  type: "textarea",
+                  admin: {
+                    description: "Leave empty to use client description.",
+                  },
                 },
               ],
             },
@@ -138,13 +154,11 @@ export const StudioPage: GlobalConfig = {
                   },
                 },
                 imageField(),
-                { name: "name", type: "text", required: true },
                 {
-                  name: "href",
-                  label: "Custom URL",
+                  name: "name",
                   type: "text",
                   admin: {
-                    description: `Optional override. Leave empty if a profile is linked above, or specify a custom URL.`,
+                    description: "Leave empty to use member's name.",
                   },
                 },
               ],

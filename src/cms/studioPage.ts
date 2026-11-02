@@ -2,6 +2,7 @@ import { cache } from "react";
 import { getPayloadClient } from "@/cms/getPayload";
 import { isVideoMedia, isVideoSrc } from "@/cms/media";
 import { storedImage } from "@/cms/storedImage";
+import { resolvedClientHref } from "@/cms/urls";
 import {
   studioFit,
   studioHero,
@@ -98,7 +99,20 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
       chips?: Array<{ label?: string | null; value?: string | null } | null> | null;
       projectsBefore?: string | null;
       projectsAccent?: string | null;
-      projects?: Array<{ image?: unknown; name?: string | null; body?: string | null; href?: string | null } | null> | null;
+      projects?: Array<{
+        client?: {
+          id?: string | number;
+          slug?: string;
+          name?: string;
+          projectType?: "hub" | "direct" | null;
+          featuredStudy?: { slug?: string; title?: string } | string | number | null;
+          hero?: { image?: unknown; heading?: string; description?: string };
+        } | string | number | null;
+        image?: unknown;
+        name?: string | null;
+        body?: string | null;
+        href?: string | null;
+      } | null> | null;
       fitBefore?: string | null;
       fitAccent?: string | null;
       fitAfter?: string | null;
@@ -125,20 +139,67 @@ export const getStudioPage = cache(async (): Promise<StudioContent> => {
       })
       .filter((row): row is StudioChip => Boolean(row));
 
-    const projects = (doc.projects || [])
-      .map((row, index) => {
-        const name = row?.name?.trim() || "";
-        if (!name) return null;
-        const designed = fallback.projects[index];
-        return {
-          id: `studio-project-${index}`,
-          name,
-          body: row?.body?.trim() || designed?.body || "",
-          image: storedImage(row?.image, designed?.image || studioProjects[0].image),
-          href: row?.href?.trim() || "",
-        };
-      })
-      .filter((row): row is StudioProject => Boolean(row));
+    const projects = (
+      await Promise.all(
+        (doc.projects || []).map(async (row, index) => {
+          let linkedClient =
+            row?.client && typeof row.client === "object" ? row.client : null;
+
+          if (!linkedClient && row?.client) {
+            const clientId =
+              typeof row.client === "object" && "id" in row.client
+                ? (row.client as { id?: unknown }).id
+                : row.client;
+            if (typeof clientId === "number" || (typeof clientId === "string" && /^\d+$/.test(clientId))) {
+              try {
+                const clientDoc = await payload.findByID({
+                  collection: "clients",
+                  id: Number(clientId),
+                  depth: 2,
+                });
+                if (clientDoc) linkedClient = clientDoc as unknown as typeof linkedClient;
+              } catch {}
+            }
+          }
+
+          const designed = fallback.projects[index];
+          const name = row?.name?.trim() || linkedClient?.name?.trim() || designed?.name || "";
+          if (!name) return null;
+
+          const image = storedImage(
+            row?.image || linkedClient?.hero?.image,
+            designed?.image || studioProjects[0].image,
+          );
+
+          const body =
+            row?.body?.trim() ||
+            (linkedClient?.hero as { description?: string })?.description?.trim() ||
+            designed?.body ||
+            "";
+
+          let href = "";
+          if (linkedClient) {
+            href =
+              resolvedClientHref(linkedClient) ||
+              (linkedClient.slug ? `/clients/${linkedClient.slug}` : "");
+          }
+          if (!href && row?.href?.trim()) {
+            href = row.href.trim();
+          }
+          if (!href && designed?.href) {
+            href = designed.href;
+          }
+
+          return {
+            id: `studio-project-${index}`,
+            name,
+            body,
+            image,
+            href,
+          };
+        }),
+      )
+    ).filter((row): row is StudioProject => Boolean(row));
 
     const captions = (rows: Array<{ caption?: string | null } | null> | null | undefined, designed: string[]) => {
       const next = (rows || [])

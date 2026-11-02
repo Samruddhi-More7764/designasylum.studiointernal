@@ -195,130 +195,166 @@ const fallback: BlogArticleContent = {
   relatedBlogs,
 };
 
+export function parseBlogArticleDoc(
+  doc: Record<string, unknown> | null | undefined,
+  baseFallback?: BlogArticleContent,
+): BlogArticleContent {
+  const fb = baseFallback || fallback;
+  if (!doc) return fb;
+
+  const docTitle = typeof doc.title === "string" ? doc.title.trim() : "";
+  const docDate = typeof doc.date === "string" ? doc.date.trim() : "";
+
+  const sections = (Array.isArray(doc.sections) ? doc.sections : [])
+    .map((section: any, index: number) => {
+      const designed = fb.sections[index];
+      const blocks = (Array.isArray(section?.blocks) ? section.blocks : [])
+        .map((block: any, blockIndex: number) => blockFrom(block, designed?.blocks[blockIndex]))
+        .filter((block: unknown): block is ArticleBlock => Boolean(block));
+      const row: ArticleSection = {
+        id: (typeof section?.anchor === "string" && section.anchor.trim()) || designed?.id || `section-${index + 1}`,
+        label: (typeof section?.tocLabel === "string" && section.tocLabel.trim()) || designed?.label || `Section ${index + 1}`,
+        before: (typeof section?.headingBefore === "string" && section.headingBefore.trim()) || undefined,
+        accent: (typeof section?.headingAccent === "string" && section.headingAccent.trim()) || undefined,
+        after: (typeof section?.headingAfter === "string" && section.headingAfter.trim()) || undefined,
+        blocks: blocks.length ? blocks : designed?.blocks || [],
+      };
+      return row;
+    })
+    .filter((section) => section.blocks.length);
+
+  const faqs = (Array.isArray(doc.faqs) ? doc.faqs : [])
+    .map((item: any) => {
+      const question = typeof item?.question === "string" ? item.question.trim() : "";
+      if (!question) return null;
+      const answer = typeof item?.answer === "string" ? item.answer.trim() : undefined;
+      return answer ? { question, answer } : { question };
+    })
+    .filter((item): item is { question: string; answer?: string } => Boolean(item));
+
+  const topics = (Array.isArray(doc.topics) ? doc.topics : [])
+    .map((topic: any) => (typeof topic?.label === "string" ? topic.label.trim() : ""))
+    .filter(Boolean);
+
+  const posts = (Array.isArray(doc.relatedBlogs) ? doc.relatedBlogs : [])
+    .map((post: any, index: number) => {
+      const linked =
+        post && "post" in post && post.post && typeof post.post === "object"
+          ? (post.post as { title?: string; slug?: string; date?: string; readTime?: string; image?: unknown })
+          : null;
+      const title = (typeof post?.title === "string" && post.title.trim()) || linked?.title?.trim() || "";
+      if (!title) return null;
+      const date = (typeof post?.date === "string" && post.date.trim()) || linked?.date?.trim() || "";
+      const readTime = (typeof post?.readTime === "string" && post.readTime.trim()) || linked?.readTime?.trim() || "";
+      const cleanSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
+      const defaultHref = cleanSlug ? `/blogs/${cleanSlug}` : "/";
+      const href = (typeof post?.href === "string" && post.href.trim()) || defaultHref;
+      const image = storedImage(
+        post?.image || linked?.image,
+        relatedBlogs[index]?.image || relatedImage,
+      );
+      return {
+        image,
+        date,
+        readTime,
+        title,
+        href,
+        key: `related-${index}`,
+      };
+    })
+    .filter((post): post is NonNullable<typeof post> => Boolean(post));
+
+  const authorMember = doc.authorMember && typeof doc.authorMember === "object" ? (doc.authorMember as { slug?: string }) : null;
+  const authorSlug = authorMember?.slug ? authorMember.slug.replace(/^\/+|\/+$/g, "").trim() : "";
+  const authorHref = authorSlug ? `/team/${authorSlug}#hero` : typeof doc.authorUrl === "string" ? doc.authorUrl.trim() : "";
+
+  return {
+    breadcrumbCurrent: text(doc.breadcrumbCurrent as string, docTitle || fb.breadcrumbCurrent),
+    titleBefore: text(doc.titleBefore as string, docTitle ? `${docTitle} ` : fb.titleBefore),
+    titleAccent: text(doc.titleAccent as string, docTitle ? "" : fb.titleAccent),
+    titleMiddle: text(doc.titleMiddle as string, fb.titleMiddle),
+    titleLine: text(doc.titleLine as string, fb.titleLine),
+    intro: text(doc.intro as string, fb.intro),
+    heroImage: storedImage(doc.heroImage || doc.image, "") || null,
+    bylineName: text(doc.bylineName as string, fb.bylineName),
+    bylineDate: text(doc.bylineDate as string, docDate || fb.bylineDate),
+    bylineAvatar: storedImage(doc.bylineAvatar, fb.bylineAvatar),
+    lead: text(doc.lead as string, fb.lead),
+    sections: sections.length ? sections : fb.sections,
+    faqs: faqs.length ? faqs : fb.faqs,
+    authorImage: storedImage(doc.authorImage, fb.authorImage),
+    authorName: text(doc.authorName as string, fb.authorName),
+    authorRole: text(doc.authorRole as string, fb.authorRole),
+    authorBio: text(doc.authorBio as string, fb.authorBio),
+    authorHref,
+    topicsBefore: text(doc.topicsBefore as string, fb.topicsBefore),
+    topicsAccent: text(doc.topicsAccent as string, fb.topicsAccent),
+    topicsAfter: text(doc.topicsAfter as string, fb.topicsAfter),
+    topics: topics.length ? topics : fb.topics,
+    relatedBefore: text(doc.relatedBefore as string, fb.relatedBefore),
+    relatedAccent: text(doc.relatedAccent as string, fb.relatedAccent),
+    relatedBlogs: posts.length ? posts : fb.relatedBlogs,
+  };
+}
+
+export const getBlogPostBySlug = cache(async (slug: string): Promise<BlogArticleContent | null> => {
+  const payload = await getPayloadClient();
+  const cleanSlug = slug.replace(/^\/+|\/+$/g, "").trim();
+
+  if (!payload) {
+    if (cleanSlug === "sevenloop-brand-website-redesign") return fallback;
+    return null;
+  }
+
+  try {
+    const result = await payload.find({
+      collection: "blog-posts",
+      where: { slug: { equals: cleanSlug } },
+      limit: 1,
+      depth: 2,
+    });
+
+    if (result.docs.length) {
+      return parseBlogArticleDoc(
+        result.docs[0] as unknown as Record<string, unknown>,
+        cleanSlug === "sevenloop-brand-website-redesign" ? fallback : undefined,
+      );
+    }
+
+    if (cleanSlug === "sevenloop-brand-website-redesign") {
+      return getBlogArticle();
+    }
+    return null;
+  } catch (error) {
+    console.warn("[cms] getBlogPostBySlug error", error);
+    if (cleanSlug === "sevenloop-brand-website-redesign") return fallback;
+    return null;
+  }
+});
+
 export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
   const payload = await getPayloadClient();
   if (!payload) return fallback;
 
   try {
+    // Check collection first
+    const fromCollection = await payload.find({
+      collection: "blog-posts",
+      where: { slug: { equals: "sevenloop-brand-website-redesign" } },
+      limit: 1,
+      depth: 2,
+    });
+    if (fromCollection.docs.length) {
+      return parseBlogArticleDoc(fromCollection.docs[0] as unknown as Record<string, unknown>, fallback);
+    }
+
+    // Check global
     const doc = (await payload.findGlobal({
       slug: "blog-article" as "site-footer",
       depth: 2,
-    })) as unknown as {
-      breadcrumbCurrent?: string | null;
-      titleBefore?: string | null;
-      titleAccent?: string | null;
-      titleMiddle?: string | null;
-      titleLine?: string | null;
-      intro?: string | null;
-      heroImage?: unknown;
-      bylineName?: string | null;
-      bylineDate?: string | null;
-      bylineAvatar?: unknown;
-      lead?: string | null;
-      sections?: Array<{
-        anchor?: string | null;
-        tocLabel?: string | null;
-        headingBefore?: string | null;
-        headingAccent?: string | null;
-        headingAfter?: string | null;
-        blocks?: CmsBlock[] | null;
-      } | null> | null;
-      faqs?: Array<{ question?: string | null; answer?: string | null } | null> | null;
-      authorImage?: unknown;
-      authorName?: string | null;
-      authorRole?: string | null;
-      authorBio?: string | null;
-      authorLink?: string | null;
-      authorMember?: { slug?: string; name?: string } | string | null;
-      authorUrl?: string | null;
-      topicsBefore?: string | null;
-      topicsAccent?: string | null;
-      topicsAfter?: string | null;
-      topics?: Array<{ label?: string | null } | null> | null;
-      relatedBefore?: string | null;
-      relatedAccent?: string | null;
-      relatedBlogs?: Array<{
-        image?: unknown;
-        date?: string | null;
-        readTime?: string | null;
-        title?: string | null;
-        href?: string | null;
-      } | null> | null;
-    };
+    })) as unknown as Record<string, unknown>;
 
-    const sections = (doc.sections || [])
-      .map((section, index) => {
-        const designed = fallback.sections[index];
-        const blocks = (section?.blocks || [])
-          .map((block, blockIndex) => blockFrom(block, designed?.blocks[blockIndex]))
-          .filter((block): block is ArticleBlock => Boolean(block));
-        const row: ArticleSection = {
-          id: section?.anchor?.trim() || designed?.id || `section-${index + 1}`,
-          label: section?.tocLabel?.trim() || designed?.label || `Section ${index + 1}`,
-          before: section?.headingBefore?.trim() || undefined,
-          accent: section?.headingAccent?.trim() || undefined,
-          after: section?.headingAfter?.trim() || undefined,
-          blocks: blocks.length ? blocks : designed?.blocks || [],
-        };
-        return row;
-      })
-      .filter((section) => section.blocks.length);
-
-    const faqs = (doc.faqs || [])
-      .map((item) => {
-        const question = item?.question?.trim() || "";
-        if (!question) return null;
-        const answer = item?.answer?.trim();
-        return answer ? { question, answer } : { question };
-      })
-      .filter((item): item is { question: string; answer?: string } => Boolean(item));
-
-    const topics = (doc.topics || []).map((topic) => topic?.label?.trim() || "").filter(Boolean);
-    const posts = (doc.relatedBlogs || [])
-      .map((post, index) => ({
-        image: storedImage(post?.image, relatedBlogs[index]?.image || relatedImage),
-        date: post?.date?.trim() || "",
-        readTime: post?.readTime?.trim() || "",
-        title: post?.title?.trim() || "",
-        href: post?.href?.trim() || "/",
-        key: `related-${index}`,
-      }))
-      .filter((post) => post.title);
-
-    return {
-      breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
-      titleBefore: text(doc.titleBefore, fallback.titleBefore),
-      titleAccent: text(doc.titleAccent, fallback.titleAccent),
-      titleMiddle: text(doc.titleMiddle, fallback.titleMiddle),
-      titleLine: text(doc.titleLine, fallback.titleLine),
-      intro: text(doc.intro, fallback.intro),
-      heroImage: storedImage(doc.heroImage, "") || null,
-      bylineName: text(doc.bylineName, fallback.bylineName),
-      bylineDate: text(doc.bylineDate, fallback.bylineDate),
-      bylineAvatar: storedImage(doc.bylineAvatar, fallback.bylineAvatar),
-      lead: text(doc.lead, fallback.lead),
-      sections: sections.length ? sections : fallback.sections,
-      faqs: faqs.length ? faqs : fallback.faqs,
-      authorImage: storedImage(doc.authorImage, fallback.authorImage),
-      authorName: text(doc.authorName, fallback.authorName),
-      authorRole: text(doc.authorRole, fallback.authorRole),
-      authorBio: text(doc.authorBio, fallback.authorBio),
-      authorHref:
-        doc.authorLink === "team"
-          ? (doc.authorMember && typeof doc.authorMember === "object" && doc.authorMember.slug
-              ? `/team/${doc.authorMember.slug.replace(/^\/+|\/+$/g, "").trim()}#hero`
-              : teamPersonHeroHref)
-          : doc.authorLink === "url"
-            ? doc.authorUrl?.trim() || ""
-            : "",
-      topicsBefore: text(doc.topicsBefore, fallback.topicsBefore),
-      topicsAccent: text(doc.topicsAccent, fallback.topicsAccent),
-      topicsAfter: text(doc.topicsAfter, fallback.topicsAfter),
-      topics: topics.length ? topics : fallback.topics,
-      relatedBefore: text(doc.relatedBefore, fallback.relatedBefore),
-      relatedAccent: text(doc.relatedAccent, fallback.relatedAccent),
-      relatedBlogs: posts.length ? posts : fallback.relatedBlogs,
-    };
+    return parseBlogArticleDoc(doc, fallback);
   } catch (error) {
     console.warn("[cms] blog article fallback", error);
     return fallback;

@@ -6,7 +6,36 @@ export const Testimonials: CollectionConfig = {
   defaultSort: "order",
   admin: { useAsTitle: "alt", defaultColumns: ["alt", "order"] },
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data;
+        const mediaType = data.mediaType || (data.image && !data.video ? "image" : "video");
+        if (mediaType === "image") {
+          data.video = null;
+        } else if (mediaType === "video") {
+          data.image = null;
+        }
+        return data;
+      },
+    ],
+  },
   fields: [
+    {
+      name: "mediaType",
+      label: "Media Type",
+      type: "radio",
+      defaultValue: "video",
+      options: [
+        { label: "Video", value: "video" },
+        { label: "Image", value: "image" },
+      ],
+      admin: {
+        layout: "horizontal",
+        description:
+          "Choose whether this testimonial displays a video or an image. Only one media can be added.",
+      },
+    },
     {
       name: "image",
       type: "upload",
@@ -14,11 +43,17 @@ export const Testimonials: CollectionConfig = {
       required: false,
       filterOptions: { mimeType: { contains: "image/" } },
       admin: {
-        description:
-          "Still poster (JPG/PNG/WebP). Do not put the MP4 here — use Video below.",
+        condition: (data) => data?.mediaType === "image",
+        description: "Still photo (JPG/PNG/WebP).",
       },
     },
-    cmsVideoUpload("video"),
+    {
+      ...cmsVideoUpload("video"),
+      admin: {
+        condition: (data) => (data?.mediaType ?? "video") === "video",
+        description: "Video (MP4/WebM).",
+      },
+    },
     {
       name: "alt",
       type: "text",
@@ -46,24 +81,14 @@ export const Testimonials: CollectionConfig = {
       },
     },
     {
-      name: "width",
+      name: "order",
       type: "number",
       required: true,
-      defaultValue: 290,
-      admin: {
-        description: "On-screen card width. Prefills to the homepage size (290).",
-      },
-    },
-    {
-      name: "height",
-      type: "number",
-      required: true,
-      defaultValue: 320,
+      defaultValue: 0,
       admin: {
         description:
-          "On-screen card height. Prefills to 320; the center card is taller on desktop via layout.",
+          "Display order. Indexing starts from 0 (0 is first, 1 is second, 2 is third).",
       },
     },
-    { name: "order", type: "number", required: true, defaultValue: 0 },
   ],
 };

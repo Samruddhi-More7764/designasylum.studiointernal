@@ -85,6 +85,8 @@ export interface Config {
     'service-pages': ServicePage;
     'solution-pages': SolutionPage;
     'work-service-pages': WorkServicePage;
+    'faq-details': FaqDetail;
+    'location-pages': LocationPage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -110,6 +112,8 @@ export interface Config {
     'service-pages': ServicePagesSelect<false> | ServicePagesSelect<true>;
     'solution-pages': SolutionPagesSelect<false> | SolutionPagesSelect<true>;
     'work-service-pages': WorkServicePagesSelect<false> | WorkServicePagesSelect<true>;
+    'faq-details': FaqDetailsSelect<false> | FaqDetailsSelect<true>;
+    'location-pages': LocationPagesSelect<false> | LocationPagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -121,12 +125,10 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-footer': SiteFooter;
-    'ahmedabad-location': AhmedabadLocation;
     'blog-index': BlogIndex;
     'blog-article': BlogArticle;
     'contact-page': ContactPage;
     'faq-page': FaqPage;
-    'faq-detail': FaqDetail;
     'careers-page': CareersPage;
     'open-roles-page': OpenRolesPage;
     'work-page': WorkPage;
@@ -137,12 +139,10 @@ export interface Config {
   };
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
-    'ahmedabad-location': AhmedabadLocationSelect<false> | AhmedabadLocationSelect<true>;
     'blog-index': BlogIndexSelect<false> | BlogIndexSelect<true>;
     'blog-article': BlogArticleSelect<false> | BlogArticleSelect<true>;
     'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
     'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
-    'faq-detail': FaqDetailSelect<false> | FaqDetailSelect<true>;
     'careers-page': CareersPageSelect<false> | CareersPageSelect<true>;
     'open-roles-page': OpenRolesPageSelect<false> | OpenRolesPageSelect<true>;
     'work-page': WorkPageSelect<false> | WorkPageSelect<true>;
@@ -802,8 +802,6 @@ export interface ClientLogo {
   name: string;
   image: number | Media;
   section?: ('hero' | 'clients') | null;
-  width: number;
-  height: number;
   order: number;
   updatedAt: string;
   createdAt: string;
@@ -846,11 +844,15 @@ export interface HomepageCaseStudy {
 export interface Testimonial {
   id: number;
   /**
-   * Still poster (JPG/PNG/WebP). Do not put the MP4 here — use Video below.
+   * Choose whether this testimonial displays a video or an image. Only one media can be added.
+   */
+  mediaType?: ('video' | 'image') | null;
+  /**
+   * Still photo (JPG/PNG/WebP).
    */
   image?: (number | null) | Media;
   /**
-   * MP4 or WebM for playback. Put a still JPG/PNG in Image — not the video file.
+   * Video (MP4/WebM).
    */
   video?: (number | null) | Media;
   /**
@@ -866,13 +868,8 @@ export interface Testimonial {
    */
   quote?: string | null;
   /**
-   * On-screen card width. Prefills to the homepage size (290).
+   * Display order. Indexing starts from 0 (0 is first, 1 is second, 2 is third).
    */
-  width: number;
-  /**
-   * On-screen card height. Prefills to 320; the center card is taller on desktop via layout.
-   */
-  height: number;
   order: number;
   updatedAt: string;
   createdAt: string;
@@ -885,7 +882,6 @@ export interface FaqItem {
   id: number;
   question: string;
   answer?: string | null;
-  order: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -1015,6 +1011,8 @@ export interface TeamMember {
   createdAt: string;
 }
 /**
+ * Create and edit complete blog articles with rich blocks, author, FAQs, and related posts.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog-posts".
  */
@@ -1037,16 +1035,203 @@ export interface BlogPost {
    * Category filter.
    */
   category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
-  image?: (number | null) | Media;
   /**
-   * Optional. Leave empty to automatically use /blogs/[slug].
+   * Listing card thumbnail image.
    */
-  href?: string | null;
+  image?: (number | null) | Media;
   /**
    * Optional card badge, e.g. 'Hot Right Now'
    */
   badge?: string | null;
   badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
+  breadcrumbCurrent?: string | null;
+  titleBefore?: string | null;
+  titleAccent?: string | null;
+  titleMiddle?: string | null;
+  titleLine?: string | null;
+  intro?: string | null;
+  /**
+   * The wide image under the heading. Leave empty to use the card image.
+   */
+  heroImage?: (number | null) | Media;
+  bylineName?: string | null;
+  bylineDate?: string | null;
+  bylineAvatar?: (number | null) | Media;
+  lead?: string | null;
+  /**
+   * Each section is a heading, its content blocks, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        blocks?:
+          | (
+              | {
+                  items?:
+                    | {
+                        text: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'paragraphs';
+                }
+              | {
+                  parts?:
+                    | {
+                        text: string;
+                        strong?: boolean | null;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'rich';
+                }
+              | {
+                  title: string;
+                  body?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'subhead';
+                }
+              | {
+                  items?:
+                    | {
+                        lead?: string | null;
+                        rest: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'arrows';
+                }
+              | {
+                  items?:
+                    | {
+                        label: string;
+                        value: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'rows';
+                }
+              | {
+                  image?: (number | null) | Media;
+                  src?: string | null;
+                  alt?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'image';
+                }
+              | {
+                  alt?: string | null;
+                  images?:
+                    | {
+                        image?: (number | null) | Media;
+                        src: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'gallery';
+                }
+              | {
+                  quote: string;
+                  name: string;
+                  role?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'quote';
+                }
+              | {
+                  kicker?: string | null;
+                  body: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'note';
+                }
+              | {
+                  kicker?: string | null;
+                  items?:
+                    | {
+                        label: string;
+                        href: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'links';
+                }
+            )[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  authorImage?: (number | null) | Media;
+  authorName?: string | null;
+  authorRole?: string | null;
+  authorBio?: string | null;
+  /**
+   * Optional: Select a team member profile to automatically link the author to /team/[slug].
+   */
+  authorMember?: (number | null) | TeamMember;
+  topicsBefore?: string | null;
+  topicsAccent?: string | null;
+  topicsAfter?: string | null;
+  topics?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedBefore?: string | null;
+  relatedAccent?: string | null;
+  relatedBlogs?:
+    | {
+        /**
+         * Select a post from Collections > Blog Posts. Title, date, read time, image, and link will auto-fill from it.
+         */
+        post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use image from selected blog post.
+         */
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
+        date?: string | null;
+        /**
+         * Leave empty to use read time from selected blog post.
+         */
+        readTime?: string | null;
+        /**
+         * Leave empty to use title from selected blog post.
+         */
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1130,16 +1315,15 @@ export interface IndustryPage {
    */
   logos?:
     | {
+        /**
+         * Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.
+         */
+        clientLogo?: (number | null) | ClientLogo;
         image?: (number | null) | Media;
-        name: string;
         /**
-         * Width inside card, in pixels. Default 160.
+         * Leave empty to use client logo name.
          */
-        width?: number | null;
-        /**
-         * Height inside card, in pixels. Default 48.
-         */
-        height?: number | null;
+        name?: string | null;
         row?: ('1' | '2') | null;
         id?: string | null;
       }[]
@@ -1178,10 +1362,6 @@ export interface IndustryPage {
          * Project summary or case study highlights.
          */
         description?: string | null;
-        /**
-         * Leave empty to link directly to the client page.
-         */
-        href?: string | null;
         /**
          * Which tab this project appears under. Leave empty to show on all tabs.
          */
@@ -1223,10 +1403,6 @@ export interface IndustryPage {
          * Leave empty to use member role.
          */
         role?: string | null;
-        /**
-         * Leave empty to automatically link to /team/[slug].
-         */
-        readMoreUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1330,16 +1506,15 @@ export interface ServicePage {
    */
   logos?:
     | {
+        /**
+         * Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.
+         */
+        clientLogo?: (number | null) | ClientLogo;
         image?: (number | null) | Media;
-        name: string;
         /**
-         * Width inside card, in pixels. Default 160.
+         * Leave empty to use client logo name.
          */
-        width?: number | null;
-        /**
-         * Height inside card, in pixels. Default 48.
-         */
-        height?: number | null;
+        name?: string | null;
         row?: ('1' | '2') | null;
         id?: string | null;
       }[]
@@ -1378,10 +1553,6 @@ export interface ServicePage {
          * Project summary or case study highlights.
          */
         description?: string | null;
-        /**
-         * Leave empty to link directly to the client page.
-         */
-        href?: string | null;
         /**
          * Which tab this project appears under. Leave empty to show on all tabs.
          */
@@ -1423,10 +1594,6 @@ export interface ServicePage {
          * Leave empty to use member role.
          */
         role?: string | null;
-        /**
-         * Leave empty to automatically link to /team/[slug].
-         */
-        readMoreUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1530,16 +1697,15 @@ export interface SolutionPage {
    */
   logos?:
     | {
+        /**
+         * Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.
+         */
+        clientLogo?: (number | null) | ClientLogo;
         image?: (number | null) | Media;
-        name: string;
         /**
-         * Width inside card, in pixels. Default 160.
+         * Leave empty to use client logo name.
          */
-        width?: number | null;
-        /**
-         * Height inside card, in pixels. Default 48.
-         */
-        height?: number | null;
+        name?: string | null;
         row?: ('1' | '2') | null;
         id?: string | null;
       }[]
@@ -1578,10 +1744,6 @@ export interface SolutionPage {
          * Project summary or case study highlights.
          */
         description?: string | null;
-        /**
-         * Leave empty to link directly to the client page.
-         */
-        href?: string | null;
         /**
          * Which tab this project appears under. Leave empty to show on all tabs.
          */
@@ -1623,10 +1785,6 @@ export interface SolutionPage {
          * Leave empty to use member role.
          */
         role?: string | null;
-        /**
-         * Leave empty to automatically link to /team/[slug].
-         */
-        readMoreUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1730,16 +1888,15 @@ export interface WorkServicePage {
    */
   logos?:
     | {
+        /**
+         * Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.
+         */
+        clientLogo?: (number | null) | ClientLogo;
         image?: (number | null) | Media;
-        name: string;
         /**
-         * Width inside card, in pixels. Default 160.
+         * Leave empty to use client logo name.
          */
-        width?: number | null;
-        /**
-         * Height inside card, in pixels. Default 48.
-         */
-        height?: number | null;
+        name?: string | null;
         row?: ('1' | '2') | null;
         id?: string | null;
       }[]
@@ -1778,10 +1935,6 @@ export interface WorkServicePage {
          * Project summary or case study highlights.
          */
         description?: string | null;
-        /**
-         * Leave empty to link directly to the client page.
-         */
-        href?: string | null;
         /**
          * Which tab this project appears under. Leave empty to show on all tabs.
          */
@@ -1823,10 +1976,6 @@ export interface WorkServicePage {
          * Leave empty to use member role.
          */
         role?: string | null;
-        /**
-         * Leave empty to automatically link to /team/[slug].
-         */
-        readMoreUrl?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1854,6 +2003,178 @@ export interface WorkServicePage {
         /**
          * Leave empty to use blog post link.
          */
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Create and edit full answer pages for FAQs (accessible at /faq/[slug]).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-details".
+ */
+export interface FaqDetail {
+  id: number;
+  /**
+   * Matches the URL address, for example defense-tech (accessible at /faq/defense-tech).
+   */
+  slug: string;
+  breadcrumbCurrent?: string | null;
+  question: string;
+  lead?: string | null;
+  /**
+   * Each section is a heading, its paragraph, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        anchor: string;
+        title: string;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Location blueprint pages accessible at /locations/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "location-pages".
+ */
+export interface LocationPage {
+  id: number;
+  /**
+   * Name of the location, for example Ahmedabad, Mumbai, or Pune.
+   */
+  title: string;
+  /**
+   * The web address suffix, for example ahmedabad (accessible at /locations/ahmedabad).
+   */
+  slug: string;
+  breadcrumbCurrent?: string | null;
+  heroTitle?: string | null;
+  heroIntro?: string | null;
+  heroImage?: (number | null) | Media;
+  clientsBefore?: string | null;
+  clientsAccent?: string | null;
+  clientsAfter?: string | null;
+  clientTabs?:
+    | {
+        tabId: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  projects?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        description: string;
+        /**
+         * Where the View website button goes. Leave empty until that page exists.
+         */
+        href?: string | null;
+        /**
+         * Which tab this project appears under. Leave empty to show it on every tab.
+         */
+        tab?: ('solution' | 'service' | 'industry' | 'location') | null;
+        id?: string | null;
+      }[]
+    | null;
+  calloutBefore?: string | null;
+  calloutAccent?: string | null;
+  calloutAfter?: string | null;
+  calloutBody?: string | null;
+  /**
+   * Logos on this location page only. Leave empty to keep using homepage logos.
+   */
+  logos?:
+    | {
+        image?: (number | null) | Media;
+        name: string;
+        /**
+         * Desktop row placement.
+         */
+        row?: ('1' | '2') | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The large lead paragraph at the top of the article.
+   */
+  lead?: string | null;
+  /**
+   * Each section becomes a heading, its body, and a table-of-contents item.
+   */
+  sections?:
+    | {
+        /**
+         * Stable ID for TOC link, for example why-brands.
+         */
+        anchor: string;
+        tocLabel: string;
+        headingBefore?: string | null;
+        headingAccent?: string | null;
+        headingAfter?: string | null;
+        paragraphs?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * A bold subheading followed by paragraphs.
+         */
+        blocks?:
+          | {
+              title: string;
+              paragraphs?:
+                | {
+                    text: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        pointers?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  ctaHeadingBefore?: string | null;
+  ctaHeadingAccent?: string | null;
+  ctaHeadingAfter?: string | null;
+  ctaBody?: string | null;
+  ctaButtonLabel?: string | null;
+  ctaButtonHref?: string | null;
+  faqs?:
+    | {
+        question: string;
+        /**
+         * Leave empty to keep the question closed.
+         */
+        answer?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relatedBefore?: string | null;
+  relatedAccent?: string | null;
+  relatedAfter?: string | null;
+  relatedBlogs?:
+    | {
+        image?: (number | null) | Media;
+        date?: string | null;
+        readTime?: string | null;
+        title: string;
         href?: string | null;
         id?: string | null;
       }[]
@@ -1956,6 +2277,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'work-service-pages';
         value: number | WorkServicePage;
+      } | null)
+    | ({
+        relationTo: 'faq-details';
+        value: number | FaqDetail;
+      } | null)
+    | ({
+        relationTo: 'location-pages';
+        value: number | LocationPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2109,8 +2438,6 @@ export interface ClientLogosSelect<T extends boolean = true> {
   name?: T;
   image?: T;
   section?: T;
-  width?: T;
-  height?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2140,13 +2467,12 @@ export interface HomepageCaseStudiesSelect<T extends boolean = true> {
  * via the `definition` "testimonials_select".
  */
 export interface TestimonialsSelect<T extends boolean = true> {
+  mediaType?: T;
   image?: T;
   video?: T;
   alt?: T;
   designation?: T;
   quote?: T;
-  width?: T;
-  height?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2158,7 +2484,6 @@ export interface TestimonialsSelect<T extends boolean = true> {
 export interface FaqItemsSelect<T extends boolean = true> {
   question?: T;
   answer?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2572,9 +2897,179 @@ export interface BlogPostsSelect<T extends boolean = true> {
   readTime?: T;
   category?: T;
   image?: T;
-  href?: T;
   badge?: T;
   badgeIcon?: T;
+  breadcrumbCurrent?: T;
+  titleBefore?: T;
+  titleAccent?: T;
+  titleMiddle?: T;
+  titleLine?: T;
+  intro?: T;
+  heroImage?: T;
+  bylineName?: T;
+  bylineDate?: T;
+  bylineAvatar?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        blocks?:
+          | T
+          | {
+              paragraphs?:
+                | T
+                | {
+                    items?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              rich?:
+                | T
+                | {
+                    parts?:
+                      | T
+                      | {
+                          text?: T;
+                          strong?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              subhead?:
+                | T
+                | {
+                    title?: T;
+                    body?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              arrows?:
+                | T
+                | {
+                    items?:
+                      | T
+                      | {
+                          lead?: T;
+                          rest?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              rows?:
+                | T
+                | {
+                    items?:
+                      | T
+                      | {
+                          label?: T;
+                          value?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              image?:
+                | T
+                | {
+                    image?: T;
+                    src?: T;
+                    alt?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              gallery?:
+                | T
+                | {
+                    alt?: T;
+                    images?:
+                      | T
+                      | {
+                          image?: T;
+                          src?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              quote?:
+                | T
+                | {
+                    quote?: T;
+                    name?: T;
+                    role?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              note?:
+                | T
+                | {
+                    kicker?: T;
+                    body?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              links?:
+                | T
+                | {
+                    kicker?: T;
+                    items?:
+                      | T
+                      | {
+                          label?: T;
+                          href?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        id?: T;
+      };
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  authorImage?: T;
+  authorName?: T;
+  authorRole?: T;
+  authorBio?: T;
+  authorMember?: T;
+  topicsBefore?: T;
+  topicsAccent?: T;
+  topicsAfter?: T;
+  topics?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedBlogs?:
+    | T
+    | {
+        post?: T;
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2629,10 +3124,9 @@ export interface IndustryPagesSelect<T extends boolean = true> {
   logos?:
     | T
     | {
+        clientLogo?: T;
         image?: T;
         name?: T;
-        width?: T;
-        height?: T;
         row?: T;
         id?: T;
       };
@@ -2653,7 +3147,6 @@ export interface IndustryPagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         description?: T;
-        href?: T;
         tab?: T;
         id?: T;
       };
@@ -2674,7 +3167,6 @@ export interface IndustryPagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         role?: T;
-        readMoreUrl?: T;
         id?: T;
       };
   relatedBefore?: T;
@@ -2739,10 +3231,9 @@ export interface ServicePagesSelect<T extends boolean = true> {
   logos?:
     | T
     | {
+        clientLogo?: T;
         image?: T;
         name?: T;
-        width?: T;
-        height?: T;
         row?: T;
         id?: T;
       };
@@ -2763,7 +3254,6 @@ export interface ServicePagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         description?: T;
-        href?: T;
         tab?: T;
         id?: T;
       };
@@ -2784,7 +3274,6 @@ export interface ServicePagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         role?: T;
-        readMoreUrl?: T;
         id?: T;
       };
   relatedBefore?: T;
@@ -2849,10 +3338,9 @@ export interface SolutionPagesSelect<T extends boolean = true> {
   logos?:
     | T
     | {
+        clientLogo?: T;
         image?: T;
         name?: T;
-        width?: T;
-        height?: T;
         row?: T;
         id?: T;
       };
@@ -2873,7 +3361,6 @@ export interface SolutionPagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         description?: T;
-        href?: T;
         tab?: T;
         id?: T;
       };
@@ -2894,7 +3381,6 @@ export interface SolutionPagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         role?: T;
-        readMoreUrl?: T;
         id?: T;
       };
   relatedBefore?: T;
@@ -2959,10 +3445,9 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
   logos?:
     | T
     | {
+        clientLogo?: T;
         image?: T;
         name?: T;
-        width?: T;
-        height?: T;
         row?: T;
         id?: T;
       };
@@ -2983,7 +3468,6 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         description?: T;
-        href?: T;
         tab?: T;
         id?: T;
       };
@@ -3004,7 +3488,6 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
         image?: T;
         name?: T;
         role?: T;
-        readMoreUrl?: T;
         id?: T;
       };
   relatedBefore?: T;
@@ -3013,6 +3496,133 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
     | T
     | {
         post?: T;
+        image?: T;
+        date?: T;
+        readTime?: T;
+        title?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faq-details_select".
+ */
+export interface FaqDetailsSelect<T extends boolean = true> {
+  slug?: T;
+  breadcrumbCurrent?: T;
+  question?: T;
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        title?: T;
+        body?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "location-pages_select".
+ */
+export interface LocationPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  breadcrumbCurrent?: T;
+  heroTitle?: T;
+  heroIntro?: T;
+  heroImage?: T;
+  clientsBefore?: T;
+  clientsAccent?: T;
+  clientsAfter?: T;
+  clientTabs?:
+    | T
+    | {
+        tabId?: T;
+        label?: T;
+        id?: T;
+      };
+  projects?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        description?: T;
+        href?: T;
+        tab?: T;
+        id?: T;
+      };
+  calloutBefore?: T;
+  calloutAccent?: T;
+  calloutAfter?: T;
+  calloutBody?: T;
+  logos?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        row?: T;
+        id?: T;
+      };
+  lead?: T;
+  sections?:
+    | T
+    | {
+        anchor?: T;
+        tocLabel?: T;
+        headingBefore?: T;
+        headingAccent?: T;
+        headingAfter?: T;
+        paragraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              title?: T;
+              paragraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        pointers?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  ctaHeadingBefore?: T;
+  ctaHeadingAccent?: T;
+  ctaHeadingAfter?: T;
+  ctaBody?: T;
+  ctaButtonLabel?: T;
+  ctaButtonHref?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  relatedBefore?: T;
+  relatedAccent?: T;
+  relatedAfter?: T;
+  relatedBlogs?:
+    | T
+    | {
         image?: T;
         date?: T;
         readTime?: T;
@@ -3174,141 +3784,6 @@ export interface SiteFooter {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ahmedabad-location".
- */
-export interface AhmedabadLocation {
-  id: number;
-  breadcrumbCurrent?: string | null;
-  heroTitle?: string | null;
-  heroIntro?: string | null;
-  heroImage?: (number | null) | Media;
-  clientsBefore?: string | null;
-  clientsAccent?: string | null;
-  clientsAfter?: string | null;
-  clientTabs?:
-    | {
-        tabId: string;
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  projects?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        description: string;
-        /**
-         * Where the View website button goes. Leave empty until that page exists.
-         */
-        href?: string | null;
-        /**
-         * Which tab this project appears under. Leave empty to show it on every tab.
-         */
-        tab?: ('solution' | 'service' | 'industry' | 'location') | null;
-        id?: string | null;
-      }[]
-    | null;
-  calloutBefore?: string | null;
-  calloutAccent?: string | null;
-  calloutAfter?: string | null;
-  calloutBody?: string | null;
-  /**
-   * Logos on the Ahmedabad page only. Leave this empty to keep using the homepage logos. Filling it does not change the homepage.
-   */
-  logos?:
-    | {
-        image?: (number | null) | Media;
-        name: string;
-        /**
-         * Width inside the card, in pixels. Default 160.
-         */
-        width?: number | null;
-        /**
-         * Height inside the card, in pixels. Default 48.
-         */
-        height?: number | null;
-        /**
-         * Desktop row. Leave empty to fill the top row first (four logos), then the bottom row.
-         */
-        row?: ('1' | '2') | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * The large paragraph at the top of the article.
-   */
-  lead?: string | null;
-  /**
-   * Each section becomes a heading, its body, and a table-of-contents item.
-   */
-  sections?:
-    | {
-        /**
-         * Stable id, for example why-ahmedabad-brands.
-         */
-        anchor: string;
-        tocLabel: string;
-        headingBefore?: string | null;
-        headingAccent?: string | null;
-        headingAfter?: string | null;
-        paragraphs?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * A bold subheading followed by paragraphs.
-         */
-        blocks?:
-          | {
-              title: string;
-              paragraphs?:
-                | {
-                    text: string;
-                    id?: string | null;
-                  }[]
-                | null;
-              id?: string | null;
-            }[]
-          | null;
-        pointers?:
-          | {
-              text: string;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  faqs?:
-    | {
-        question: string;
-        /**
-         * Leave empty to keep the question closed.
-         */
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  relatedBefore?: string | null;
-  relatedAccent?: string | null;
-  relatedAfter?: string | null;
-  relatedBlogs?:
-    | {
-        image?: (number | null) | Media;
-        date?: string | null;
-        readTime?: string | null;
-        title: string;
-        href?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog-index".
  */
 export interface BlogIndex {
@@ -3327,17 +3802,26 @@ export interface BlogIndex {
   featuredAfter?: string | null;
   featuredPosts?:
     | {
+        /**
+         * Select a post from Collections > Blog Posts. Title, date, category, image, and link will auto-fill from the selected post.
+         */
+        post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use the image from the selected blog post.
+         */
         image?: (number | null) | Media;
-        title: string;
+        /**
+         * Leave empty to use the title from the selected blog post.
+         */
+        title?: string | null;
+        /**
+         * Leave empty to use the date from the selected blog post.
+         */
         date?: string | null;
         /**
-         * Which filter this post appears under. All always shows every post.
+         * Which filter this post appears under. Leave empty to use the category from the selected blog post.
          */
         category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
-        /**
-         * Where the card goes.
-         */
-        href?: string | null;
         badge?: string | null;
         badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
         id?: string | null;
@@ -3357,17 +3841,26 @@ export interface BlogIndex {
     | null;
   posts?:
     | {
+        /**
+         * Select a post from Collections > Blog Posts. Title, date, category, image, and link will auto-fill from the selected post.
+         */
+        post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use the image from the selected blog post.
+         */
         image?: (number | null) | Media;
-        title: string;
+        /**
+         * Leave empty to use the title from the selected blog post.
+         */
+        title?: string | null;
+        /**
+         * Leave empty to use the date from the selected blog post.
+         */
         date?: string | null;
         /**
-         * Which filter this post appears under. All always shows every post.
+         * Which filter this post appears under. Leave empty to use the category from the selected blog post.
          */
         category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
-        /**
-         * Where the card goes.
-         */
-        href?: string | null;
         badge?: string | null;
         badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
         id?: string | null;
@@ -3389,7 +3882,7 @@ export interface BlogArticle {
   titleLine?: string | null;
   intro?: string | null;
   /**
-   * The wide image under the heading. Leave empty to keep the black block.
+   * The wide image under the heading. Leave empty to use the card image.
    */
   heroImage?: (number | null) | Media;
   bylineName?: string | null;
@@ -3397,7 +3890,7 @@ export interface BlogArticle {
   bylineAvatar?: (number | null) | Media;
   lead?: string | null;
   /**
-   * Each section is a heading, its blocks, and a table-of-contents item.
+   * Each section is a heading, its content blocks, and a table-of-contents item.
    */
   sections?:
     | {
@@ -3531,17 +4024,9 @@ export interface BlogArticle {
   authorRole?: string | null;
   authorBio?: string | null;
   /**
-   * Open a custom URL, or a team member profile page.
-   */
-  authorLink?: ('none' | 'url' | 'team') | null;
-  /**
-   * Select which team member profile to link to.
+   * Optional: Select a team member profile to automatically link the author to /team/[slug].
    */
   authorMember?: (number | null) | TeamMember;
-  /**
-   * A path such as /contact, or a full https URL.
-   */
-  authorUrl?: string | null;
   topicsBefore?: string | null;
   topicsAccent?: string | null;
   topicsAfter?: string | null;
@@ -3555,11 +4040,26 @@ export interface BlogArticle {
   relatedAccent?: string | null;
   relatedBlogs?:
     | {
+        /**
+         * Select a post from Collections > Blog Posts. Title, date, read time, image, and link will auto-fill from it.
+         */
+        post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use image from selected blog post.
+         */
         image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
         date?: string | null;
+        /**
+         * Leave empty to use read time from selected blog post.
+         */
         readTime?: string | null;
-        title: string;
-        href?: string | null;
+        /**
+         * Leave empty to use title from selected blog post.
+         */
+        title?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3628,40 +4128,17 @@ export interface FaqPage {
         question: string;
         category: 'about' | 'branding' | 'website' | 'marketing';
         /**
-         * Leave empty to keep the question closed.
+         * Answer displayed when opened. Leave empty to use default answer.
          */
         answer?: string | null;
         /**
-         * Slug for Read full answer, for example defense-tech. Leave empty to hide the link.
+         * Select an FAQ detail page from Collections > FAQ Details to link 'Read full answer'.
+         */
+        faqDetail?: (number | null) | FaqDetail;
+        /**
+         * Optional slug override (e.g. defense-tech). If left empty and a detail page is selected above, its slug is used.
          */
         detailSlug?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "faq-detail".
- */
-export interface FaqDetail {
-  id: number;
-  /**
-   * Matches the address, for example defense-tech.
-   */
-  slug?: string | null;
-  breadcrumbCurrent?: string | null;
-  question?: string | null;
-  lead?: string | null;
-  /**
-   * Each section is a heading, its paragraph, and a table-of-contents item.
-   */
-  sections?:
-    | {
-        anchor: string;
-        title: string;
-        body: string;
         id?: string | null;
       }[]
     | null;
@@ -3819,17 +4296,23 @@ export interface WorkPage {
     | null;
   projects?:
     | {
+        /**
+         * Select a client from Collections > Clients. Link (/clients/[slug]), name, and image will auto-populate if left empty.
+         */
+        client?: (number | null) | Client;
+        /**
+         * Leave empty to use client hero image.
+         */
         image?: (number | null) | Media;
-        name: string;
+        /**
+         * Leave empty to use client name.
+         */
+        name?: string | null;
         service?: string | null;
         /**
          * Which filter this project appears under. All always shows every project.
          */
         category?: ('fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry') | null;
-        /**
-         * Where the card goes. Leave empty until that page exists.
-         */
-        href?: string | null;
         /**
          * Card position order (lower numbers appear first).
          */
@@ -3851,15 +4334,18 @@ export interface ClientsIndex {
   cards?:
     | {
         /**
-         * The picture on the card. Leave empty to keep the DirectMeds cover.
+         * Select a client from Collections > Clients. Link (/clients/[slug]), name, and image will auto-populate if left empty.
+         */
+        client?: (number | null) | Client;
+        /**
+         * Leave empty to use client hero image.
          */
         image?: (number | null) | Media;
-        name: string;
-        service?: string | null;
         /**
-         * Where the card goes. Leave empty until that page exists.
+         * Leave empty to use client name.
          */
-        href?: string | null;
+        name?: string | null;
+        service?: string | null;
         /**
          * Card position order (lower numbers appear first).
          */
@@ -3903,13 +4389,22 @@ export interface StudioPage {
   projectsAccent?: string | null;
   projects?:
     | {
-        image?: (number | null) | Media;
-        name: string;
-        body?: string | null;
         /**
-         * Where View website goes. Leave empty until that page exists.
+         * Select a client from Collections > Clients. Routes to the client hub page (/clients/[slug]) or direct case study (/clients/[slug]/[study]). Name, image, and description will auto-populate if left empty.
          */
-        href?: string | null;
+        client?: (number | null) | Client;
+        /**
+         * Leave empty to use client hero image.
+         */
+        image?: (number | null) | Media;
+        /**
+         * Leave empty to use client name.
+         */
+        name?: string | null;
+        /**
+         * Leave empty to use client description.
+         */
+        body?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3940,11 +4435,10 @@ export interface StudioPage {
          */
         member?: (number | null) | TeamMember;
         image?: (number | null) | Media;
-        name: string;
         /**
-         * Optional override. Leave empty if a profile is linked above, or specify a custom URL.
+         * Leave empty to use member's name.
          */
-        href?: string | null;
+        name?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3964,19 +4458,25 @@ export interface TeamPage {
   leadership?:
     | {
         /**
-         * Select a leadership profile created under Collections > Team & Leadership (must have 'Leadership Member' checked). Automatically links 'Read more' to /team/[slug]. Use '+' to create a new leadership profile with full details (bio, services, etc.).
+         * Select a leadership profile created under Collections > Team & Leadership. The card automatically uses their photo, name, role, and profile link.
          */
         member?: (number | null) | TeamMember;
         /**
-         * Leave empty to keep the designed portrait.
+         * Check this only if you want to override the name, role, or photo from the linked profile.
+         */
+        customOverride?: boolean | null;
+        /**
+         * Upload a photo for this card.
          */
         image?: (number | null) | Media;
-        name: string;
-        role?: string | null;
         /**
-         * Optional override. If a Linked Leadership Profile is selected above, this can be left empty.
+         * Full name for this card.
          */
-        href?: string | null;
+        name?: string | null;
+        /**
+         * Role / title for this card.
+         */
+        role?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3985,19 +4485,25 @@ export interface TeamPage {
   members?:
     | {
         /**
-         * Select a profile created under Collections > Team & Leadership. Automatically links 'Read more' to /team/[slug]. Use '+' to create a new team profile.
+         * Select a profile created under Collections > Team & Leadership. The card automatically uses their photo, name, role, and profile link.
          */
         member?: (number | null) | TeamMember;
         /**
-         * Leave empty to keep the designed portrait.
+         * Check this only if you want to override the name, role, or photo from the linked profile.
+         */
+        customOverride?: boolean | null;
+        /**
+         * Upload a photo for this card.
          */
         image?: (number | null) | Media;
-        name: string;
-        role?: string | null;
         /**
-         * Optional override. If a Linked Team Member Profile is selected above, this can be left empty.
+         * Full name for this card.
          */
-        href?: string | null;
+        name?: string | null;
+        /**
+         * Role / title for this card.
+         */
+        role?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -4110,108 +4616,6 @@ export interface SiteFooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ahmedabad-location_select".
- */
-export interface AhmedabadLocationSelect<T extends boolean = true> {
-  breadcrumbCurrent?: T;
-  heroTitle?: T;
-  heroIntro?: T;
-  heroImage?: T;
-  clientsBefore?: T;
-  clientsAccent?: T;
-  clientsAfter?: T;
-  clientTabs?:
-    | T
-    | {
-        tabId?: T;
-        label?: T;
-        id?: T;
-      };
-  projects?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        description?: T;
-        href?: T;
-        tab?: T;
-        id?: T;
-      };
-  calloutBefore?: T;
-  calloutAccent?: T;
-  calloutAfter?: T;
-  calloutBody?: T;
-  logos?:
-    | T
-    | {
-        image?: T;
-        name?: T;
-        width?: T;
-        height?: T;
-        row?: T;
-        id?: T;
-      };
-  lead?: T;
-  sections?:
-    | T
-    | {
-        anchor?: T;
-        tocLabel?: T;
-        headingBefore?: T;
-        headingAccent?: T;
-        headingAfter?: T;
-        paragraphs?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        blocks?:
-          | T
-          | {
-              title?: T;
-              paragraphs?:
-                | T
-                | {
-                    text?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-        pointers?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        id?: T;
-      };
-  faqs?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  relatedBefore?: T;
-  relatedAccent?: T;
-  relatedAfter?: T;
-  relatedBlogs?:
-    | T
-    | {
-        image?: T;
-        date?: T;
-        readTime?: T;
-        title?: T;
-        href?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog-index_select".
  */
 export interface BlogIndexSelect<T extends boolean = true> {
@@ -4227,11 +4631,11 @@ export interface BlogIndexSelect<T extends boolean = true> {
   featuredPosts?:
     | T
     | {
+        post?: T;
         image?: T;
         title?: T;
         date?: T;
         category?: T;
-        href?: T;
         badge?: T;
         badgeIcon?: T;
         id?: T;
@@ -4248,11 +4652,11 @@ export interface BlogIndexSelect<T extends boolean = true> {
   posts?:
     | T
     | {
+        post?: T;
         image?: T;
         title?: T;
         date?: T;
         category?: T;
-        href?: T;
         badge?: T;
         badgeIcon?: T;
         id?: T;
@@ -4415,9 +4819,7 @@ export interface BlogArticleSelect<T extends boolean = true> {
   authorName?: T;
   authorRole?: T;
   authorBio?: T;
-  authorLink?: T;
   authorMember?: T;
-  authorUrl?: T;
   topicsBefore?: T;
   topicsAccent?: T;
   topicsAfter?: T;
@@ -4432,11 +4834,11 @@ export interface BlogArticleSelect<T extends boolean = true> {
   relatedBlogs?:
     | T
     | {
+        post?: T;
         image?: T;
         date?: T;
         readTime?: T;
         title?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -4499,28 +4901,8 @@ export interface FaqPageSelect<T extends boolean = true> {
         question?: T;
         category?: T;
         answer?: T;
+        faqDetail?: T;
         detailSlug?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "faq-detail_select".
- */
-export interface FaqDetailSelect<T extends boolean = true> {
-  slug?: T;
-  breadcrumbCurrent?: T;
-  question?: T;
-  lead?: T;
-  sections?:
-    | T
-    | {
-        anchor?: T;
-        title?: T;
-        body?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -4651,11 +5033,11 @@ export interface WorkPageSelect<T extends boolean = true> {
   projects?:
     | T
     | {
+        client?: T;
         image?: T;
         name?: T;
         service?: T;
         category?: T;
-        href?: T;
         order?: T;
         id?: T;
       };
@@ -4673,10 +5055,10 @@ export interface ClientsIndexSelect<T extends boolean = true> {
   cards?:
     | T
     | {
+        client?: T;
         image?: T;
         name?: T;
         service?: T;
-        href?: T;
         order?: T;
         id?: T;
       };
@@ -4711,10 +5093,10 @@ export interface StudioPageSelect<T extends boolean = true> {
   projects?:
     | T
     | {
+        client?: T;
         image?: T;
         name?: T;
         body?: T;
-        href?: T;
         id?: T;
       };
   fitBefore?: T;
@@ -4743,7 +5125,6 @@ export interface StudioPageSelect<T extends boolean = true> {
         member?: T;
         image?: T;
         name?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -4763,10 +5144,10 @@ export interface TeamPageSelect<T extends boolean = true> {
     | T
     | {
         member?: T;
+        customOverride?: T;
         image?: T;
         name?: T;
         role?: T;
-        href?: T;
         id?: T;
       };
   teamAccent?: T;
@@ -4775,10 +5156,10 @@ export interface TeamPageSelect<T extends boolean = true> {
     | T
     | {
         member?: T;
+        customOverride?: T;
         image?: T;
         name?: T;
         role?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;

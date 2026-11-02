@@ -11,7 +11,7 @@ import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { FAQ } from "@/components/sections/14-FAQ";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
-import { getAhmedabadLocation } from "@/cms/ahmedabadLocation";
+import { getLocationPageBySlug } from "@/cms/locationPages";
 import {
   AHMEDABAD_CTA_ID,
   ahmedabadBreadcrumbs,
@@ -27,7 +27,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AhmedabadLocationPage() {
-  const [page, footer] = await Promise.all([getAhmedabadLocation(), getFooter()]);
+  const [page, footer] = await Promise.all([getLocationPageBySlug("ahmedabad"), getFooter()]);
+
+  if (!page) {
+    return null;
+  }
 
   return (
     <>

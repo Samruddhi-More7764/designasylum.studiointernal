@@ -52,6 +52,7 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
       heading?: string | null;
       filters?: Array<{ filterId?: string | null; label?: string | null } | null> | null;
       projects?: Array<{
+        client?: { slug?: string; name?: string; hero?: { image?: unknown } } | string | null;
         image?: unknown;
         name?: string | null;
         service?: string | null;
@@ -74,11 +75,13 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
     const projects = (
       await Promise.all(
         (doc.projects || []).map(async (row, index) => {
-          const name = row?.name?.trim() || "";
+          const linkedClient =
+            row?.client && typeof row.client === "object" ? row.client : null;
+          const name = row?.name?.trim() || linkedClient?.name?.trim() || "";
           const category = row?.category?.trim() || "";
           if (!name || !projectCategories.has(category as Exclude<WorkFilterId, "all">)) return null;
           const designed = fallback.projects[index];
-          let imageSrc = storedImage(row?.image, "");
+          let imageSrc = storedImage(row?.image || linkedClient?.hero?.image, "");
 
           if (!imageSrc && row?.image != null) {
             const mediaId =
@@ -225,13 +228,16 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
                 ? parseInt(rawOrder, 10)
                 : index + 1;
 
+          const cleanClientSlug = linkedClient?.slug?.replace(/^\/+|\/+$/g, "").trim();
+          const defaultHref = cleanClientSlug ? `/clients/${cleanClientSlug}` : "#";
+
           return {
             id: `work-${index}`,
             name,
             service: row?.service?.trim() || designed?.service || "",
             image: imageSrc,
             category: category as Exclude<WorkFilterId, "all">,
-            href: row?.href?.trim() || "#",
+            href: row?.href?.trim() || defaultHref,
             order,
           };
         }),

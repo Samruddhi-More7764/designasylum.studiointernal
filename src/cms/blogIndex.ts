@@ -38,6 +38,17 @@ function text(value: string | null | undefined, fallback: string) {
 }
 
 type CmsPost = {
+  post?: {
+    id?: string;
+    title?: string;
+    slug?: string;
+    date?: string;
+    category?: string;
+    image?: unknown;
+    href?: string;
+    badge?: string;
+    badgeIcon?: string;
+  } | string | null;
   image?: unknown;
   title?: string | null;
   date?: string | null;
@@ -51,23 +62,31 @@ function postsFrom(rows: CmsPost[] | null | undefined, fallback: BlogPost[]): Bl
   if (!rows?.length) return fallback;
   const posts = rows
     .map((row, index) => {
-      const title = row?.title?.trim() || "";
+      const linked =
+        row?.post && typeof row.post === "object" ? row.post : null;
+      const title = row?.title?.trim() || linked?.title?.trim() || "";
       if (!title) return null;
-      const category = categories.has(row?.category as Exclude<BlogCategory, "All">)
-        ? (row?.category as Exclude<BlogCategory, "All">)
+      const rawCategory = row?.category || linked?.category;
+      const category = categories.has(rawCategory as Exclude<BlogCategory, "All">)
+        ? (rawCategory as Exclude<BlogCategory, "All">)
         : fallback[index]?.category || "Brand";
-      const icon = badgeIcons.has(row?.badgeIcon as BlogBadgeIcon)
-        ? (row?.badgeIcon as BlogBadgeIcon)
+      const rawIcon = row?.badgeIcon || linked?.badgeIcon;
+      const icon = badgeIcons.has(rawIcon as BlogBadgeIcon)
+        ? (rawIcon as BlogBadgeIcon)
         : undefined;
+      const cleanSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
+      const defaultHref = cleanSlug
+        ? `/blogs/${cleanSlug}`
+        : fallback[index]?.href || "/blogs/sevenloop-brand-website-redesign";
       const post: BlogPost = {
         id: `cms-${index}`,
         title,
-        date: row?.date?.trim() || fallback[index]?.date || "",
+        date: row?.date?.trim() || linked?.date?.trim() || fallback[index]?.date || "",
         category,
-        image: storedImage(row?.image, fallback[index]?.image || cardImage),
-        href: row?.href?.trim() || fallback[index]?.href || "/blogs/sevenloop-brand-website-redesign",
+        image: storedImage(row?.image || linked?.image, fallback[index]?.image || cardImage),
+        href: row?.href?.trim() || linked?.href?.trim() || defaultHref,
       };
-      const badge = row?.badge?.trim();
+      const badge = row?.badge?.trim() || linked?.badge?.trim();
       if (badge && icon) {
         post.badge = badge;
         post.badgeIcon = icon;

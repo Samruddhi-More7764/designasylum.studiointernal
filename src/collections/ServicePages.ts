@@ -143,17 +143,21 @@ export const ServicePages: CollectionConfig = {
                   "Logos on this service page only. They do not change the homepage.",
               },
               fields: [
-                imageUpload,
-                { name: "name", type: "text", required: true },
                 {
-                  name: "width",
-                  type: "number",
-                  admin: { description: "Width inside card, in pixels. Default 160." },
+                  name: "clientLogo",
+                  label: "Select Client Logo",
+                  type: "relationship",
+                  relationTo: "client-logos",
+                  admin: {
+                    description:
+                      "Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.",
+                  },
                 },
+                imageUpload,
                 {
-                  name: "height",
-                  type: "number",
-                  admin: { description: "Height inside card, in pixels. Default 48." },
+                  name: "name",
+                  type: "text",
+                  admin: { description: "Leave empty to use client logo name." },
                 },
                 {
                   name: "row",
@@ -221,12 +225,6 @@ export const ServicePages: CollectionConfig = {
                   name: "description",
                   type: "textarea",
                   admin: { description: "Project summary or case study highlights." },
-                },
-                {
-                  name: "href",
-                  label: "Custom URL",
-                  type: "text",
-                  admin: { description: "Leave empty to link directly to the client page." },
                 },
                 {
                   name: "tab",
@@ -304,12 +302,6 @@ export const ServicePages: CollectionConfig = {
                   name: "role",
                   type: "text",
                   admin: { description: "Leave empty to use member role." },
-                },
-                {
-                  name: "readMoreUrl",
-                  label: "Custom Read more URL",
-                  type: "text",
-                  admin: { description: "Leave empty to automatically link to /team/[slug]." },
                 },
               ],
             },

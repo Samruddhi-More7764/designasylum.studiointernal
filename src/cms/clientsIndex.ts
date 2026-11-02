@@ -33,11 +33,12 @@ export const getClientsIndex = cache(async (): Promise<ClientsIndexContent> => {
   try {
     const doc = (await payload.findGlobal({
       slug: "clients-index" as "site-footer",
-      depth: 1,
+      depth: 2,
     })) as unknown as {
       breadcrumbCurrent?: string | null;
       heading?: string | null;
       cards?: Array<{
+        client?: { slug?: string; name?: string; hero?: { image?: unknown } } | string | null;
         image?: unknown;
         name?: string | null;
         service?: string | null;
@@ -50,10 +51,12 @@ export const getClientsIndex = cache(async (): Promise<ClientsIndexContent> => {
     const cards = (
       await Promise.all(
         (doc.cards || []).map(async (row, index) => {
-          const name = row?.name?.trim() || "";
+          const linkedClient =
+            row?.client && typeof row.client === "object" ? row.client : null;
+          const name = row?.name?.trim() || linkedClient?.name?.trim() || "";
           if (!name) return null;
           const designed = fallback.cards[index];
-          let imageSrc = storedImage(row?.image, "");
+          let imageSrc = storedImage(row?.image || linkedClient?.hero?.image, "");
 
           if (!imageSrc && row?.image != null) {
             const mediaId =
@@ -200,12 +203,15 @@ export const getClientsIndex = cache(async (): Promise<ClientsIndexContent> => {
                 ? parseInt(rawOrder, 10)
                 : index + 1;
 
+          const cleanClientSlug = linkedClient?.slug?.replace(/^\/+|\/+$/g, "").trim();
+          const defaultHref = cleanClientSlug ? `/clients/${cleanClientSlug}` : "#";
+
           return {
             id: `client-card-${index}`,
             name,
             service: row?.service?.trim() || designed?.service || "",
             image: imageSrc,
-            href: row?.href?.trim() || "#",
+            href: row?.href?.trim() || defaultHref,
             order,
           };
         }),

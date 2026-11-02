@@ -119,36 +119,38 @@ export function FaqExplorer({
               <p className="font-satoshi text-[16px] text-black/70">No matching questions.</p>
             ) : (
               visible.map((entry) => {
-                const open = openId === entry.id && Boolean(entry.answer);
+                const open = openId === entry.id;
+                const detailSlug = entry.detailSlug || entry.id;
                 return (
                   <article key={entry.id} className="border-b border-black/10 py-8 lg:py-6">
                     <button
                       type="button"
-                      className="flex w-full items-start justify-between gap-6 text-left"
-                      aria-expanded={entry.answer ? open : undefined}
+                      className="group flex w-full cursor-pointer items-start justify-between gap-6 text-left"
+                      aria-expanded={open}
                       onClick={() => {
-                        if (!entry.answer) return;
                         setOpenId(open ? null : entry.id);
                       }}
                     >
-                      <span className="font-figtree text-[22px] leading-7 font-normal tracking-[-0.5px] text-black lg:text-[24px] lg:leading-8 lg:tracking-[-1px]">
+                      <span className="font-figtree text-[22px] leading-7 font-normal tracking-[-0.5px] text-black transition-colors group-hover:text-black/80 lg:text-[24px] lg:leading-8 lg:tracking-[-1px]">
                         {entry.question}
                       </span>
                       <ChevronDown
-                        className={`mt-1 size-5 shrink-0 text-black transition-transform lg:size-6 ${open ? "rotate-180" : ""}`}
+                        className={`mt-1 size-5 shrink-0 text-black transition-transform duration-300 ease-in-out lg:size-6 ${open ? "rotate-180" : ""}`}
                         strokeWidth={1.5}
                         aria-hidden="true"
                       />
                     </button>
-                    {open && entry.answer ? (
-                      <div className="mt-3 flex max-w-[997px] flex-col items-start gap-3">
-                        <p className="font-satoshi text-[18px] leading-[1.35] font-normal tracking-[-0.5px] text-[#374151] lg:text-[20px]">
-                          {entry.answer}
-                        </p>
-                        {entry.detailSlug ? (
+                    {open ? (
+                      <div className="mt-3 flex max-w-[997px] flex-col items-start gap-4">
+                        {entry.answer ? (
+                          <p className="font-satoshi text-[18px] leading-[1.35] font-normal tracking-[-0.5px] text-[#374151] lg:text-[20px]">
+                            {entry.answer}
+                          </p>
+                        ) : null}
+                        {detailSlug ? (
                           <Link
-                            href={`/faq/${entry.detailSlug}`}
-                            className="group inline-flex h-10 items-center gap-2 rounded-full border border-black px-[17px] font-satoshi text-[13px] leading-4 font-medium tracking-[-0.26px] text-black uppercase"
+                            href={`/faq/${detailSlug}`}
+                            className="group inline-flex h-10 items-center gap-2 rounded-full border border-black px-[17px] font-satoshi text-[13px] leading-4 font-medium tracking-[-0.26px] text-black uppercase transition-colors hover:border-[#FE5A28]"
                           >
                             <CtaHoverLabel>Read full answer</CtaHoverLabel>
                             <ArrowUpRight className={`size-3.5 ${ctaArrowClass}`} aria-hidden="true" />

@@ -27,13 +27,13 @@ import { IndustryPages } from "./collections/IndustryPages";
 import { ServicePages } from "./collections/ServicePages";
 import { SolutionPages } from "./collections/SolutionPages";
 import { WorkServicePages } from "./collections/WorkServicePages";
+import { FaqDetails } from "./collections/FaqDetails";
+import { LocationPages } from "./collections/LocationPages";
 import { SiteFooter } from "./globals/SiteFooter";
-import { AhmedabadLocation } from "./globals/AhmedabadLocation";
 import { BlogIndex } from "./globals/BlogIndex";
 import { BlogArticleGlobal } from "./globals/BlogArticle";
 import { ContactPage } from "./globals/ContactPage";
 import { FaqPage } from "./globals/FaqPage";
-import { FaqDetail } from "./globals/FaqDetail";
 import { CareersPage } from "./globals/CareersPage";
 import { OpenRolesPage } from "./globals/OpenRolesPage";
 import { WorkPage } from "./globals/WorkPage";
@@ -133,15 +133,15 @@ export default buildConfig({
     withRevalidation(ServicePages),
     withRevalidation(SolutionPages),
     withRevalidation(WorkServicePages),
+    withRevalidation(FaqDetails),
+    withRevalidation(LocationPages),
   ],
   globals: [
     SiteFooter,
-    AhmedabadLocation,
     BlogIndex,
     BlogArticleGlobal,
     ContactPage,
     FaqPage,
-    FaqDetail,
     CareersPage,
     OpenRolesPage,
     WorkPage,

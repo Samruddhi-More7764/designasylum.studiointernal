@@ -35,21 +35,29 @@ export const ClientsIndex: GlobalConfig = {
               type: "array",
               fields: [
                 {
+                  name: "client",
+                  label: "Select Client",
+                  type: "relationship",
+                  relationTo: "clients",
+                  admin: {
+                    description:
+                      "Select a client from Collections > Clients. Link (/clients/[slug]), name, and image will auto-populate if left empty.",
+                  },
+                },
+                {
                   ...image,
                   admin: {
-                    description: "The picture on the card. Leave empty to keep the DirectMeds cover.",
+                    description: "Leave empty to use client hero image.",
                   },
                 },
-                { name: "name", type: "text", required: true },
-                { name: "service", label: "Service line", type: "text" },
                 {
-                  name: "href",
-                  label: "URL",
+                  name: "name",
                   type: "text",
                   admin: {
-                    description: "Where the card goes. Leave empty until that page exists.",
+                    description: "Leave empty to use client name.",
                   },
                 },
+                { name: "service", label: "Service line", type: "text" },
                 {
                   name: "order",
                   label: "Display order",

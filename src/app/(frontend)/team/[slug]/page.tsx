@@ -136,7 +136,7 @@ export default async function TeamPersonPage({ params }: Props) {
               </p>
             </div>
 
-            <div className="mt-8 flex w-full max-w-[675px] flex-col gap-4 text-black lg:mt-10">
+            <div className="mt-8 flex w-full max-w-[675px] flex-col items-center gap-4 text-center text-black lg:mt-10">
               {page.paragraphs.map((paragraph, index) => (
                 <p
                   key={paragraph.slice(0, 24)}

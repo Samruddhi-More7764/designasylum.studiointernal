@@ -1,68 +1,55 @@
 import type { Field, GlobalConfig } from "payload";
 
-function imageField(): Field {
-  return {
-    name: "image",
-    label: "Photo",
-    type: "upload",
-    relationTo: "media",
-    filterOptions: { mimeType: { contains: "image/" } },
-    admin: {
-      description: "Leave empty to keep the designed portrait.",
-    },
-  };
-}
-
-function leadershipMemberFields(): Field[] {
+function memberFields(isLeadership: boolean): Field[] {
   return [
     {
       name: "member",
-      label: "Linked Leadership Profile",
+      label: isLeadership ? "Linked Leadership Profile" : "Linked Team Member Profile",
       type: "relationship",
       relationTo: "team-members",
-      filterOptions: {
-        isLeadership: { equals: true },
-      },
+      ...(isLeadership ? { filterOptions: { isLeadership: { equals: true } } } : {}),
       admin: {
-        description:
-          "Select a leadership profile created under Collections > Team & Leadership (must have 'Leadership Member' checked). Automatically links 'Read more' to /team/[slug]. Use '+' to create a new leadership profile with full details (bio, services, etc.).",
+        description: isLeadership
+          ? "Select a leadership profile created under Collections > Team & Leadership. The card automatically uses their photo, name, role, and profile link."
+          : "Select a profile created under Collections > Team & Leadership. The card automatically uses their photo, name, role, and profile link.",
       },
     },
-    imageField(),
-    { name: "name", type: "text", required: true },
-    { name: "role", type: "text" },
     {
-      name: "href",
-      label: "Custom Read more URL",
+      name: "customOverride",
+      label: "Customize photo, name, or role for this card",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        condition: (_data, siblingData) => Boolean(siblingData?.member),
+        description:
+          "Check this only if you want to override the name, role, or photo from the linked profile.",
+      },
+    },
+    {
+      name: "image",
+      label: "Photo",
+      type: "upload",
+      relationTo: "media",
+      filterOptions: { mimeType: { contains: "image/" } },
+      admin: {
+        condition: (_data, siblingData) => !siblingData?.member || Boolean(siblingData?.customOverride),
+        description: "Upload a photo for this card.",
+      },
+    },
+    {
+      name: "name",
       type: "text",
       admin: {
-        description: "Optional override. If a Linked Leadership Profile is selected above, this can be left empty.",
+        condition: (_data, siblingData) => !siblingData?.member || Boolean(siblingData?.customOverride),
+        description: "Full name for this card.",
       },
     },
-  ];
-}
-
-function teamMemberFields(): Field[] {
-  return [
     {
-      name: "member",
-      label: "Linked Team Member Profile",
-      type: "relationship",
-      relationTo: "team-members",
-      admin: {
-        description:
-          "Select a profile created under Collections > Team & Leadership. Automatically links 'Read more' to /team/[slug]. Use '+' to create a new team profile.",
-      },
-    },
-    imageField(),
-    { name: "name", type: "text", required: true },
-    { name: "role", type: "text" },
-    {
-      name: "href",
-      label: "Custom Read more URL",
+      name: "role",
       type: "text",
       admin: {
-        description: "Optional override. If a Linked Team Member Profile is selected above, this can be left empty.",
+        condition: (_data, siblingData) => !siblingData?.member || Boolean(siblingData?.customOverride),
+        description: "Role / title for this card.",
       },
     },
   ];
@@ -77,6 +64,43 @@ export const TeamPage: GlobalConfig = {
   slug: "team-page",
   label: "Team",
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req }) => {
+        if (!data) return data;
+        const autofillRows = async (rows: unknown) => {
+          if (!Array.isArray(rows)) return;
+          for (const row of rows) {
+            if (!row || !row.member) continue;
+            const rawId = typeof row.member === "object" ? row.member.id : row.member;
+            const idNum = Number(rawId);
+            if (isNaN(idNum)) continue;
+            try {
+              const member = await req.payload.findByID({
+                collection: "team-members",
+                id: idNum,
+                depth: 0,
+              });
+              if (member) {
+                if (!row.name || !row.customOverride) row.name = member.name;
+                if (!row.role || !row.customOverride) row.role = member.role;
+                const photoId =
+                  typeof member.photoOne === "object" && member.photoOne
+                    ? (member.photoOne as { id?: number }).id
+                    : member.photoOne;
+                if ((!row.image || !row.customOverride) && photoId) row.image = photoId;
+              }
+            } catch {
+              // Ignore lookup errors
+            }
+          }
+        };
+        await autofillRows(data.leadership);
+        await autofillRows(data.members);
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       type: "tabs",
@@ -96,7 +120,7 @@ export const TeamPage: GlobalConfig = {
             {
               name: "leadership",
               type: "array",
-              fields: leadershipMemberFields(),
+              fields: memberFields(true),
             },
           ],
         },
@@ -109,7 +133,7 @@ export const TeamPage: GlobalConfig = {
               name: "members",
               label: "People",
               type: "array",
-              fields: teamMemberFields(),
+              fields: memberFields(false),
             },
           ],
         },

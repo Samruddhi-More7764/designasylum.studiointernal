@@ -43,6 +43,18 @@ import {
   sevenloopCaseStudyGallery,
   sevenloopCaseStudyViewAllClients,
 } from "../data/caseStudyPage";
+import { faqDetails } from "../data/faqDetailPage";
+import { faqEntries } from "../data/faqPage";
+import {
+  ahmedabadBreadcrumbCurrent,
+  ahmedabadCallout,
+  ahmedabadCta,
+  ahmedabadFaqItems,
+  ahmedabadHero,
+  ahmedabadLead,
+  ahmedabadProjectTabs,
+  ahmedabadSections,
+} from "../data/ahmedabadLocationPage";
 import { dropLegacyImageColumns } from "./drop-legacy-image-columns";
 
 type CollectionSlug =
@@ -112,7 +124,13 @@ async function upsertByOrder(
     depth: 0,
   });
   const byOrder = new Map(
-    existing.docs.map((doc) => [Number(doc.order), doc] as const),
+    existing.docs.map((doc, idx) => {
+      const rec = doc as unknown as Record<string, unknown>;
+      return [
+        typeof rec.order === "number" ? Number(rec.order) : idx,
+        doc,
+      ] as const;
+    }),
   );
 
   for (const [index, data] of rows.entries()) {
@@ -444,8 +462,149 @@ async function seed() {
     },
   });
 
+  // Seed FAQ Details collection
+  const existingFaqs = await payload.find({
+    collection: "faq-details" as any,
+    limit: 100,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const existingFaqSlugs = new Set(
+    existingFaqs.docs.map((doc: any) => String(doc.slug || "").trim().toLowerCase()),
+  );
+
+  const defense = faqDetails["defense-tech"];
+  if (defense && !existingFaqSlugs.has("defense-tech")) {
+    await payload.create({
+      collection: "faq-details" as any,
+      data: {
+        slug: "defense-tech",
+        question: defense.question,
+        lead: defense.lead,
+        breadcrumbCurrent: "Sevenloop Brand Website Redesign",
+        sections: defense.sections.map((s) => ({
+          anchor: s.id,
+          title: s.title,
+          body: s.body,
+        })),
+      },
+      overrideAccess: true,
+    });
+    existingFaqSlugs.add("defense-tech");
+  }
+
+  for (const item of faqEntries) {
+    const slug = (item.detailSlug || item.id).trim().toLowerCase();
+    if (!slug || existingFaqSlugs.has(slug)) continue;
+
+    await payload.create({
+      collection: "faq-details" as any,
+      data: {
+        slug,
+        question: item.question,
+        lead: item.answer || item.question,
+        breadcrumbCurrent: item.question,
+        sections: [
+          {
+            anchor: "strategic-overview",
+            title: "Strategic Overview",
+            body:
+              item.answer ||
+              "Developing a rigorous brand framework requires direct alignment with market expectations and commercial objectives.",
+          },
+          {
+            anchor: "messaging-positioning",
+            title: "Messaging & Positioning",
+            body:
+              "Clear differentiation stems from translating complex technical value into unambiguous commercial incentives for enterprise decision-makers.",
+          },
+          {
+            anchor: "execution-impact",
+            title: "Execution & Commercial Impact",
+            body:
+              "A disciplined identity system accelerates sales velocity, elevates market perception, and establishes lasting authority across competitive sectors.",
+          },
+        ],
+      },
+      overrideAccess: true,
+    });
+    existingFaqSlugs.add(slug);
+  }
+
+  // Seed Location Pages collection
+  const existingLocations = await payload.find({
+    collection: "location-pages" as any,
+    where: { slug: { equals: "ahmedabad" } },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+
+  if (existingLocations.docs.length === 0) {
+    await payload.create({
+      collection: "location-pages" as any,
+      data: {
+        title: "Ahmedabad",
+        slug: "ahmedabad",
+        breadcrumbCurrent: ahmedabadBreadcrumbCurrent,
+        heroTitle: ahmedabadHero.title,
+        heroIntro: ahmedabadHero.intro,
+        clientsBefore: "Design projects for ",
+        clientsAccent: "Ahmedabad",
+        clientsAfter: " brands",
+        clientTabs: ahmedabadProjectTabs.map((tab) => ({
+          tabId: tab.id,
+          label: tab.label,
+        })),
+        projects: brandingProjects.map((p) => ({
+          name: p.name,
+          description: p.description,
+          href: p.href,
+        })),
+        calloutBefore: ahmedabadCallout.before,
+        calloutAccent: ahmedabadCallout.accent,
+        calloutAfter: ahmedabadCallout.after,
+        calloutBody: ahmedabadCallout.body,
+        lead: ahmedabadLead,
+        sections: ahmedabadSections.map((s) => ({
+          anchor: s.id,
+          tocLabel: s.tocLabel,
+          headingBefore: s.before,
+          headingAccent: s.accent,
+          headingAfter: s.after,
+          paragraphs: s.paragraphs.map((text) => ({ text })),
+          blocks: (s.blocks ?? []).map((b) => ({
+            title: b.title,
+            paragraphs: b.paragraphs.map((text) => ({ text })),
+          })),
+          pointers: (s.pointers ?? []).map((p) => ({ text: p.text })),
+        })),
+        ctaHeadingBefore: "Ready to ",
+        ctaHeadingAccent: "transform",
+        ctaHeadingAfter: " your Ahmedabad brand?",
+        ctaBody: ahmedabadCta.body,
+        ctaButtonLabel: ahmedabadCta.button,
+        ctaButtonHref: ahmedabadCta.href,
+        faqs: ahmedabadFaqItems.map((f) => ({
+          question: f.question,
+          answer: f.answer || undefined,
+        })),
+        relatedBefore: "",
+        relatedAccent: "Related ",
+        relatedAfter: "blogs",
+        relatedBlogs: relatedBlogs.map((b) => ({
+          date: b.date,
+          readTime: b.readTime,
+          title: b.title,
+          href: b.href,
+        })),
+      },
+      overrideAccess: true,
+    });
+  }
+
   payload.logger.info(
-    "Seed complete. Sevenloop client (hub) + case-study ready. Create the first admin user at /admin if needed.",
+    "Seed complete. Sevenloop client (hub) + case-study, FAQ details, and Location pages ready.",
   );
   process.exit(0);
 }

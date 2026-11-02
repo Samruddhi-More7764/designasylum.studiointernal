@@ -61,8 +61,29 @@ export const WorkPage: GlobalConfig = {
               name: "projects",
               type: "array",
               fields: [
-                image,
-                { name: "name", type: "text", required: true },
+                {
+                  name: "client",
+                  label: "Select Client",
+                  type: "relationship",
+                  relationTo: "clients",
+                  admin: {
+                    description:
+                      "Select a client from Collections > Clients. Link (/clients/[slug]), name, and image will auto-populate if left empty.",
+                  },
+                },
+                {
+                  ...image,
+                  admin: {
+                    description: "Leave empty to use client hero image.",
+                  },
+                },
+                {
+                  name: "name",
+                  type: "text",
+                  admin: {
+                    description: "Leave empty to use client name.",
+                  },
+                },
                 { name: "service", label: "Service line", type: "text" },
                 {
                   name: "category",
@@ -76,12 +97,6 @@ export const WorkPage: GlobalConfig = {
                     { label: "Industry & Sustainability", value: "industry" },
                   ],
                   admin: { description: "Which filter this project appears under. All always shows every project." },
-                },
-                {
-                  name: "href",
-                  label: "URL",
-                  type: "text",
-                  admin: { description: "Where the card goes. Leave empty until that page exists." },
                 },
                 {
                   name: "order",

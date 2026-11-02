@@ -13,12 +13,17 @@ export function revalidateMarketingPages(slug?: string) {
     revalidatePath("/work");
     revalidatePath("/contact");
     revalidatePath("/why-design-asylum");
+    revalidatePath("/faq");
+    revalidatePath("/locations/ahmedabad");
 
     if (slug) {
       const cleanSlug = slug.replace(/^\/+|\/+$/g, "").trim();
       revalidatePath(`/team/${cleanSlug}`);
       revalidatePath(`/clients/${cleanSlug}`);
       revalidatePath(`/blog/${cleanSlug}`);
+      revalidatePath(`/blogs/${cleanSlug}`);
+      revalidatePath(`/faq/${cleanSlug}`);
+      revalidatePath(`/locations/${cleanSlug}`);
       revalidatePath(`/industries/${cleanSlug}`);
       revalidatePath(`/services/${cleanSlug}`);
       revalidatePath(`/solutions/${cleanSlug}`);

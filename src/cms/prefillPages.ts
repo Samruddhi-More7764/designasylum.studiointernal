@@ -2,6 +2,19 @@ import { createHash } from "node:crypto";
 import type { Payload } from "payload";
 
 import { pageEntries } from "./pageEntries";
+import { faqDetails } from "../data/faqDetailPage";
+import { faqEntries } from "../data/faqPage";
+import {
+  ahmedabadBreadcrumbCurrent,
+  ahmedabadCallout,
+  ahmedabadCta,
+  ahmedabadFaqItems,
+  ahmedabadHero,
+  ahmedabadLead,
+  ahmedabadProjectTabs,
+  ahmedabadSections,
+} from "../data/ahmedabadLocationPage";
+import { brandingProjects, relatedBlogs } from "../data/brandingAgencyPage";
 
 const FINGERPRINT_KEY = "cms-page-entries";
 
@@ -24,11 +37,167 @@ export async function prefillPageEntries(payload: Payload): Promise<void> {
 
   try {
     await fillEmptyEntries(payload);
+    await prefillCollections(payload);
   } catch (error) {
     payload.logger.error({
       err: error,
       msg: "Could not fill empty CMS page entries. Existing content was not changed.",
     });
+  }
+}
+
+async function prefillCollections(payload: Payload): Promise<void> {
+  // 1. Prefill FAQ Details collection
+  try {
+    const existingFaqs = await payload.find({
+      collection: "faq-details" as any,
+      limit: 100,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const existingSlugs = new Set(
+      existingFaqs.docs.map((doc: any) => String(doc.slug || "").trim().toLowerCase()),
+    );
+
+    // Defense-tech detail
+    const defense = faqDetails["defense-tech"];
+    if (defense && !existingSlugs.has("defense-tech")) {
+      await payload.create({
+        collection: "faq-details" as any,
+        data: {
+          slug: "defense-tech",
+          question: defense.question,
+          lead: defense.lead,
+          breadcrumbCurrent: "Sevenloop Brand Website Redesign",
+          sections: defense.sections.map((s) => ({
+            anchor: s.id,
+            title: s.title,
+            body: s.body,
+          })),
+        },
+        overrideAccess: true,
+      });
+      existingSlugs.add("defense-tech");
+      payload.logger.info({ msg: "Prefilled FAQ Detail: defense-tech" });
+    }
+
+    // Prefill remaining faqEntries
+    for (const item of faqEntries) {
+      const slug = (item.detailSlug || item.id).trim().toLowerCase();
+      if (!slug || existingSlugs.has(slug)) continue;
+
+      await payload.create({
+        collection: "faq-details" as any,
+        data: {
+          slug,
+          question: item.question,
+          lead: item.answer || item.question,
+          breadcrumbCurrent: item.question,
+          sections: [
+            {
+              anchor: "strategic-overview",
+              title: "Strategic Overview",
+              body:
+                item.answer ||
+                "Developing a rigorous brand framework requires direct alignment with market expectations and commercial objectives.",
+            },
+            {
+              anchor: "messaging-positioning",
+              title: "Messaging & Positioning",
+              body:
+                "Clear differentiation stems from translating complex technical value into unambiguous commercial incentives for enterprise decision-makers.",
+            },
+            {
+              anchor: "execution-impact",
+              title: "Execution & Commercial Impact",
+              body:
+                "A disciplined identity system accelerates sales velocity, elevates market perception, and establishes lasting authority across competitive sectors.",
+            },
+          ],
+        },
+        overrideAccess: true,
+      });
+      existingSlugs.add(slug);
+    }
+  } catch (err) {
+    payload.logger.warn({ err, msg: "Skipped prefilling faq-details collection." });
+  }
+
+  // 2. Prefill Location Pages collection
+  try {
+    const existingLocations = await payload.find({
+      collection: "location-pages" as any,
+      where: { slug: { equals: "ahmedabad" } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+
+    if (existingLocations.docs.length === 0) {
+      await payload.create({
+        collection: "location-pages" as any,
+        data: {
+          title: "Ahmedabad",
+          slug: "ahmedabad",
+          breadcrumbCurrent: ahmedabadBreadcrumbCurrent,
+          heroTitle: ahmedabadHero.title,
+          heroIntro: ahmedabadHero.intro,
+          clientsBefore: "Design projects for ",
+          clientsAccent: "Ahmedabad",
+          clientsAfter: " brands",
+          clientTabs: ahmedabadProjectTabs.map((tab) => ({
+            tabId: tab.id,
+            label: tab.label,
+          })),
+          projects: brandingProjects.map((p) => ({
+            name: p.name,
+            description: p.description,
+            href: p.href,
+          })),
+          calloutBefore: ahmedabadCallout.before,
+          calloutAccent: ahmedabadCallout.accent,
+          calloutAfter: ahmedabadCallout.after,
+          calloutBody: ahmedabadCallout.body,
+          lead: ahmedabadLead,
+          sections: ahmedabadSections.map((s) => ({
+            anchor: s.id,
+            tocLabel: s.tocLabel,
+            headingBefore: s.before,
+            headingAccent: s.accent,
+            headingAfter: s.after,
+            paragraphs: s.paragraphs.map((text) => ({ text })),
+            blocks: (s.blocks ?? []).map((b) => ({
+              title: b.title,
+              paragraphs: b.paragraphs.map((text) => ({ text })),
+            })),
+            pointers: (s.pointers ?? []).map((p) => ({ text: p.text })),
+          })),
+          ctaHeadingBefore: "Ready to ",
+          ctaHeadingAccent: "transform",
+          ctaHeadingAfter: " your Ahmedabad brand?",
+          ctaBody: ahmedabadCta.body,
+          ctaButtonLabel: ahmedabadCta.button,
+          ctaButtonHref: ahmedabadCta.href,
+          faqs: ahmedabadFaqItems.map((f) => ({
+            question: f.question,
+            answer: f.answer || undefined,
+          })),
+          relatedBefore: "",
+          relatedAccent: "Related ",
+          relatedAfter: "blogs",
+          relatedBlogs: relatedBlogs.map((b) => ({
+            date: b.date,
+            readTime: b.readTime,
+            title: b.title,
+            href: b.href,
+          })),
+        },
+        overrideAccess: true,
+      });
+      payload.logger.info({ msg: "Prefilled Location Page: Ahmedabad" });
+    }
+  } catch (err) {
+    payload.logger.warn({ err, msg: "Skipped prefilling location-pages collection." });
   }
 }
 

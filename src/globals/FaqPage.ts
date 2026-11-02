@@ -64,15 +64,25 @@ export const FaqPage: GlobalConfig = {
                 {
                   name: "answer",
                   type: "textarea",
-                  admin: { description: "Leave empty to keep the question closed." },
+                  admin: { description: "Answer displayed when opened. Leave empty to use default answer." },
+                },
+                {
+                  name: "faqDetail",
+                  label: "Select FAQ Detail Page",
+                  type: "relationship",
+                  relationTo: "faq-details",
+                  admin: {
+                    description:
+                      "Select an FAQ detail page from Collections > FAQ Details to link 'Read full answer'.",
+                  },
                 },
                 {
                   name: "detailSlug",
-                  label: "Full answer URL",
+                  label: "Custom Detail Page Slug / URL",
                   type: "text",
                   admin: {
                     description:
-                      "Slug for Read full answer, for example defense-tech. Leave empty to hide the link.",
+                      "Optional slug override (e.g. defense-tech). If left empty and a detail page is selected above, its slug is used.",
                   },
                 },
               ],

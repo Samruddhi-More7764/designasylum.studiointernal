@@ -576,8 +576,8 @@ export const getClientLogoLayouts = cache(async () => {
         return {
           name: String(doc.name),
           image: src,
-          width: Number(doc.width),
-          height: Number(doc.height),
+          width: Number((doc as unknown as { width?: unknown }).width) || 192,
+          height: Number((doc as unknown as { height?: unknown }).height) || 49,
         };
       })
       .filter((row): row is ClientLogo => Boolean(row));
@@ -784,8 +784,8 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
         ...(designation ? { designation } : {}),
         ...(doc.quote ? { quote: String(doc.quote) } : {}),
         ...(video ? { video } : {}),
-        width: Number(doc.width) || 320,
-        height: Number(doc.height) || 320,
+        width: Number((doc as unknown as { width?: unknown }).width) || 320,
+        height: Number((doc as unknown as { height?: unknown }).height) || 320,
       });
     }
     // The second card often has no stored quote. Show the third card's
@@ -808,7 +808,7 @@ export const getFaqItems = cache(async (): Promise<FaqItem[]> => {
   try {
     const result = await payload.find({
       collection: "faq-items",
-      sort: "order",
+      sort: "createdAt",
       limit: 100,
       depth: 0,
     });

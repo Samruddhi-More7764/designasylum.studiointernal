@@ -8,20 +8,44 @@ const image: Field = {
 };
 
 const postFields: Field[] = [
-  image,
-  { name: "title", type: "text", required: true },
-  { name: "date", type: "text" },
+  {
+    name: "post",
+    label: "Select Blog Post",
+    type: "relationship",
+    relationTo: "blog-posts",
+    admin: {
+      description:
+        "Select a post from Collections > Blog Posts. Title, date, category, image, and link will auto-fill from the selected post.",
+    },
+  },
+  {
+    ...image,
+    admin: {
+      description: "Leave empty to use the image from the selected blog post.",
+    },
+  },
+  {
+    name: "title",
+    type: "text",
+    admin: {
+      description: "Leave empty to use the title from the selected blog post.",
+    },
+  },
+  {
+    name: "date",
+    type: "text",
+    admin: {
+      description: "Leave empty to use the date from the selected blog post.",
+    },
+  },
   {
     name: "category",
     type: "select",
     options: ["Brand", "Digital", "Strategy", "Studio"],
-    admin: { description: "Which filter this post appears under. All always shows every post." },
-  },
-  {
-    name: "href",
-    label: "URL",
-    type: "text",
-    admin: { description: "Where the card goes." },
+    admin: {
+      description:
+        "Which filter this post appears under. Leave empty to use the category from the selected blog post.",
+    },
   },
   { name: "badge", label: "Badge", type: "text" },
   {
@@ -46,6 +70,41 @@ export const BlogIndex: GlobalConfig = {
   slug: "blog-index",
   label: "Blog",
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req }) => {
+        if (!data) return data;
+        const autofillPosts = async (rows: unknown) => {
+          if (!Array.isArray(rows)) return;
+          for (const row of rows) {
+            if (!row || !row.post) continue;
+            const postId = typeof row.post === "object" ? row.post.id : row.post;
+            if (!postId) continue;
+            try {
+              const post = await req.payload.findByID({
+                collection: "blog-posts",
+                id: postId,
+                depth: 0,
+              });
+              if (post) {
+                if (!row.title && post.title) row.title = post.title;
+                if (!row.date && post.date) row.date = post.date;
+                if (!row.category && post.category) row.category = post.category;
+                if (!row.image && post.image) row.image = post.image;
+                if (!row.badge && post.badge) row.badge = post.badge;
+                if (!row.badgeIcon && post.badgeIcon) row.badgeIcon = post.badgeIcon;
+              }
+            } catch {
+              // Ignore lookup errors
+            }
+          }
+        };
+        await autofillPosts(data.featuredPosts);
+        await autofillPosts(data.posts);
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       type: "tabs",

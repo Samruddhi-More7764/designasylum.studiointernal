@@ -62,6 +62,7 @@ type RawServiceDoc = {
   lead?: string | null;
   sections?: CmsSection[] | null;
   logos?: Array<{
+    clientLogo?: { name?: string; image?: unknown } | string | null;
     image?: unknown;
     name?: string | null;
     width?: number | null;
@@ -250,13 +251,17 @@ function parseServiceDoc(
 
   const logos = (doc.logos || [])
     .map((logo, index) => {
-      const name = logo?.name?.trim() || "";
+      const linked =
+        logo?.clientLogo && typeof logo.clientLogo === "object"
+          ? (logo.clientLogo as { name?: string; image?: unknown })
+          : null;
+      const name = logo?.name?.trim() || linked?.name?.trim() || "";
       if (!name) return null;
       return {
         name,
-        image: mediaSrc(logo?.image, defaultHeroImage),
-        width: logo?.width || 160,
-        height: logo?.height || 48,
+        image: mediaSrc(logo?.image || linked?.image, defaultHeroImage),
+        width: 160,
+        height: 48,
         row: logo?.row === "2" ? "2" : logo?.row === "1" ? "1" : "",
         index,
       };
