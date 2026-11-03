@@ -151,7 +151,21 @@ export default buildConfig({
     ClientsGridGlobal,
   ].map(withGlobalRevalidation),
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || "dev-only-change-me-32-chars-min!!",
+  // PAYLOAD_SECRET must be set as an environment variable.
+  // The app will refuse to start if it is missing — this prevents accidentally
+  // running in production with a predictable secret that could be used to
+  // forge session tokens.
+  secret: (() => {
+    const s = process.env.PAYLOAD_SECRET;
+    if (!s) throw new Error("PAYLOAD_SECRET environment variable is not set.");
+    return s;
+  })(),
+  // Disable the GraphQL API and its playground in production.
+  // All CMS collections have read: () => true which would otherwise expose
+  // the full content database to unauthenticated GraphQL queries.
+  graphQL: {
+    disable: process.env.NODE_ENV === "production",
+  },
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
