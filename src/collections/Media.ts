@@ -10,19 +10,7 @@ export const Media: CollectionConfig = {
     defaultColumns: ["filename", "alt", "updatedAt"],
   },
   upload: {
-    // Explicit allowlist supporting standard web raster formats, vector SVGs
-    // (for client logos and icons), and web-optimised video formats.
-    mimeTypes: [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "image/avif",
-      "image/svg+xml",
-      "video/mp4",
-      "video/webm",
-      "video/quicktime",
-    ],
+    mimeTypes: ["image/*", "video/mp4", "video/webm", "video/quicktime"],
   },
   fields: [
     {

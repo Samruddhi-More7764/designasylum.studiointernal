@@ -21,7 +21,6 @@
     "@payloadcms/next": "^3.88.0",
     "@payloadcms/richtext-lexical": "^3.88.0",
     "@payloadcms/storage-vercel-blob": "^3.88.0",
-    "@upstash/redis": "^1.41.0",
     "framer-motion": "^12.43.0",
     "google-auth-library": "^11.0.2",
     "graphql": "^16.8.1",

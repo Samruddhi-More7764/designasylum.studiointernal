@@ -9,13 +9,28 @@ function slotLayout(
         gallery?: ({ layout?: MediaLayout | null } | null)[] | null;
       }
     | undefined,
-  path: (number | string)[],
+  path?: unknown,
+  siblingData?: Record<string, unknown>,
 ): MediaLayout {
-  if (!data) return "full";
-  if (path[0] === "hero") return data.hero?.layout === "split" ? "split" : "full";
-  if (path[0] === "gallery" && typeof path[1] === "number") {
-    return data.gallery?.[path[1]]?.layout === "split" ? "split" : "full";
+  if (siblingData && typeof siblingData.layout === "string") {
+    return siblingData.layout === "split" ? "split" : "full";
   }
+  if (!data) return "full";
+  if (Array.isArray(path) && path.length > 0) {
+    if (path[0] === "hero") return data.hero?.layout === "split" ? "split" : "full";
+    if (path[0] === "gallery" && typeof path[1] === "number") {
+      return data.gallery?.[path[1]]?.layout === "split" ? "split" : "full";
+    }
+  }
+  if (typeof path === "string") {
+    if (path.startsWith("hero")) return data.hero?.layout === "split" ? "split" : "full";
+    const galleryMatch = path.match(/^gallery\.(\d+)/);
+    if (galleryMatch) {
+      const idx = Number(galleryMatch[1]);
+      return data.gallery?.[idx]?.layout === "split" ? "split" : "full";
+    }
+  }
+  if (data.hero?.layout === "split") return "split";
   return "full";
 }
 
@@ -31,10 +46,16 @@ function mediaUpload(when: MediaLayout): UploadField {
     admin: { description: mediaDescription },
     validate: (
       value: unknown,
-      { data, path }: { data?: LayoutData; path: (number | string)[] },
+      options?: { data?: LayoutData; path?: unknown; siblingData?: unknown },
     ) => {
-      if (slotLayout(data, path) !== when) return true;
-      return value ? true : "Upload a photo, GIF, or video.";
+      try {
+        const path = options?.path;
+        const sibling = (options?.siblingData || {}) as Record<string, unknown>;
+        if (slotLayout(options?.data, path, sibling) !== when) return true;
+        return value ? true : "Upload a photo, GIF, or video.";
+      } catch {
+        return true;
+      }
     },
   };
 }
@@ -45,12 +66,18 @@ function mediaAlt(when: MediaLayout): TextField {
     type: "text",
     validate: (
       value: unknown,
-      { data, path }: { data?: LayoutData; path: (number | string)[] },
+      options?: { data?: LayoutData; path?: unknown; siblingData?: unknown },
     ) => {
-      if (slotLayout(data, path) !== when) return true;
-      return typeof value === "string" && value.trim()
-        ? true
-        : "Add a short description.";
+      try {
+        const path = options?.path;
+        const sibling = (options?.siblingData || {}) as Record<string, unknown>;
+        if (slotLayout(options?.data, path, sibling) !== when) return true;
+        return typeof value === "string" && value.trim()
+          ? true
+          : "Add a short description.";
+      } catch {
+        return true;
+      }
     },
   };
 }
