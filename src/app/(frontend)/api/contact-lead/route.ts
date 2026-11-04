@@ -23,19 +23,36 @@ const redis = Redis.fromEnv();
 // ---------------------------------------------------------------------------
 // CSRF: allowed origins for the contact form POST
 // ---------------------------------------------------------------------------
-const ALLOWED_ORIGINS = new Set([
-  "https://designasylum.studio",
-  "https://www.designasylum.studio",
-  // Allow preview deployments and local dev
-  process.env.NEXT_PUBLIC_SERVER_URL ?? "",
-]);
+function isAllowedOrigin(origin: string): boolean {
+  if (!origin) return true; // Same-origin or non-browser client
+  try {
+    const url = new URL(origin);
+    const host = url.hostname.toLowerCase();
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "designasylum.studio" ||
+      host.endsWith(".designasylum.studio") ||
+      host === "designasylum.vercel.app" ||
+      host.endsWith(".vercel.app")
+    ) {
+      return true;
+    }
+    if (process.env.NEXT_PUBLIC_SERVER_URL) {
+      const serverUrl = new URL(process.env.NEXT_PUBLIC_SERVER_URL);
+      if (serverUrl.hostname.toLowerCase() === host) return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
 
 export async function POST(request: Request) {
   // --- CSRF guard -----------------------------------------------------------
-  // Reject cross-origin POSTs that don't come from our own frontend.
-  // Same-origin requests from the browser always include the Origin header.
+  // Reject cross-origin POSTs from unauthorized third-party sites.
   const origin = request.headers.get("origin") ?? "";
-  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+  if (!isAllowedOrigin(origin)) {
     return NextResponse.json({ ok: false, error: "Forbidden." }, { status: 403 });
   }
 

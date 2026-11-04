@@ -10,15 +10,15 @@ export const Media: CollectionConfig = {
     defaultColumns: ["filename", "alt", "updatedAt"],
   },
   upload: {
-    // Explicit allowlist instead of "image/*" to exclude image/svg+xml.
-    // SVG files can contain embedded <script> tags, making them an XSS vector
-    // when served back to visitors from Vercel Blob storage.
+    // Explicit allowlist supporting standard web raster formats, vector SVGs
+    // (for client logos and icons), and web-optimised video formats.
     mimeTypes: [
       "image/jpeg",
       "image/png",
       "image/gif",
       "image/webp",
       "image/avif",
+      "image/svg+xml",
       "video/mp4",
       "video/webm",
       "video/quicktime",
