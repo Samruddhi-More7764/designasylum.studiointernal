@@ -57,10 +57,10 @@ export const Testimonials: CollectionConfig = {
     {
       name: "alt",
       type: "text",
-      required: true,
+      required: false,
       admin: {
         description:
-          "Person's name, shown on the photo or video. Example: Dr. Mallesh B.",
+          "Person's name, shown on the photo or video (optional). Example: Dr. Mallesh B.",
       },
     },
     {

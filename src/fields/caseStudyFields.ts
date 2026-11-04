@@ -60,24 +60,13 @@ function mediaUpload(when: MediaLayout): UploadField {
   };
 }
 
-function mediaAlt(when: MediaLayout): TextField {
+function mediaAlt(_when?: MediaLayout): TextField {
   return {
     name: "alt",
     type: "text",
-    validate: (
-      value: unknown,
-      options?: { data?: LayoutData; path?: unknown; siblingData?: unknown },
-    ) => {
-      try {
-        const path = options?.path;
-        const sibling = (options?.siblingData || {}) as Record<string, unknown>;
-        if (slotLayout(options?.data, path, sibling) !== when) return true;
-        return typeof value === "string" && value.trim()
-          ? true
-          : "Add a short description.";
-      } catch {
-        return true;
-      }
+    label: "Image alt text",
+    admin: {
+      description: "Short description for screen readers and SEO (optional).",
     },
   };
 }

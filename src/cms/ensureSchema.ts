@@ -109,7 +109,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v2_drop_not_null_clients_work_team_logos"];
+  const lines: string[] = ["migration_v3_drop_not_null_alt_fields"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -330,7 +330,7 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
     WHERE admin_title IS NULL OR admin_title = '';
   `).catch(() => undefined);
 
-  // 3. Drop NOT NULL on name columns in array tables where name is optional / auto-filled from relations
+  // 3. Drop NOT NULL on name and alt columns where fields are optional / auto-filled from relations
   await client.query(`
     DO $$
     BEGIN
@@ -343,6 +343,9 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
       ALTER TABLE IF EXISTS service_pages_logos ALTER COLUMN name DROP NOT NULL;
       ALTER TABLE IF EXISTS solution_pages_logos ALTER COLUMN name DROP NOT NULL;
       ALTER TABLE IF EXISTS work_service_pages_logos ALTER COLUMN name DROP NOT NULL;
+      ALTER TABLE IF EXISTS portfolio_items ALTER COLUMN alt DROP NOT NULL;
+      ALTER TABLE IF EXISTS featured_projects ALTER COLUMN alt DROP NOT NULL;
+      ALTER TABLE IF EXISTS testimonials ALTER COLUMN alt DROP NOT NULL;
     EXCEPTION WHEN OTHERS THEN
       NULL;
     END $$;

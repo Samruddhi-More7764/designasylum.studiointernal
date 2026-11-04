@@ -28,7 +28,7 @@ export const PortfolioItems: CollectionConfig = {
       required: true,
       filterOptions: { mimeType: { contains: "image" } },
     },
-    { name: "alt", type: "text", required: true },
+    { name: "alt", type: "text" },
     homepageClientLink,
     { name: "order", type: "number", required: true, defaultValue: 0 },
   ],

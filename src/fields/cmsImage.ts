@@ -20,7 +20,6 @@ export const cmsImageFields: Field[] = [
   {
     name: "alt",
     type: "text",
-    required: true,
   },
 ];
 
@@ -41,7 +40,6 @@ export const cmsEitherMediaFields: Field[] = [
   {
     name: "alt",
     type: "text",
-    required: true,
   },
 ];
 
