@@ -284,12 +284,13 @@ const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
     }
 
     if (modified) {
+      // Run decoupled from req transaction so secondary placement sync cannot
+      // poison or roll back the newly saved case study document.
       await req.payload.update({
         collection: "clients",
         id: clientId,
         data: { placements } as never,
         context: { skipSync: true, skipHeroSync: true, skipRevalidation: true },
-        req,
       });
     }
   } catch (err) {

@@ -47,7 +47,7 @@ const dirname = path.dirname(filename);
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
 import type { CollectionConfig, GlobalConfig } from "payload";
-import { revalidateMarketingPages } from "./cms/revalidate";
+import { revalidateForCollection, revalidateForGlobal } from "./cms/revalidate";
 
 function withRevalidation(collection: CollectionConfig): CollectionConfig {
   return {
@@ -62,7 +62,7 @@ function withRevalidation(collection: CollectionConfig): CollectionConfig {
             doc && typeof doc === "object" && "slug" in doc && typeof doc.slug === "string"
               ? doc.slug
               : undefined;
-          revalidateMarketingPages(slug);
+          revalidateForCollection(collection.slug, slug);
           return doc;
         },
       ],
@@ -74,7 +74,7 @@ function withRevalidation(collection: CollectionConfig): CollectionConfig {
             doc && typeof doc === "object" && "slug" in doc && typeof doc.slug === "string"
               ? doc.slug
               : undefined;
-          revalidateMarketingPages(slug);
+          revalidateForCollection(collection.slug, slug);
           return doc;
         },
       ],
@@ -91,7 +91,7 @@ function withGlobalRevalidation(global: GlobalConfig): GlobalConfig {
         ...(global.hooks?.afterChange || []),
         ({ doc, context }) => {
           if (context?.skipRevalidation || context?.skipSync) return doc;
-          revalidateMarketingPages();
+          revalidateForGlobal(global.slug);
           return doc;
         },
       ],

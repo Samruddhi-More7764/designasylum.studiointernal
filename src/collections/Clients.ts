@@ -68,8 +68,10 @@ const autoPopulatePlacements: CollectionBeforeChangeHook = async ({
   data,
   originalDoc,
   req,
+  context,
 }) => {
   if (!data) return data;
+  if (context?.skipSync || context?.skipHeroSync) return data;
 
   data.placements = data.placements || {};
   const placements = data.placements as Record<string, Record<string, unknown>>;

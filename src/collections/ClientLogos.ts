@@ -1,23 +1,10 @@
 import type { CollectionConfig } from "payload";
-import { revalidateMarketingPages } from "@/cms/revalidate";
 
 export const ClientLogos: CollectionConfig = {
   slug: "client-logos",
   defaultSort: "order",
   admin: { useAsTitle: "name", defaultColumns: ["name", "order"] },
   access: { read: () => true },
-  hooks: {
-    afterChange: [
-      () => {
-        revalidateMarketingPages();
-      },
-    ],
-    afterDelete: [
-      () => {
-        revalidateMarketingPages();
-      },
-    ],
-  },
   fields: [
     { name: "name", type: "text", required: true },
     {
