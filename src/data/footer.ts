@@ -21,6 +21,7 @@ export const FOOTER_SOCIAL_LINKS = {
 };
 
 const FOOTER_HREFS: Record<string, string> = {
+  // Company & Main Pages
   "Why Design Asylum": "/why-design-asylum",
   Work: "/work",
   Clients: "/clients",
@@ -30,12 +31,52 @@ const FOOTER_HREFS: Record<string, string> = {
   Contact: "/contact",
   Studio: "/studio",
   FAQs: "/faq",
+  Reviews: "/why-design-asylum",
+  "Recent Updates": "/blogs",
+  "Our Terms": "/why-design-asylum",
+  "The No Brainer Offer": "/why-design-asylum",
+
+  // Industries
   Manufacturing: "/industries/manufacturing",
+  Fintech: "/industries/fintech",
+  Deeptech: "/industries/deeptech",
+  "Enterprise SaaS": "/industries/enterprise-saas",
+  Cybersecurity: "/industries/cybersecurity",
+  Healthcare: "/industries/healthcare",
+
+  // Services
   "Brand Systems": "/services/brand-systems",
+  "Website Design": "/services/website-design",
+  "Webflow Build": "/services/webflow-build",
+  "Film & Motion": "/services/film-motion",
+  "Print Design": "/services/print-design",
+  Campaigns: "/services/campaigns",
+
+  // Solutions
+  "B2B Branding": "/solutions/b2b-branding",
+  "Brand Strategy": "/solutions/brand-strategy",
+  Rebrand: "/solutions/rebrand",
+  Naming: "/solutions/naming",
+  Positioning: "/solutions/positioning",
+  "Visual Identity": "/solutions/visual-identity",
+
+  // Work
+  "B2B Website Design": "/work/b2b-website-design",
+  "Website Projects": "/work/website-projects",
+  "3D & Motion": "/work/3d-motion",
+  Thinking: "/work/thinking",
+  "Website Audit": "/work/website-audit",
+  "Print Studio": "/work/print-studio",
+  "Studio Reviews": "/work/studio-reviews",
 };
 
 export function footerLinkHref(label: string): string {
-  return FOOTER_HREFS[label] ?? "#";
+  if (FOOTER_HREFS[label]) return FOOTER_HREFS[label];
+  const normalized = label.trim().toLowerCase();
+  for (const [key, href] of Object.entries(FOOTER_HREFS)) {
+    if (key.toLowerCase().trim() === normalized) return href;
+  }
+  return "#";
 }
 
 function footerLink(label: string): FooterLink {

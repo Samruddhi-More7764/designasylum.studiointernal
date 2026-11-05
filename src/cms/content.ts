@@ -867,9 +867,22 @@ function extractRelationId(val: unknown): string | number | null {
   return null;
 }
 
+function cleanSlugPart(slug?: string | null): string {
+  return slug ? slug.replace(/^\/+|\/+$/g, "").trim() : "";
+}
+
+function slugifyLabel(label: string): string {
+  return label
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 async function resolveFooterLinks(
   rows: FooterListRow[] | null | undefined,
   payload: NonNullable<Awaited<ReturnType<typeof getPayloadClient>>>,
+  columnKey?: string,
 ): Promise<FooterLink[] | null> {
   if (!rows?.length) return null;
   const links: FooterLink[] = [];
@@ -890,7 +903,7 @@ async function resolveFooterLinks(
             id,
             depth: 0,
           });
-          if (doc) linkedIndustry = { title: doc.title || "", slug: doc.slug };
+          if (doc) linkedIndustry = { title: doc.title || "", slug: cleanSlugPart(doc.slug) };
         } catch {}
       }
     }
@@ -904,7 +917,7 @@ async function resolveFooterLinks(
             id,
             depth: 0,
           });
-          if (doc) linkedService = { title: doc.title || "", slug: doc.slug };
+          if (doc) linkedService = { title: doc.title || "", slug: cleanSlugPart(doc.slug) };
         } catch {}
       }
     }
@@ -918,7 +931,7 @@ async function resolveFooterLinks(
             id,
             depth: 0,
           });
-          if (doc) linkedSolution = { title: doc.title || "", slug: doc.slug };
+          if (doc) linkedSolution = { title: doc.title || "", slug: cleanSlugPart(doc.slug) };
         } catch {}
       }
     }
@@ -932,10 +945,40 @@ async function resolveFooterLinks(
             id,
             depth: 0,
           });
-          if (doc) linkedWork = { title: doc.title || "", slug: doc.slug };
+          if (doc) linkedWork = { title: doc.title || "", slug: cleanSlugPart(doc.slug) };
         } catch {}
       }
     }
+
+    // Auto-match by title/slug if relation wasn't explicitly linked in CMS
+    if (!linkedIndustry && columnKey === "industries" && row?.label?.trim()) {
+      const slugCandidate = slugifyLabel(row.label);
+      try {
+        const found = await payload.find({
+          collection: "industry-pages",
+          where: {
+            or: [
+              { slug: { equals: slugCandidate } },
+              { slug: { equals: `/${slugCandidate}` } },
+              { title: { equals: row.label.trim() } },
+            ],
+          },
+          limit: 1,
+          depth: 0,
+        });
+        if (found.docs.length > 0 && found.docs[0]) {
+          linkedIndustry = {
+            title: found.docs[0].title || "",
+            slug: cleanSlugPart(found.docs[0].slug),
+          };
+        }
+      } catch {}
+    }
+
+    const industrySlug = cleanSlugPart(linkedIndustry?.slug);
+    const serviceSlug = cleanSlugPart(linkedService?.slug);
+    const solutionSlug = cleanSlugPart(linkedSolution?.slug);
+    const workSlug = cleanSlugPart(linkedWork?.slug);
 
     const defaultLabel =
       linkedIndustry?.title ||
@@ -943,20 +986,31 @@ async function resolveFooterLinks(
       linkedSolution?.title ||
       linkedWork?.title ||
       "";
-    const defaultHref = linkedIndustry
-      ? `/industries/${linkedIndustry.slug}`
-      : linkedService
-        ? `/services/${linkedService.slug}`
-        : linkedSolution
-          ? `/solutions/${linkedSolution.slug}`
-          : linkedWork
-            ? `/work/${linkedWork.slug}`
-            : "";
 
     const label = row?.label?.trim() || defaultLabel;
     if (!label) continue;
 
-    const href = row?.href?.trim() || defaultHref || footerLinkHref(label);
+    const fallbackSlug = slugifyLabel(label);
+    const defaultHref = industrySlug
+      ? `/industries/${industrySlug}`
+      : columnKey === "industries"
+        ? `/industries/${fallbackSlug}`
+        : serviceSlug
+          ? `/services/${serviceSlug}`
+          : columnKey === "services"
+            ? `/services/${fallbackSlug}`
+            : solutionSlug
+              ? `/solutions/${solutionSlug}`
+              : columnKey === "solutions"
+                ? `/solutions/${fallbackSlug}`
+                : workSlug
+                  ? `/work/${workSlug}`
+                  : columnKey === "work"
+                    ? `/work/${fallbackSlug}`
+                    : "";
+
+    const validHref = (h?: string | null) => (h && h.trim() && h.trim() !== "#" ? h.trim() : null);
+    const href = validHref(row?.href) || validHref(defaultHref) || footerLinkHref(label);
     links.push({ label, href });
   }
 
@@ -981,7 +1035,7 @@ export const getFooter = cache(async (): Promise<FooterContent> => {
       fallbackFooterColumns.map(async (column) => {
         const key = FOOTER_LISTS[column.title as keyof typeof FOOTER_LISTS];
         if (!key) return column;
-        const links = await resolveFooterLinks(global[key], payload);
+        const links = await resolveFooterLinks(global[key], payload, key);
         const resolvedLinks = links ?? column.links;
         return { ...column, links: resolvedLinks };
       }),

@@ -15,6 +15,8 @@ import { BookStrategyCta } from "@/components/sections/BookStrategyCta";
 import { Footer } from "@/components/sections/15-Footer";
 import { getFaqItems, getFooter } from "@/cms/content";
 
+export const revalidate = 120;
+
 // Code-split below-the-fold interactive components to optimize initial JS bundle size
 const VideoEmbed = dynamic(
   () => import("@/components/sections/06-VideoEmbed").then((m) => m.VideoEmbed),

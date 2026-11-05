@@ -209,7 +209,6 @@ async function autofillRow(
   payload: Payload,
 ) {
   const rel = row[relField];
-  if (!rel) return;
 
   let docId: string | number | null = null;
   let title: string | undefined;
@@ -224,6 +223,35 @@ async function autofillRow(
     }
   } else if (typeof rel === "string" || typeof rel === "number") {
     docId = rel;
+  }
+
+  // If no relation was explicitly selected, attempt to match by label
+  if (!docId && !slug && row.label && typeof row.label === "string" && row.label.trim()) {
+    const candidate = row.label
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    try {
+      const match = await payload.find({
+        collection,
+        where: {
+          or: [
+            { slug: { equals: candidate } },
+            { slug: { equals: `/${candidate}` } },
+            { title: { equals: row.label.trim() } },
+          ],
+        },
+        limit: 1,
+        depth: 0,
+      });
+      if (match.docs.length > 0 && match.docs[0]) {
+        docId = match.docs[0].id;
+        slug = match.docs[0].slug;
+        title = match.docs[0].title;
+        row[relField] = match.docs[0].id;
+      }
+    } catch {}
   }
 
   if ((!slug || !title) && docId !== null) {
@@ -242,8 +270,17 @@ async function autofillRow(
     }
   }
 
-  const cleanSlug = slug ? slug.replace(/^\/+|\/+$/g, "").trim() : "";
-  if (cleanSlug && (!row.href || typeof row.href !== "string" || !row.href.trim())) {
+  const cleanSlug = slug
+    ? slug.replace(/^\/+|\/+$/g, "").trim()
+    : row.label && typeof row.label === "string"
+      ? row.label
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9_-]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+      : "";
+
+  if (cleanSlug && (!row.href || typeof row.href !== "string" || !row.href.trim() || row.href.trim() === "#")) {
     row.href = `${prefix}/${cleanSlug}`;
   }
   if (title && (!row.label || typeof row.label !== "string" || !row.label.trim())) {
