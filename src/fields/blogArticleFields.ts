@@ -226,7 +226,7 @@ export const blogArticleRelatedFields: Field[] = [
       {
         ...blogUploadImage,
         admin: {
-          description: "Leave empty to use image from selected blog post.",
+          description: "Leave empty to use hero image from selected blog post.",
         },
       },
       {
@@ -240,9 +240,6 @@ export const blogArticleRelatedFields: Field[] = [
         name: "readTime",
         label: "Read time",
         type: "text",
-        admin: {
-          description: "Leave empty to use read time from selected blog post.",
-        },
       },
       {
         name: "title",

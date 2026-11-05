@@ -49,7 +49,7 @@ export function revalidateForCollection(collectionSlug: string, docSlug?: string
 
       case "services":
       case "service-pages":
-        revalidatePath("/");
+        revalidatePath("/", "layout");
         revalidatePath("/services");
         if (cleanSlug) {
           revalidatePath(`/services/${cleanSlug}`);
@@ -57,18 +57,23 @@ export function revalidateForCollection(collectionSlug: string, docSlug?: string
         break;
 
       case "industry-pages":
+        revalidatePath("/", "layout");
+        revalidatePath("/industries");
         if (cleanSlug) {
           revalidatePath(`/industries/${cleanSlug}`);
         }
         break;
 
       case "solution-pages":
+        revalidatePath("/", "layout");
+        revalidatePath("/solutions");
         if (cleanSlug) {
           revalidatePath(`/solutions/${cleanSlug}`);
         }
         break;
 
       case "work-service-pages":
+        revalidatePath("/", "layout");
         revalidatePath("/work");
         if (cleanSlug) {
           revalidatePath(`/work/${cleanSlug}`);
@@ -131,7 +136,7 @@ export function revalidateForGlobal(globalSlug: string) {
         revalidatePath("/blogs");
         break;
       case "site-footer":
-        revalidatePath("/");
+        revalidatePath("/", "layout");
         break;
       default:
         revalidatePath("/");

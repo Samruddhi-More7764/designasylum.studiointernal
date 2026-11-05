@@ -36,6 +36,122 @@ const imageUpload: Field = {
   filterOptions: { mimeType: { contains: "image/" } },
 };
 
+const autofillIndustryPageFields: CollectionBeforeValidateHook = async ({ data, req }) => {
+  if (!data) return data;
+
+  // 1. Logos autofill from clientLogo
+  if (Array.isArray(data.logos)) {
+    for (const row of data.logos) {
+      if (!row || !row.clientLogo) continue;
+      const logoId = typeof row.clientLogo === "object" ? row.clientLogo.id : row.clientLogo;
+      if (!logoId) continue;
+      if (!row.image || !row.name) {
+        try {
+          const logoDoc = await req.payload.findByID({
+            collection: "client-logos",
+            id: logoId,
+            depth: 0,
+          });
+          if (logoDoc) {
+            if (!row.image && logoDoc.image) row.image = logoDoc.image;
+            if (!row.name && logoDoc.name) row.name = logoDoc.name;
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // 2. Clients tab projects autofill from client
+  if (Array.isArray(data.projects)) {
+    for (let i = 0; i < data.projects.length; i++) {
+      const row = data.projects[i];
+      if (!row) continue;
+      if (row.order == null) row.order = i;
+      if (!row.client) continue;
+      const clientId = typeof row.client === "object" ? row.client.id : row.client;
+      if (!clientId) continue;
+      if (!row.heading || !row.name || !row.image || !row.description || !row.href) {
+        try {
+          const clientDoc = await req.payload.findByID({
+            collection: "clients",
+            id: clientId,
+            depth: 0,
+          });
+          if (clientDoc) {
+            if (!row.heading && clientDoc.name) row.heading = clientDoc.name;
+            if (!row.name && clientDoc.name) row.name = clientDoc.name;
+            const heroImg = clientDoc.hero?.image;
+            if (!row.image && heroImg) row.image = heroImg;
+            if (!row.description) {
+              row.description =
+                clientDoc.adminTitle || clientDoc.hero?.subheading || clientDoc.hero?.heading || "";
+            }
+            if (clientDoc.slug) {
+              const cleanSlug = clientDoc.slug.replace(/^\/+|\/+$/g, "").trim();
+              row.href = `/clients/${cleanSlug}`;
+            }
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // 3. Experts autofill from member
+  if (Array.isArray(data.experts)) {
+    for (const row of data.experts) {
+      if (!row || !row.member) continue;
+      const memberId = typeof row.member === "object" ? row.member.id : row.member;
+      if (!memberId) continue;
+      if (!row.name || !row.role || !row.image) {
+        try {
+          const memberDoc = await req.payload.findByID({
+            collection: "team-members",
+            id: memberId,
+            depth: 0,
+          });
+          if (memberDoc) {
+            if (!row.name && memberDoc.name) row.name = memberDoc.name;
+            if (!row.role && memberDoc.role) row.role = memberDoc.role;
+            if (!row.image) {
+              const defaultPhoto = memberDoc.photoOne || memberDoc.photoTwo;
+              if (defaultPhoto) row.image = defaultPhoto;
+            }
+          }
+        } catch {}
+      }
+    }
+  }
+
+  // 4. Related blogs autofill from post
+  if (Array.isArray(data.relatedBlogs)) {
+    for (const row of data.relatedBlogs) {
+      if (!row || !row.post) continue;
+      const postId = typeof row.post === "object" ? row.post.id : row.post;
+      if (!postId) continue;
+      if (!row.image || !row.title || !row.date || !row.readTime) {
+        try {
+          const postDoc = await req.payload.findByID({
+            collection: "blog-posts",
+            id: postId,
+            depth: 0,
+          });
+          if (postDoc) {
+            if (!row.image) {
+              const defaultImg = postDoc.heroImage || postDoc.image;
+              if (defaultImg) row.image = defaultImg;
+            }
+            if (!row.title && postDoc.title) row.title = postDoc.title;
+            if (!row.date && postDoc.date) row.date = postDoc.date;
+            if (!row.readTime && postDoc.readTime) row.readTime = postDoc.readTime;
+          }
+        } catch {}
+      }
+    }
+  }
+
+  return data;
+};
+
 export const IndustryPages: CollectionConfig = {
   slug: "industry-pages",
   labels: {
@@ -49,7 +165,7 @@ export const IndustryPages: CollectionConfig = {
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug],
+    beforeValidate: [ensureSlug, autofillIndustryPageFields],
   },
   fields: [
     {
@@ -157,10 +273,13 @@ export const IndustryPages: CollectionConfig = {
                   relationTo: "client-logos",
                   admin: {
                     description:
-                      "Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.",
+                      "Pick a logo from Collections > Client Logos. Name and image will auto-fill from it, with the option to edit/override.",
                   },
                 },
-                imageUpload,
+                {
+                  ...imageUpload,
+                  admin: { description: "Leave empty to use image from selected client logo." },
+                },
                 {
                   name: "name",
                   type: "text",
@@ -219,24 +338,15 @@ export const IndustryPages: CollectionConfig = {
                   type: "relationship",
                   relationTo: "clients",
                   admin: {
-                    description: "Select from clients list to automatically pull name, image, and link.",
+                    description:
+                      "Select from existing clients list to automatically pull heading, image, description, and link.",
                   },
                 },
-                imageUpload,
                 {
-                  name: "name",
-                  type: "text",
-                  admin: { description: "Leave empty to use client name." },
-                },
-                {
-                  name: "description",
-                  type: "textarea",
-                  admin: { description: "Project summary or case study highlights." },
-                },
-                {
-                  name: "tab",
-                  label: "Client tab",
+                  name: "category",
+                  label: "Category",
                   type: "select",
+                  defaultValue: "industry",
                   options: [
                     { label: "Solution", value: "solution" },
                     { label: "Service", value: "service" },
@@ -244,8 +354,38 @@ export const IndustryPages: CollectionConfig = {
                     { label: "Branding Projects", value: "branding-projects" },
                   ],
                   admin: {
-                    description: "Which tab this project appears under. Leave empty to show on all tabs.",
+                    description: "Which category tab this project appears under. Defaults to Industry.",
                   },
+                },
+                {
+                  name: "order",
+                  label: "Order",
+                  type: "number",
+                  defaultValue: 0,
+                  admin: {
+                    description: "Display order. Lower numbers appear first.",
+                  },
+                },
+                {
+                  name: "heading",
+                  label: "Heading",
+                  type: "text",
+                  admin: { description: "Project heading. Leave empty to use client name." },
+                },
+                {
+                  name: "description",
+                  label: "Description",
+                  type: "textarea",
+                  admin: { description: "Project summary or highlights. Leave empty to use client description." },
+                },
+                {
+                  ...imageUpload,
+                  admin: { description: "Project image. Leave empty to use client hero image." },
+                },
+                {
+                  name: "href",
+                  type: "text",
+                  admin: { hidden: true },
                 },
               ],
             },
@@ -296,10 +436,14 @@ export const IndustryPages: CollectionConfig = {
                   type: "relationship",
                   relationTo: "team-members",
                   admin: {
-                    description: "Select from team members (leadership or team member) to automatically link profile.",
+                    description:
+                      "Select from team members to automatically pull name, role, photo, and link, with the option to edit.",
                   },
                 },
-                imageUpload,
+                {
+                  ...imageUpload,
+                  admin: { description: "Leave empty to use photo from selected team member." },
+                },
                 {
                   name: "name",
                   type: "text",
@@ -343,19 +487,24 @@ export const IndustryPages: CollectionConfig = {
                     description: "Select from all blogs list to automatically pull title, image, date, and link.",
                   },
                 },
-                imageUpload,
-                { name: "date", type: "text" },
-                { name: "readTime", label: "Read time", type: "text" },
+                {
+                  ...imageUpload,
+                  admin: { description: "Leave empty to use hero image from selected blog post." },
+                },
+                {
+                  name: "date",
+                  type: "text",
+                  admin: { description: "Leave empty to use date from selected blog post." },
+                },
+                {
+                  name: "readTime",
+                  label: "Read time",
+                  type: "text",
+                },
                 {
                   name: "title",
                   type: "text",
                   admin: { description: "Leave empty to use blog post title." },
-                },
-                {
-                  name: "href",
-                  label: "Custom URL",
-                  type: "text",
-                  admin: { description: "Leave empty to use blog post link." },
                 },
               ],
             },

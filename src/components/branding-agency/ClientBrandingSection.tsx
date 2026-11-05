@@ -21,7 +21,7 @@ export function ClientBrandingSection({
   headingAfter?: string;
   tabs?: readonly { id: string; label: string }[];
   projects?: ReadonlyArray<
-    (typeof brandingProjects)[number] & { tab?: string }
+    (typeof brandingProjects)[number] & { tab?: string; ctaText?: string }
   >;
   /** Drop the desktop top padding when the section sits under the hero. */
   flushTop?: boolean;

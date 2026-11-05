@@ -52,28 +52,36 @@ export default async function BlogPostPage({ params }: PageProps) {
           lead={page.lead}
           sections={page.sections}
         />
-        <FAQ items={page.faqs} heading="FAQs" showCta={false} />
-        <ArticleAuthor
-          image={page.authorImage}
-          name={page.authorName}
-          role={page.authorRole}
-          bio={page.authorBio}
-          href={page.authorHref}
-        />
-        <ArticleTopics
-          before={page.topicsBefore}
-          accent={page.topicsAccent}
-          after={page.topicsAfter}
-          topics={page.topics}
-        />
-        <RelatedBlogs
-          heading={
-            <>
-              <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
-            </>
-          }
-          posts={page.relatedBlogs}
-        />
+        {page.faqs && page.faqs.length > 0 ? (
+          <FAQ items={page.faqs} heading="FAQs" showCta={false} />
+        ) : null}
+        {page.authorName ? (
+          <ArticleAuthor
+            image={page.authorImage}
+            name={page.authorName}
+            role={page.authorRole}
+            bio={page.authorBio}
+            href={page.authorHref}
+          />
+        ) : null}
+        {page.topics && page.topics.length > 0 ? (
+          <ArticleTopics
+            before={page.topicsBefore}
+            accent={page.topicsAccent}
+            after={page.topicsAfter}
+            topics={page.topics}
+          />
+        ) : null}
+        {page.relatedBlogs && page.relatedBlogs.length > 0 ? (
+          <RelatedBlogs
+            heading={
+              <>
+                <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
+              </>
+            }
+            posts={page.relatedBlogs}
+          />
+        ) : null}
       </main>
       <Footer columns={footer.columns} aiLinks={footer.aiLinks} />
     </>

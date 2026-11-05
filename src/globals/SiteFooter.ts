@@ -1,4 +1,4 @@
-import type { ArrayField, GlobalConfig } from "payload";
+import type { ArrayField, GlobalConfig, Payload } from "payload";
 
 /** Standard editable link under a footer heading. */
 function linkList(name: string, label: string): ArrayField {
@@ -12,6 +12,14 @@ function linkList(name: string, label: string): ArrayField {
     },
     fields: [
       { name: "label", type: "text", required: true },
+      {
+        name: "href",
+        label: "Custom URL (optional)",
+        type: "text",
+        admin: {
+          description: "Optional destination URL (e.g. /why-design-asylum).",
+        },
+      },
     ],
   };
 }
@@ -45,6 +53,15 @@ function industryLinkList(): ArrayField {
         admin: {
           description:
             "Link name. If an Industry Page is selected above, leave empty to automatically use the page's name.",
+        },
+      },
+      {
+        name: "href",
+        label: "Custom URL (optional)",
+        type: "text",
+        admin: {
+          description:
+            "Auto-filled with /industries/[slug] when an Industry Page is selected. Can also be customized.",
         },
       },
     ],
@@ -82,6 +99,15 @@ function serviceLinkList(): ArrayField {
             "Link name. If a Service Page is selected above, leave empty to automatically use the page's name.",
         },
       },
+      {
+        name: "href",
+        label: "Custom URL (optional)",
+        type: "text",
+        admin: {
+          description:
+            "Auto-filled with /services/[slug] when a Service Page is selected. Can also be customized.",
+        },
+      },
     ],
   };
 }
@@ -115,6 +141,15 @@ function solutionLinkList(): ArrayField {
         admin: {
           description:
             "Link name. If a Solution Page is selected above, leave empty to automatically use the page's name.",
+        },
+      },
+      {
+        name: "href",
+        label: "Custom URL (optional)",
+        type: "text",
+        admin: {
+          description:
+            "Auto-filled with /solutions/[slug] when a Solution Page is selected. Can also be customized.",
         },
       },
     ],
@@ -152,8 +187,68 @@ function workServiceLinkList(): ArrayField {
             "Link name. If a Work Service Page is selected above, leave empty to automatically use the page's name.",
         },
       },
+      {
+        name: "href",
+        label: "Custom URL (optional)",
+        type: "text",
+        admin: {
+          description:
+            "Auto-filled with /work/[slug] when a Work Service Page is selected. Can also be customized.",
+        },
+      },
     ],
   };
+}
+
+/** Helper to auto-populate label and href from selected page relationship. */
+async function autofillRow(
+  row: Record<string, unknown>,
+  relField: string,
+  collection: "industry-pages" | "service-pages" | "solution-pages" | "work-service-pages",
+  prefix: string,
+  payload: Payload,
+) {
+  const rel = row[relField];
+  if (!rel) return;
+
+  let docId: string | number | null = null;
+  let title: string | undefined;
+  let slug: string | undefined;
+
+  if (typeof rel === "object" && rel !== null) {
+    if ("slug" in rel && typeof (rel as { slug?: unknown }).slug === "string") {
+      slug = (rel as { slug: string }).slug;
+      title = (rel as { title?: string }).title;
+    } else if ("id" in rel) {
+      docId = (rel as { id: string | number }).id;
+    }
+  } else if (typeof rel === "string" || typeof rel === "number") {
+    docId = rel;
+  }
+
+  if ((!slug || !title) && docId !== null) {
+    try {
+      const found = await payload.findByID({
+        collection,
+        id: docId,
+        depth: 0,
+      });
+      if (found) {
+        if (!slug && typeof found.slug === "string") slug = found.slug;
+        if (!title && typeof found.title === "string") title = found.title;
+      }
+    } catch {
+      // ignore lookup error
+    }
+  }
+
+  const cleanSlug = slug ? slug.replace(/^\/+|\/+$/g, "").trim() : "";
+  if (cleanSlug && (!row.href || typeof row.href !== "string" || !row.href.trim())) {
+    row.href = `${prefix}/${cleanSlug}`;
+  }
+  if (title && (!row.label || typeof row.label !== "string" || !row.label.trim())) {
+    row.label = title.trim();
+  }
 }
 
 /**
@@ -165,6 +260,47 @@ export const SiteFooter: GlobalConfig = {
   slug: "site-footer",
   label: "Footer",
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req }) => {
+        if (!data || !req?.payload) return data;
+
+        if (Array.isArray(data.industries)) {
+          for (const row of data.industries) {
+            if (row && typeof row === "object") {
+              await autofillRow(row, "industryPage", "industry-pages", "/industries", req.payload);
+            }
+          }
+        }
+
+        if (Array.isArray(data.services)) {
+          for (const row of data.services) {
+            if (row && typeof row === "object") {
+              await autofillRow(row, "servicePage", "service-pages", "/services", req.payload);
+            }
+          }
+        }
+
+        if (Array.isArray(data.solutions)) {
+          for (const row of data.solutions) {
+            if (row && typeof row === "object") {
+              await autofillRow(row, "solutionPage", "solution-pages", "/solutions", req.payload);
+            }
+          }
+        }
+
+        if (Array.isArray(data.work)) {
+          for (const row of data.work) {
+            if (row && typeof row === "object") {
+              await autofillRow(row, "workServicePage", "work-service-pages", "/work", req.payload);
+            }
+          }
+        }
+
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       name: "columns",

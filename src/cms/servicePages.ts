@@ -48,6 +48,7 @@ type LinkedBlogPost = {
   date?: string | null;
   readTime?: string | null;
   image?: unknown;
+  heroImage?: unknown;
   slug?: string | null;
   href?: string | null;
 };
@@ -231,7 +232,7 @@ function parseServiceDoc(
       const date = post?.date?.trim() || linked?.date?.trim() || "";
       const readTime = post?.readTime?.trim() || linked?.readTime?.trim() || "";
       const image = mediaSrc(
-        post?.image || linked?.image,
+        post?.image || linked?.heroImage || linked?.image,
         fallback.relatedBlogs[index]?.image || defaultHeroImage,
       );
       const cleanPostSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();

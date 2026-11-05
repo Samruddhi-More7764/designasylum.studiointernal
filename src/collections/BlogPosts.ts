@@ -23,6 +23,33 @@ const ensureSlug: CollectionBeforeValidateHook = ({ data }) => {
   return data;
 };
 
+const autofillRelatedHeroImage: CollectionBeforeValidateHook = async ({ data, req }) => {
+  if (!data?.relatedBlogs || !Array.isArray(data.relatedBlogs)) return data;
+  for (const row of data.relatedBlogs) {
+    if (!row || !row.post) continue;
+    const postId = typeof row.post === "object" ? row.post.id : row.post;
+    if (!postId) continue;
+    if (!row.image) {
+      try {
+        const linked = await req.payload.findByID({
+          collection: "blog-posts",
+          id: postId,
+          depth: 0,
+        });
+        if (linked) {
+          const defaultImage = linked.heroImage || linked.image;
+          if (defaultImage) {
+            row.image = defaultImage;
+          }
+        }
+      } catch {
+        // ignore lookup errors
+      }
+    }
+  }
+  return data;
+};
+
 export const BlogPosts: CollectionConfig = {
   slug: "blog-posts",
   labels: {
@@ -36,7 +63,7 @@ export const BlogPosts: CollectionConfig = {
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug],
+    beforeValidate: [ensureSlug, autofillRelatedHeroImage],
   },
   fields: [
     {

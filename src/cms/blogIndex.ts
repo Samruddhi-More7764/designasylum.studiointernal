@@ -146,6 +146,55 @@ export const getBlogIndex = cache(async (): Promise<BlogIndexContent> => {
       .map((row) => row?.label?.trim() || "")
       .filter(Boolean);
 
+    // Fetch posts directly from the blog-posts collection so newly created CMS blogs appear immediately
+    const collectionPosts = await payload.find({
+      collection: "blog-posts",
+      limit: 100,
+      sort: "-createdAt",
+      depth: 1,
+    });
+
+    let realCollectionPosts: BlogPost[] = [];
+    if (collectionPosts.docs.length > 0) {
+      realCollectionPosts = collectionPosts.docs
+        .map((p, index: number) => {
+          const title = typeof p?.title === "string" ? p.title.trim() : "";
+          if (!title) return null;
+          const cleanSlug = typeof p?.slug === "string" ? p.slug.replace(/^\/+|\/+$/g, "").trim() : "";
+          const href = cleanSlug ? `/blogs/${cleanSlug}` : `/blogs/post-${p.id}`;
+          const rawCat = p?.category;
+          const category = categories.has(rawCat as Exclude<BlogCategory, "All">)
+            ? (rawCat as Exclude<BlogCategory, "All">)
+            : "Brand";
+          const rawIcon = p?.badgeIcon;
+          const badgeIcon = badgeIcons.has(rawIcon as BlogBadgeIcon)
+            ? (rawIcon as BlogBadgeIcon)
+            : undefined;
+          const formattedDate =
+            typeof p?.date === "string" && p.date.trim()
+              ? p.date.trim()
+              : p?.createdAt
+                ? new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                : "";
+
+          const item: BlogPost = {
+            id: String(p.id || `blog-${index}`),
+            title,
+            date: formattedDate,
+            category,
+            image: storedImage(p?.image || p?.heroImage, cardImage),
+            href,
+          };
+          const badge = typeof p?.badge === "string" ? p.badge.trim() : "";
+          if (badge && badgeIcon) {
+            item.badge = badge;
+            item.badgeIcon = badgeIcon;
+          }
+          return item;
+        })
+        .filter((post): post is BlogPost => Boolean(post));
+    }
+
     return {
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
       titleBefore: text(doc.titleBefore, fallback.titleBefore),
@@ -161,7 +210,7 @@ export const getBlogIndex = cache(async (): Promise<BlogIndexContent> => {
       listingAccent: text(doc.listingAccent, fallback.listingAccent),
       listingAfter: text(doc.listingAfter, fallback.listingAfter),
       categories: labels.length ? labels : fallback.categories,
-      posts: postsFrom(doc.posts, fallback.posts),
+      posts: realCollectionPosts.length ? realCollectionPosts : postsFrom(doc.posts, fallback.posts),
     };
   } catch (error) {
     console.warn("[cms] blog index fallback", error);

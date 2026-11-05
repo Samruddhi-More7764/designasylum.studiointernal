@@ -223,13 +223,17 @@ export function BlogArticle({
             />
             <span className="block">{titleLine}</span>
           </h1>
-          <p className="max-w-[842px] font-satoshi text-[12px] leading-[1.2] tracking-[-0.5px] text-black uppercase lg:text-[14px]">
-            {intro}
-          </p>
+          {intro ? (
+            <p className="max-w-[842px] font-satoshi text-[12px] leading-[1.2] tracking-[-0.5px] text-black uppercase lg:text-[14px]">
+              {intro}
+            </p>
+          ) : null}
           <p className="flex items-center gap-1 font-satoshi text-[14px] leading-[1.2] tracking-[-0.5px] text-black capitalize">
-            <Image src={bylineAvatar} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
+            {bylineAvatar ? (
+              <Image src={bylineAvatar} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
+            ) : null}
             {bylineName}
-            <span className="text-black/50">• {bylineDate}</span>
+            {bylineDate ? <span className="text-black/50">• {bylineDate}</span> : null}
           </p>
         </div>
         <div className="relative mx-auto mt-8 aspect-[358/201] w-full max-w-[1150px] overflow-hidden rounded-[8.6px] bg-black sm:aspect-auto sm:h-[420px] lg:mt-8 lg:h-[647px]">
@@ -245,28 +249,34 @@ export function BlogArticle({
         </div>
       </header>
 
-      <section className="bg-white px-5 pt-16 sm:px-8 lg:px-[60px] lg:pt-20">
-        <div className="mx-auto flex w-full max-w-[1350px] flex-col gap-10 lg:flex-row lg:items-start lg:gap-[72px]">
-          <StickyTableOfContents
-            items={sections.map((section) => ({ id: section.id, label: section.label }))}
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-16 lg:max-w-[932px] lg:gap-20">
-            <p className="font-figtree text-[22px] leading-[1.2] font-normal tracking-[-1px] text-[#05201F] sm:text-[28px] lg:text-[32px] lg:tracking-[-2.09px]">
-              {lead}
-            </p>
-            {sections.map((section) => (
-              <article key={section.id} id={section.id} className="flex scroll-mt-[100px] flex-col gap-6">
-                <h2 className={headingClass}>
-                  <SplitHeading before={section.before} accent={section.accent ?? ""} after={section.after} />
-                </h2>
-                {section.blocks.map((block, index) => (
-                  <BlockView key={`${section.id}-${index}`} block={block} />
-                ))}
-              </article>
-            ))}
+      {sections.length > 0 || lead ? (
+        <section className="bg-white px-5 pt-16 sm:px-8 lg:px-[60px] lg:pt-20">
+          <div className="mx-auto flex w-full max-w-[1350px] flex-col gap-10 lg:flex-row lg:items-start lg:gap-[72px]">
+            {sections.length > 0 ? (
+              <StickyTableOfContents
+                items={sections.map((section) => ({ id: section.id, label: section.label }))}
+              />
+            ) : null}
+            <div className="flex min-w-0 flex-1 flex-col gap-16 lg:max-w-[932px] lg:gap-20">
+              {lead ? (
+                <p className="font-figtree text-[22px] leading-[1.2] font-normal tracking-[-1px] text-[#05201F] sm:text-[28px] lg:text-[32px] lg:tracking-[-2.09px]">
+                  {lead}
+                </p>
+              ) : null}
+              {sections.map((section) => (
+                <article key={section.id} id={section.id} className="flex scroll-mt-[100px] flex-col gap-6">
+                  <h2 className={headingClass}>
+                    <SplitHeading before={section.before} accent={section.accent ?? ""} after={section.after} />
+                  </h2>
+                  {section.blocks.map((block, index) => (
+                    <BlockView key={`${section.id}-${index}`} block={block} />
+                  ))}
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
     </>
   );
 }
@@ -324,13 +334,15 @@ export function ArticleAuthor({
   return (
     <section className="bg-white px-5 pb-8 sm:px-8 lg:px-[60px]">
       <div className="mx-auto flex w-full max-w-[1081px] flex-col items-start gap-6 rounded-2xl bg-[#D5D5D533] p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
-        <Image
-          src={image}
-          alt=""
-          width={250}
-          height={250}
-          className="size-[140px] shrink-0 rounded-full object-cover sm:size-[180px] lg:size-[250px]"
-        />
+        {image ? (
+          <Image
+            src={image}
+            alt=""
+            width={250}
+            height={250}
+            className="size-[140px] shrink-0 rounded-full object-cover sm:size-[180px] lg:size-[250px]"
+          />
+        ) : null}
         <div className="flex flex-col gap-4 lg:h-[226px] lg:justify-between">
           <div>
             <p className="font-figtree text-[28px] leading-[1.2] font-normal tracking-[-0.5px] text-black capitalize lg:text-[44px]">

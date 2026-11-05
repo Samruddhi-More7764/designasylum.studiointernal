@@ -32,6 +32,7 @@ type LinkedClient = {
   name?: string | null;
   slug?: string | null;
   heroImage?: unknown;
+  hero?: { image?: unknown; heading?: string | null; subheading?: string | null } | null;
   adminTitle?: string | null;
   projectType?: string | null;
 };
@@ -50,6 +51,7 @@ type LinkedBlogPost = {
   date?: string | null;
   readTime?: string | null;
   image?: unknown;
+  heroImage?: unknown;
   slug?: string | null;
   href?: string | null;
 };
@@ -79,10 +81,14 @@ type RawIndustryDoc = {
   projects?: Array<{
     client?: LinkedClient | string | null;
     image?: unknown;
+    heading?: string | null;
     name?: string | null;
     description?: string | null;
     href?: string | null;
+    category?: string | null;
     tab?: string | null;
+    order?: number | null;
+    ctaText?: string | null;
   } | null> | null;
   faqs?: Array<{ question?: string | null; answer?: string | null } | null> | null;
   expertsBefore?: string | null;
@@ -151,10 +157,11 @@ function sectionsFrom(rows: CmsSection[] | null | undefined): ArticleSection[] |
   });
 }
 
-function parseIndustryDoc(
+async function parseIndustryDoc(
   doc: RawIndustryDoc,
   fallback: ManufacturingContent,
-): ManufacturingContent {
+  payload?: NonNullable<Awaited<ReturnType<typeof getPayloadClient>>>,
+): Promise<ManufacturingContent> {
   const sections = sectionsFrom(doc.sections);
   const preface = linesOf(doc.preface);
 
@@ -165,35 +172,66 @@ function parseIndustryDoc(
     }))
     .filter((tab) => tab.id && tab.label);
 
-  const projects = (doc.projects || [])
-    .map((project, index) => {
-      const linked =
-        project?.client && typeof project.client === "object" ? project.client : null;
-      const name = project?.name?.trim() || linked?.name?.trim() || "";
-      if (!name) return null;
-      const image = mediaSrc(
-        project?.image || linked?.heroImage,
-        fallback.projects[index]?.image || defaultHeroImage,
-      );
-      const cleanClientSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const defaultHref = cleanClientSlug ? `/clients/${cleanClientSlug}` : "";
-      const href = project?.href?.trim() || defaultHref || fallback.projects[index]?.href || "#";
-      const description =
-        project?.description?.trim() ||
-        linked?.adminTitle?.trim() ||
-        fallback.projects[index]?.description ||
-        "";
+  const projects = (
+    await Promise.all(
+      (doc.projects || []).map(async (project, index) => {
+        let linked =
+          project?.client && typeof project.client === "object" ? project.client : null;
+        let cleanClientSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
 
-      return {
-        image,
-        name,
-        description,
-        href,
-        key: `project-${index}`,
-        tab: project?.tab?.trim() || undefined,
-      };
-    })
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+        if (!cleanClientSlug && project?.client && payload) {
+          const clientId =
+            typeof project.client === "object"
+              ? (project.client as { id?: string | number }).id
+              : project.client;
+          if (clientId) {
+            try {
+              const clientDoc = await payload.findByID({
+                collection: "clients",
+                id: clientId,
+                depth: 0,
+              });
+              if (clientDoc) {
+                cleanClientSlug = clientDoc.slug?.replace(/^\/+|\/+$/g, "").trim();
+                if (!linked) {
+                  linked = clientDoc as unknown as typeof linked;
+                }
+              }
+            } catch {}
+          }
+        }
+
+        const name =
+          project?.heading?.trim() || project?.name?.trim() || linked?.name?.trim() || "";
+        if (!name) return null;
+        const image = mediaSrc(
+          project?.image || linked?.hero?.image || linked?.heroImage,
+          fallback.projects[index]?.image || defaultHeroImage,
+        );
+        const defaultHref = cleanClientSlug ? `/clients/${cleanClientSlug}` : "";
+        const href = project?.href?.trim() || defaultHref || fallback.projects[index]?.href || "#";
+        const description =
+          project?.description?.trim() ||
+          linked?.adminTitle?.trim() ||
+          fallback.projects[index]?.description ||
+          "";
+        const order = typeof project?.order === "number" ? project.order : index;
+
+        return {
+          image,
+          name,
+          description,
+          href,
+          ctaText: "View website",
+          key: `project-${index}`,
+          tab: project?.category?.trim() || project?.tab?.trim() || undefined,
+          order,
+        };
+      }),
+    )
+  )
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .sort((a, b) => a.order - b.order);
 
   const faqs = (doc.faqs || [])
     .map((item) => ({
@@ -235,12 +273,11 @@ function parseIndustryDoc(
       const date = post?.date?.trim() || linked?.date?.trim() || "";
       const readTime = post?.readTime?.trim() || linked?.readTime?.trim() || "";
       const image = mediaSrc(
-        post?.image || linked?.image,
+        post?.image || linked?.heroImage || linked?.image,
         fallback.relatedBlogs[index]?.image || defaultHeroImage,
       );
       const cleanPostSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const defaultHref = cleanPostSlug ? `/blogs/${cleanPostSlug}` : "#";
-      const href = post?.href?.trim() || linked?.href?.trim() || defaultHref;
+      const href = cleanPostSlug ? `/blogs/${cleanPostSlug}` : "#";
 
       return {
         image,
@@ -351,7 +388,7 @@ export const getIndustryPageBySlug = cache(
         })) as unknown as { docs: RawIndustryDoc[] };
 
         if (res.docs && res.docs.length > 0 && res.docs[0]) {
-          return parseIndustryDoc(res.docs[0], blueprintFallback);
+          return await parseIndustryDoc(res.docs[0], blueprintFallback, payload);
         }
       } catch (error) {
         console.warn("[cms] industry-pages collection query error:", error);

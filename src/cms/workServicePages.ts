@@ -48,6 +48,7 @@ type LinkedBlogPost = {
   date?: string | null;
   readTime?: string | null;
   image?: unknown;
+  heroImage?: unknown;
   slug?: string | null;
   href?: string | null;
 };
@@ -229,7 +230,7 @@ function parseWorkServiceDoc(
       const href = row?.href?.trim() || fallbackHref;
       const date = row?.date?.trim() || linked?.date?.trim() || "Recent";
       const readTime = row?.readTime?.trim() || linked?.readTime?.trim() || "5 min read";
-      const image = mediaSrc(row?.image || linked?.image, defaultHeroImage);
+      const image = mediaSrc(row?.image || linked?.heroImage || linked?.image, defaultHeroImage);
 
       return {
         key: `work-service-blog-${index}`,

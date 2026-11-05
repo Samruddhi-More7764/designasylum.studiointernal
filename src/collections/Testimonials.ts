@@ -5,7 +5,10 @@ export const Testimonials: CollectionConfig = {
   slug: "testimonials",
   defaultSort: "order",
   admin: { useAsTitle: "alt", defaultColumns: ["alt", "order"] },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    create: () => false,
+  },
   hooks: {
     beforeValidate: [
       ({ data }) => {

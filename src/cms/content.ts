@@ -858,13 +858,84 @@ function resolvePageSlug(page: LinkedPage): { title: string; slug: string } | nu
   return null;
 }
 
-function footerList(rows: FooterListRow[] | null | undefined): FooterLink[] | null {
+function extractRelationId(val: unknown): string | number | null {
+  if (typeof val === "number" || typeof val === "string") return val;
+  if (val && typeof val === "object" && "id" in val) {
+    const id = (val as { id?: unknown }).id;
+    if (typeof id === "number" || typeof id === "string") return id;
+  }
+  return null;
+}
+
+async function resolveFooterLinks(
+  rows: FooterListRow[] | null | undefined,
+  payload: NonNullable<Awaited<ReturnType<typeof getPayloadClient>>>,
+): Promise<FooterLink[] | null> {
   if (!rows?.length) return null;
-  const links = rows.flatMap((row) => {
-    const linkedIndustry = resolvePageSlug(row?.industryPage);
-    const linkedService = resolvePageSlug(row?.servicePage);
-    const linkedSolution = resolvePageSlug(row?.solutionPage);
-    const linkedWork = resolvePageSlug(row?.workServicePage);
+  const links: FooterLink[] = [];
+
+  for (const row of rows) {
+    let linkedIndustry = resolvePageSlug(row?.industryPage);
+    let linkedService = resolvePageSlug(row?.servicePage);
+    let linkedSolution = resolvePageSlug(row?.solutionPage);
+    let linkedWork = resolvePageSlug(row?.workServicePage);
+
+    // If relationships are unpopulated IDs or objects without slug, fetch them directly
+    if (!linkedIndustry && row?.industryPage) {
+      const id = extractRelationId(row.industryPage);
+      if (id !== null) {
+        try {
+          const doc = await payload.findByID({
+            collection: "industry-pages",
+            id,
+            depth: 0,
+          });
+          if (doc) linkedIndustry = { title: doc.title || "", slug: doc.slug };
+        } catch {}
+      }
+    }
+
+    if (!linkedService && row?.servicePage) {
+      const id = extractRelationId(row.servicePage);
+      if (id !== null) {
+        try {
+          const doc = await payload.findByID({
+            collection: "service-pages",
+            id,
+            depth: 0,
+          });
+          if (doc) linkedService = { title: doc.title || "", slug: doc.slug };
+        } catch {}
+      }
+    }
+
+    if (!linkedSolution && row?.solutionPage) {
+      const id = extractRelationId(row.solutionPage);
+      if (id !== null) {
+        try {
+          const doc = await payload.findByID({
+            collection: "solution-pages",
+            id,
+            depth: 0,
+          });
+          if (doc) linkedSolution = { title: doc.title || "", slug: doc.slug };
+        } catch {}
+      }
+    }
+
+    if (!linkedWork && row?.workServicePage) {
+      const id = extractRelationId(row.workServicePage);
+      if (id !== null) {
+        try {
+          const doc = await payload.findByID({
+            collection: "work-service-pages",
+            id,
+            depth: 0,
+          });
+          if (doc) linkedWork = { title: doc.title || "", slug: doc.slug };
+        } catch {}
+      }
+    }
 
     const defaultLabel =
       linkedIndustry?.title ||
@@ -883,11 +954,12 @@ function footerList(rows: FooterListRow[] | null | undefined): FooterLink[] | nu
             : "";
 
     const label = row?.label?.trim() || defaultLabel;
-    if (!label) return [];
+    if (!label) continue;
 
     const href = row?.href?.trim() || defaultHref || footerLinkHref(label);
-    return [{ label, href }];
-  });
+    links.push({ label, href });
+  }
+
   return links.length ? links : null;
 }
 
@@ -902,15 +974,18 @@ export const getFooter = cache(async (): Promise<FooterContent> => {
   try {
     const global = (await payload.findGlobal({
       slug: "site-footer",
-      depth: 1,
+      depth: 2,
     })) as Partial<Record<(typeof FOOTER_LISTS)[keyof typeof FOOTER_LISTS], FooterListRow[] | null>>;
-    const columns = fallbackFooterColumns.map((column) => {
-      const key = FOOTER_LISTS[column.title as keyof typeof FOOTER_LISTS];
-      if (!key) return column;
-      const links = footerList(global[key]);
-      const resolvedLinks = links ?? column.links;
-      return { ...column, links: resolvedLinks };
-    });
+
+    const columns = await Promise.all(
+      fallbackFooterColumns.map(async (column) => {
+        const key = FOOTER_LISTS[column.title as keyof typeof FOOTER_LISTS];
+        if (!key) return column;
+        const links = await resolveFooterLinks(global[key], payload);
+        const resolvedLinks = links ?? column.links;
+        return { ...column, links: resolvedLinks };
+      }),
+    );
     return { columns, aiLinks: fallback.aiLinks };
   } catch (error) {
     console.warn("[cms] footer fallback", error);

@@ -1,5 +1,4 @@
 import { cache } from "react";
-import { teamPersonHeroHref } from "@/data/teamPage";
 import { getPayloadClient } from "@/cms/getPayload";
 import { storedImage } from "@/cms/storedImage";
 import { relatedBlogs, relatedBlogsHeading } from "@/data/brandingAgencyPage";
@@ -199,17 +198,17 @@ export function parseBlogArticleDoc(
   doc: Record<string, unknown> | null | undefined,
   baseFallback?: BlogArticleContent,
 ): BlogArticleContent {
-  const fb = baseFallback || fallback;
-  if (!doc) return fb;
+  const fb = baseFallback;
+  if (!doc) return fb || fallback;
 
   const docTitle = typeof doc.title === "string" ? doc.title.trim() : "";
   const docDate = typeof doc.date === "string" ? doc.date.trim() : "";
 
   const sections = (Array.isArray(doc.sections) ? doc.sections : [])
-    .map((section: any, index: number) => {
-      const designed = fb.sections[index];
-      const blocks = (Array.isArray(section?.blocks) ? section.blocks : [])
-        .map((block: any, blockIndex: number) => blockFrom(block, designed?.blocks[blockIndex]))
+    .map((section: Record<string, unknown> | null | undefined, index: number) => {
+      const designed = fb?.sections[index];
+      const blocks = (Array.isArray(section?.blocks) ? (section.blocks as CmsBlock[]) : [])
+        .map((block, blockIndex) => (block ? blockFrom(block, designed?.blocks[blockIndex]) : null))
         .filter((block: unknown): block is ArticleBlock => Boolean(block));
       const row: ArticleSection = {
         id: (typeof section?.anchor === "string" && section.anchor.trim()) || designed?.id || `section-${index + 1}`,
@@ -224,7 +223,7 @@ export function parseBlogArticleDoc(
     .filter((section) => section.blocks.length);
 
   const faqs = (Array.isArray(doc.faqs) ? doc.faqs : [])
-    .map((item: any) => {
+    .map((item: Record<string, unknown> | null | undefined) => {
       const question = typeof item?.question === "string" ? item.question.trim() : "";
       if (!question) return null;
       const answer = typeof item?.answer === "string" ? item.answer.trim() : undefined;
@@ -233,14 +232,16 @@ export function parseBlogArticleDoc(
     .filter((item): item is { question: string; answer?: string } => Boolean(item));
 
   const topics = (Array.isArray(doc.topics) ? doc.topics : [])
-    .map((topic: any) => (typeof topic?.label === "string" ? topic.label.trim() : ""))
+    .map((topic: Record<string, unknown> | null | undefined) =>
+      typeof topic?.label === "string" ? topic.label.trim() : "",
+    )
     .filter(Boolean);
 
   const posts = (Array.isArray(doc.relatedBlogs) ? doc.relatedBlogs : [])
-    .map((post: any, index: number) => {
+    .map((post: Record<string, unknown> | null | undefined, index: number) => {
       const linked =
         post && "post" in post && post.post && typeof post.post === "object"
-          ? (post.post as { title?: string; slug?: string; date?: string; readTime?: string; image?: unknown })
+          ? (post.post as { title?: string; slug?: string; date?: string; readTime?: string; image?: unknown; heroImage?: unknown })
           : null;
       const title = (typeof post?.title === "string" && post.title.trim()) || linked?.title?.trim() || "";
       if (!title) return null;
@@ -250,8 +251,8 @@ export function parseBlogArticleDoc(
       const defaultHref = cleanSlug ? `/blogs/${cleanSlug}` : "/";
       const href = (typeof post?.href === "string" && post.href.trim()) || defaultHref;
       const image = storedImage(
-        post?.image || linked?.image,
-        relatedBlogs[index]?.image || relatedImage,
+        post?.image || linked?.heroImage || linked?.image,
+        fb ? relatedBlogs[index]?.image || relatedImage : relatedImage,
       );
       return {
         image,
@@ -269,31 +270,31 @@ export function parseBlogArticleDoc(
   const authorHref = authorSlug ? `/team/${authorSlug}#hero` : typeof doc.authorUrl === "string" ? doc.authorUrl.trim() : "";
 
   return {
-    breadcrumbCurrent: text(doc.breadcrumbCurrent as string, docTitle || fb.breadcrumbCurrent),
-    titleBefore: text(doc.titleBefore as string, docTitle ? `${docTitle} ` : fb.titleBefore),
-    titleAccent: text(doc.titleAccent as string, docTitle ? "" : fb.titleAccent),
-    titleMiddle: text(doc.titleMiddle as string, fb.titleMiddle),
-    titleLine: text(doc.titleLine as string, fb.titleLine),
-    intro: text(doc.intro as string, fb.intro),
+    breadcrumbCurrent: text(doc.breadcrumbCurrent as string, docTitle || fb?.breadcrumbCurrent || "Blog"),
+    titleBefore: text(doc.titleBefore as string, docTitle ? `${docTitle} ` : fb?.titleBefore || ""),
+    titleAccent: text(doc.titleAccent as string, docTitle ? "" : fb?.titleAccent || ""),
+    titleMiddle: text(doc.titleMiddle as string, fb?.titleMiddle || ""),
+    titleLine: text(doc.titleLine as string, fb?.titleLine || ""),
+    intro: text(doc.intro as string, fb?.intro || ""),
     heroImage: storedImage(doc.heroImage || doc.image, "") || null,
-    bylineName: text(doc.bylineName as string, fb.bylineName),
-    bylineDate: text(doc.bylineDate as string, docDate || fb.bylineDate),
-    bylineAvatar: storedImage(doc.bylineAvatar, fb.bylineAvatar),
-    lead: text(doc.lead as string, fb.lead),
-    sections: sections.length ? sections : fb.sections,
-    faqs: faqs.length ? faqs : fb.faqs,
-    authorImage: storedImage(doc.authorImage, fb.authorImage),
-    authorName: text(doc.authorName as string, fb.authorName),
-    authorRole: text(doc.authorRole as string, fb.authorRole),
-    authorBio: text(doc.authorBio as string, fb.authorBio),
+    bylineName: text(doc.bylineName as string, fb?.bylineName || "Design Asylum"),
+    bylineDate: text(doc.bylineDate as string, docDate || fb?.bylineDate || ""),
+    bylineAvatar: storedImage(doc.bylineAvatar, fb?.bylineAvatar || ""),
+    lead: text(doc.lead as string, fb?.lead || ""),
+    sections: sections.length ? sections : (fb?.sections || []),
+    faqs: faqs.length ? faqs : (fb?.faqs || []),
+    authorImage: storedImage(doc.authorImage, fb?.authorImage || ""),
+    authorName: text(doc.authorName as string, fb?.authorName || ""),
+    authorRole: text(doc.authorRole as string, fb?.authorRole || ""),
+    authorBio: text(doc.authorBio as string, fb?.authorBio || ""),
     authorHref,
-    topicsBefore: text(doc.topicsBefore as string, fb.topicsBefore),
-    topicsAccent: text(doc.topicsAccent as string, fb.topicsAccent),
-    topicsAfter: text(doc.topicsAfter as string, fb.topicsAfter),
-    topics: topics.length ? topics : fb.topics,
-    relatedBefore: text(doc.relatedBefore as string, fb.relatedBefore),
-    relatedAccent: text(doc.relatedAccent as string, fb.relatedAccent),
-    relatedBlogs: posts.length ? posts : fb.relatedBlogs,
+    topicsBefore: text(doc.topicsBefore as string, fb?.topicsBefore || ""),
+    topicsAccent: text(doc.topicsAccent as string, fb?.topicsAccent || ""),
+    topicsAfter: text(doc.topicsAfter as string, fb?.topicsAfter || ""),
+    topics: topics.length ? topics : (fb?.topics || []),
+    relatedBefore: text(doc.relatedBefore as string, fb?.relatedBefore || relatedBlogsHeading.before),
+    relatedAccent: text(doc.relatedAccent as string, fb?.relatedAccent || relatedBlogsHeading.accent),
+    relatedBlogs: posts.length ? posts : (fb?.relatedBlogs || []),
   };
 }
 

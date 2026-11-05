@@ -255,7 +255,7 @@ export interface FeaturedProject {
   metric?: string | null;
   metricLabel?: string | null;
   image: number | Media;
-  alt: string;
+  alt?: string | null;
   /**
    * Card opens this Client: Hub → /clients/{slug}; Direct → that client’s featured case study.
    */
@@ -352,7 +352,7 @@ export interface Client {
     images?:
       | {
           image: number | Media;
-          alt: string;
+          alt?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -375,7 +375,7 @@ export interface Client {
     rest?: string | null;
     image: {
       image: number | Media;
-      alt: string;
+      alt?: string | null;
       id?: string | null;
     };
     /**
@@ -398,7 +398,7 @@ export interface Client {
     images?:
       | {
           image: number | Media;
-          alt: string;
+          alt?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -424,7 +424,7 @@ export interface Client {
      */
     image: {
       image: number | Media;
-      alt: string;
+      alt?: string | null;
       id?: string | null;
     };
     /**
@@ -451,7 +451,7 @@ export interface Client {
     images?:
       | {
           image: number | Media;
-          alt: string;
+          alt?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -490,12 +490,12 @@ export interface Client {
     subtext: string;
     before: {
       image: number | Media;
-      alt: string;
+      alt?: string | null;
       id?: string | null;
     };
     after: {
       image: number | Media;
-      alt: string;
+      alt?: string | null;
       id?: string | null;
     };
   };
@@ -508,7 +508,7 @@ export interface Client {
           role: string;
           photo: {
             image: number | Media;
-            alt: string;
+            alt?: string | null;
             id?: string | null;
           };
           id?: string | null;
@@ -681,6 +681,9 @@ export interface CaseStudy {
        * Photo, GIF, or video (MP4, WebM, MOV).
        */
       image?: (number | null) | Media;
+      /**
+       * Short description for screen readers and SEO (optional).
+       */
       alt?: string | null;
     };
     left?: {
@@ -688,6 +691,9 @@ export interface CaseStudy {
        * Photo, GIF, or video (MP4, WebM, MOV).
        */
       image?: (number | null) | Media;
+      /**
+       * Short description for screen readers and SEO (optional).
+       */
       alt?: string | null;
     };
     right?: {
@@ -695,6 +701,9 @@ export interface CaseStudy {
        * Photo, GIF, or video (MP4, WebM, MOV).
        */
       image?: (number | null) | Media;
+      /**
+       * Short description for screen readers and SEO (optional).
+       */
       alt?: string | null;
     };
   };
@@ -739,6 +748,9 @@ export interface CaseStudy {
            * Photo, GIF, or video (MP4, WebM, MOV).
            */
           image?: (number | null) | Media;
+          /**
+           * Short description for screen readers and SEO (optional).
+           */
           alt?: string | null;
         };
         right?: {
@@ -746,6 +758,9 @@ export interface CaseStudy {
            * Photo, GIF, or video (MP4, WebM, MOV).
            */
           image?: (number | null) | Media;
+          /**
+           * Short description for screen readers and SEO (optional).
+           */
           alt?: string | null;
         };
         id?: string | null;
@@ -767,7 +782,7 @@ export interface PortfolioItem {
   name: string;
   category: string;
   image: number | Media;
-  alt: string;
+  alt?: string | null;
   /**
    * Card opens this Client: Hub → /clients/{slug}; Direct → that client’s featured case study.
    */
@@ -856,9 +871,9 @@ export interface Testimonial {
    */
   video?: (number | null) | Media;
   /**
-   * Person's name, shown on the photo or video. Example: Dr. Mallesh B.
+   * Person's name, shown on the photo or video (optional). Example: Dr. Mallesh B.
    */
-  alt: string;
+  alt?: string | null;
   /**
    * Optional. Shown under the name. Example: Co-founder, i3systems.
    */
@@ -1214,7 +1229,7 @@ export interface BlogPost {
          */
         post?: (number | null) | BlogPost;
         /**
-         * Leave empty to use image from selected blog post.
+         * Leave empty to use hero image from selected blog post.
          */
         image?: (number | null) | Media;
         /**
@@ -1316,9 +1331,12 @@ export interface IndustryPage {
   logos?:
     | {
         /**
-         * Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.
+         * Pick a logo from Collections > Client Logos. Name and image will auto-fill from it, with the option to edit/override.
          */
         clientLogo?: (number | null) | ClientLogo;
+        /**
+         * Leave empty to use image from selected client logo.
+         */
         image?: (number | null) | Media;
         /**
          * Leave empty to use client logo name.
@@ -1350,22 +1368,33 @@ export interface IndustryPage {
   projects?:
     | {
         /**
-         * Select from clients list to automatically pull name, image, and link.
+         * Select from existing clients list to automatically pull heading, image, description, and link.
          */
         client?: (number | null) | Client;
-        image?: (number | null) | Media;
         /**
-         * Leave empty to use client name.
+         * Which category tab this project appears under. Defaults to Industry.
          */
-        name?: string | null;
+        category?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
         /**
-         * Project summary or case study highlights.
+         * Display order. Lower numbers appear first.
+         */
+        order?: number | null;
+        /**
+         * Project heading. Leave empty to use client name.
+         */
+        heading?: string | null;
+        /**
+         * Project summary or highlights. Leave empty to use client description.
          */
         description?: string | null;
         /**
-         * Which tab this project appears under. Leave empty to show on all tabs.
+         * Project image. Leave empty to use client hero image.
          */
-        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        image?: (number | null) | Media;
+        /**
+         * Button text. Directs to the respective client.
+         */
+        ctaText?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1391,9 +1420,12 @@ export interface IndustryPage {
   experts?:
     | {
         /**
-         * Select from team members (leadership or team member) to automatically link profile.
+         * Select from team members to automatically pull name, role, photo, and link, with the option to edit.
          */
         member?: (number | null) | TeamMember;
+        /**
+         * Leave empty to use photo from selected team member.
+         */
         image?: (number | null) | Media;
         /**
          * Leave empty to use member name.
@@ -1420,17 +1452,22 @@ export interface IndustryPage {
          * Select from all blogs list to automatically pull title, image, date, and link.
          */
         post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use hero image from selected blog post.
+         */
         image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
         date?: string | null;
+        /**
+         * Leave empty to use read time from selected blog post.
+         */
         readTime?: string | null;
         /**
          * Leave empty to use blog post title.
          */
         title?: string | null;
-        /**
-         * Leave empty to use blog post link.
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3144,10 +3181,12 @@ export interface IndustryPagesSelect<T extends boolean = true> {
     | T
     | {
         client?: T;
-        image?: T;
-        name?: T;
+        category?: T;
+        order?: T;
+        heading?: T;
         description?: T;
-        tab?: T;
+        image?: T;
+        ctaText?: T;
         id?: T;
       };
   faqs?:
@@ -3179,7 +3218,6 @@ export interface IndustryPagesSelect<T extends boolean = true> {
         date?: T;
         readTime?: T;
         title?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -3710,6 +3748,10 @@ export interface SiteFooter {
          * Link name. If a Work Service Page is selected above, leave empty to automatically use the page's name.
          */
         label?: string | null;
+        /**
+         * Auto-filled with /work/[slug] when a Work Service Page is selected. Can also be customized.
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3719,6 +3761,10 @@ export interface SiteFooter {
   company?:
     | {
         label: string;
+        /**
+         * Optional destination URL (e.g. /why-design-asylum).
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3735,6 +3781,10 @@ export interface SiteFooter {
          * Link name. If a Solution Page is selected above, leave empty to automatically use the page's name.
          */
         label?: string | null;
+        /**
+         * Auto-filled with /solutions/[slug] when a Solution Page is selected. Can also be customized.
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3751,6 +3801,10 @@ export interface SiteFooter {
          * Link name. If a Service Page is selected above, leave empty to automatically use the page's name.
          */
         label?: string | null;
+        /**
+         * Auto-filled with /services/[slug] when a Service Page is selected. Can also be customized.
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3767,6 +3821,10 @@ export interface SiteFooter {
          * Link name. If an Industry Page is selected above, leave empty to automatically use the page's name.
          */
         label?: string | null;
+        /**
+         * Auto-filled with /industries/[slug] when an Industry Page is selected. Can also be customized.
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3776,6 +3834,10 @@ export interface SiteFooter {
   studio?:
     | {
         label: string;
+        /**
+         * Optional destination URL (e.g. /why-design-asylum).
+         */
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -4045,7 +4107,7 @@ export interface BlogArticle {
          */
         post?: (number | null) | BlogPost;
         /**
-         * Leave empty to use image from selected blog post.
+         * Leave empty to use hero image from selected blog post.
          */
         image?: (number | null) | Media;
         /**
@@ -4575,12 +4637,14 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | {
         workServicePage?: T;
         label?: T;
+        href?: T;
         id?: T;
       };
   company?:
     | T
     | {
         label?: T;
+        href?: T;
         id?: T;
       };
   solutions?:
@@ -4588,6 +4652,7 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | {
         solutionPage?: T;
         label?: T;
+        href?: T;
         id?: T;
       };
   services?:
@@ -4595,6 +4660,7 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | {
         servicePage?: T;
         label?: T;
+        href?: T;
         id?: T;
       };
   industries?:
@@ -4602,12 +4668,14 @@ export interface SiteFooterSelect<T extends boolean = true> {
     | {
         industryPage?: T;
         label?: T;
+        href?: T;
         id?: T;
       };
   studio?:
     | T
     | {
         label?: T;
+        href?: T;
         id?: T;
       };
   updatedAt?: T;
