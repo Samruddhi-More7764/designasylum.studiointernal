@@ -14,7 +14,7 @@ import { faqItems as fallbackFaqItems, type FaqItem } from "@/data/faq";
  * Desktop (lg+): 2-col intro | accordion.
  */
 export function FAQ({
-  items = fallbackFaqItems,
+  items,
   heading,
   showCta = true,
 }: {
@@ -22,7 +22,10 @@ export function FAQ({
   heading?: ReactNode;
   showCta?: boolean;
 }) {
-  const firstOpen = items.findIndex((item) => Boolean(item.answer?.trim()));
+  const resolvedItems = items ?? fallbackFaqItems;
+  if (!resolvedItems || resolvedItems.length === 0) return null;
+
+  const firstOpen = resolvedItems.findIndex((item) => Boolean(item.answer?.trim()));
 
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-20 lg:px-[60px]">
@@ -52,7 +55,7 @@ export function FAQ({
         </div>
 
         <div className="flex flex-col">
-          {items.map((item, i) => {
+          {resolvedItems.map((item, i) => {
             const answer = item.answer?.trim();
 
             if (!answer) {

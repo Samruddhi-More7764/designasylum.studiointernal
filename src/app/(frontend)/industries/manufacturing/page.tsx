@@ -48,48 +48,56 @@ export default async function ManufacturingIndustryPage() {
           imageSrc={page.heroImage}
           showActions={false}
         />
-        <BrandingAgencyArticle
-          lead={page.lead}
-          preface={page.preface}
-          sections={page.sections}
-          toc={[
-            ...page.sections.map((section) => ({
-              id: section.id,
-              label: section.tocLabel,
-            })),
-            { id: RIGHT_TO_WIN_ID, label: "Design your right to win" },
-          ]}
-        />
-        {page.logos ? (
+        {(page.lead || page.preface?.length > 0 || page.sections?.length > 0) && (
+          <BrandingAgencyArticle
+            lead={page.lead}
+            preface={page.preface}
+            sections={page.sections}
+            toc={[
+              ...page.sections.map((section) => ({
+                id: section.id,
+                label: section.tocLabel,
+              })),
+              { id: RIGHT_TO_WIN_ID, label: "Design your right to win" },
+            ]}
+          />
+        )}
+        {page.logos && (page.logos.row1?.length > 0 || page.logos.row2?.length > 0) && (
           <LogoMarquee placement="service" logos={page.logos} />
-        ) : (
-          <LogoMarquee placement="service" />
         )}
         <ResourceCta id={RIGHT_TO_WIN_ID} buttonHref="/contact" />
-        <ClientBrandingSection
-          headingBefore={page.clientsBefore}
-          headingAccent={page.clientsAccent}
-          headingAfter={page.clientsAfter}
-          tabs={page.clientTabs}
-          projects={page.projects}
-        />
-        <FAQ items={page.faqs} heading="FAQs" showCta={false} />
-        <BrandingExperts
-          heading={{
-            before: page.expertsBefore,
-            accent: page.expertsAccent,
-            subheading: page.expertsSubheading,
-          }}
-          members={page.experts}
-        />
-        <RelatedBlogs
-          heading={
-            <>
-              <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
-            </>
-          }
-          posts={page.relatedBlogs}
-        />
+        {page.projects?.length > 0 && (
+          <ClientBrandingSection
+            headingBefore={page.clientsBefore}
+            headingAccent={page.clientsAccent}
+            headingAfter={page.clientsAfter}
+            tabs={page.clientTabs}
+            projects={page.projects}
+          />
+        )}
+        {page.faqs?.length > 0 && (
+          <FAQ items={page.faqs} heading="FAQs" showCta={false} />
+        )}
+        {page.experts?.length > 0 && (
+          <BrandingExperts
+            heading={{
+              before: page.expertsBefore,
+              accent: page.expertsAccent,
+              subheading: page.expertsSubheading,
+            }}
+            members={page.experts}
+          />
+        )}
+        {page.relatedBlogs?.length > 0 && (
+          <RelatedBlogs
+            heading={
+              <>
+                <SplitHeading before={page.relatedBefore} accent={page.relatedAccent} />
+              </>
+            }
+            posts={page.relatedBlogs}
+          />
+        )}
         <IndustryPager />
       </main>
       <Footer columns={footer.columns} aiLinks={footer.aiLinks} />

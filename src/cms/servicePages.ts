@@ -31,7 +31,9 @@ type LinkedClient = {
   name?: string | null;
   slug?: string | null;
   heroImage?: unknown;
+  hero?: { image?: unknown; heading?: string | null; subheading?: string | null } | null;
   adminTitle?: string | null;
+  projectType?: string | null;
 };
 
 type LinkedMember = {
@@ -63,7 +65,7 @@ type RawServiceDoc = {
   lead?: string | null;
   sections?: CmsSection[] | null;
   logos?: Array<{
-    clientLogo?: { name?: string; image?: unknown } | string | null;
+    clientLogo?: { name?: string; image?: unknown } | string | number | null;
     image?: unknown;
     name?: string | null;
     width?: number | null;
@@ -75,19 +77,23 @@ type RawServiceDoc = {
   clientsAfter?: string | null;
   clientTabs?: Array<{ tabId?: string | null; label?: string | null } | null> | null;
   projects?: Array<{
-    client?: LinkedClient | string | null;
+    client?: LinkedClient | string | number | null;
     image?: unknown;
+    heading?: string | null;
     name?: string | null;
     description?: string | null;
     href?: string | null;
+    category?: string | null;
     tab?: string | null;
+    order?: number | null;
+    ctaText?: string | null;
   } | null> | null;
   faqs?: Array<{ question?: string | null; answer?: string | null } | null> | null;
   expertsBefore?: string | null;
   expertsAccent?: string | null;
   expertsSubheading?: string | null;
   experts?: Array<{
-    member?: LinkedMember | string | null;
+    member?: LinkedMember | string | number | null;
     image?: unknown;
     name?: string | null;
     role?: string | null;
@@ -96,7 +102,7 @@ type RawServiceDoc = {
   relatedBefore?: string | null;
   relatedAccent?: string | null;
   relatedBlogs?: Array<{
-    post?: LinkedBlogPost | string | null;
+    post?: LinkedBlogPost | string | number | null;
     image?: unknown;
     date?: string | null;
     readTime?: string | null;
@@ -104,11 +110,6 @@ type RawServiceDoc = {
     href?: string | null;
   } | null> | null;
 };
-
-function text(value: string | null | undefined, fallback: string): string {
-  const trimmed = value?.trim();
-  return trimmed || fallback;
-}
 
 function linesOf(rows: TextRow[] | null | undefined): string[] {
   if (!rows?.length) return [];
@@ -149,11 +150,12 @@ function sectionsFrom(rows: CmsSection[] | null | undefined): ArticleSection[] |
   });
 }
 
-function parseServiceDoc(
+async function parseServiceDoc(
   doc: RawServiceDoc,
   fallback: BrandingStrategyContent,
-): BrandingStrategyContent {
-  const sections = sectionsFrom(doc.sections);
+  payload?: NonNullable<Awaited<ReturnType<typeof getPayloadClient>>>,
+): Promise<BrandingStrategyContent> {
+  const sections = sectionsFrom(doc.sections) || [];
 
   const tabs = (doc.clientTabs || [])
     .map((tab) => ({
@@ -162,35 +164,65 @@ function parseServiceDoc(
     }))
     .filter((tab) => tab.id && tab.label);
 
-  const projects = (doc.projects || [])
-    .map((project, index) => {
-      const linked =
-        project?.client && typeof project.client === "object" ? project.client : null;
-      const name = project?.name?.trim() || linked?.name?.trim() || "";
-      if (!name) return null;
-      const image = mediaSrc(
-        project?.image || linked?.heroImage,
-        fallback.projects[index]?.image || defaultHeroImage,
-      );
-      const cleanClientSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const defaultHref = cleanClientSlug ? `/clients/${cleanClientSlug}` : "";
-      const href = project?.href?.trim() || defaultHref || fallback.projects[index]?.href || "#";
-      const description =
-        project?.description?.trim() ||
-        linked?.adminTitle?.trim() ||
-        fallback.projects[index]?.description ||
-        "";
+  const projects = (
+    await Promise.all(
+      (doc.projects || []).map(async (project, index) => {
+        let linked =
+          project?.client && typeof project.client === "object" ? project.client : null;
+        let cleanClientSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
 
-      return {
-        image,
-        name,
-        description,
-        href,
-        key: `project-${index}`,
-        tab: project?.tab?.trim() || undefined,
-      };
-    })
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+        if (!cleanClientSlug && project?.client && payload) {
+          const clientId =
+            typeof project.client === "object"
+              ? (project.client as { id?: string | number }).id
+              : project.client;
+          if (clientId) {
+            try {
+              const clientDoc = await payload.findByID({
+                collection: "clients",
+                id: clientId,
+                depth: 0,
+              });
+              if (clientDoc) {
+                cleanClientSlug = clientDoc.slug?.replace(/^\/+|\/+$/g, "").trim();
+                if (!linked) {
+                  linked = clientDoc as unknown as typeof linked;
+                }
+              }
+            } catch {}
+          }
+        }
+
+        const name =
+          project?.heading?.trim() || project?.name?.trim() || linked?.name?.trim() || "";
+        if (!name) return null;
+        const image = mediaSrc(
+          project?.image || (linked as { hero?: { image?: unknown } })?.hero?.image || linked?.heroImage,
+          defaultHeroImage,
+        );
+        const defaultHref = cleanClientSlug ? `/clients/${cleanClientSlug}` : "";
+        const href = project?.href?.trim() || defaultHref || "#";
+        const description =
+          project?.description?.trim() ||
+          linked?.adminTitle?.trim() ||
+          "";
+        const order = typeof project?.order === "number" ? project.order : index;
+
+        return {
+          image,
+          name,
+          description,
+          href,
+          ctaText: "View website",
+          key: `project-${index}`,
+          tab: project?.category?.trim() || project?.tab?.trim() || undefined,
+          order,
+        };
+      }),
+    )
+  )
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .sort((a, b) => a.order - b.order);
 
   const faqs = (doc.faqs || [])
     .map((item) => ({
@@ -199,61 +231,111 @@ function parseServiceDoc(
     }))
     .filter((item) => item.question);
 
-  const experts = (doc.experts || [])
-    .map((expert, index) => {
-      const linked =
-        expert?.member && typeof expert.member === "object" ? expert.member : null;
-      const name = expert?.name?.trim() || linked?.name?.trim() || "";
-      if (!name) return null;
-      const role = expert?.role?.trim() || linked?.role?.trim() || "";
-      const image = mediaSrc(
-        expert?.image || linked?.photoOne,
-        fallback.experts[index]?.image || defaultHeroImage,
-      );
-      const cleanMemberSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const defaultHref = cleanMemberSlug ? `/team/${cleanMemberSlug}` : "#";
-      const href = expert?.readMoreUrl?.trim() || defaultHref;
+  const experts = (
+    await Promise.all(
+      (doc.experts || []).map(async (expert, index) => {
+        let linked =
+          expert?.member && typeof expert.member === "object" ? expert.member : null;
+        let cleanMemberSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
 
-      return {
-        image,
-        name,
-        role,
-        key: `expert-${index}`,
-        href,
-      };
-    })
-    .filter((e): e is NonNullable<typeof e> => Boolean(e));
+        if (!cleanMemberSlug && expert?.member && payload) {
+          const memberId =
+            typeof expert.member === "object"
+              ? (expert.member as { id?: string | number }).id
+              : expert.member;
+          if (memberId) {
+            try {
+              const memberDoc = await payload.findByID({
+                collection: "team-members" as "users",
+                id: memberId,
+                depth: 0,
+              });
+              if (memberDoc) {
+                cleanMemberSlug = (memberDoc as unknown as { slug?: string }).slug?.replace(/^\/+|\/+$/g, "").trim();
+                if (!linked) {
+                  linked = memberDoc as unknown as typeof linked;
+                }
+              }
+            } catch {}
+          }
+        }
 
-  const posts = (doc.relatedBlogs || [])
-    .map((post, index) => {
-      const linked = post?.post && typeof post.post === "object" ? post.post : null;
-      const title = post?.title?.trim() || linked?.title?.trim() || "";
-      if (!title) return null;
-      const date = post?.date?.trim() || linked?.date?.trim() || "";
-      const readTime = post?.readTime?.trim() || linked?.readTime?.trim() || "";
-      const image = mediaSrc(
-        post?.image || linked?.heroImage || linked?.image,
-        fallback.relatedBlogs[index]?.image || defaultHeroImage,
-      );
-      const cleanPostSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const defaultHref = cleanPostSlug ? `/blogs/${cleanPostSlug}` : "#";
-      const href = post?.href?.trim() || linked?.href?.trim() || defaultHref;
+        const name = expert?.name?.trim() || linked?.name?.trim() || "";
+        if (!name) return null;
+        const role = expert?.role?.trim() || linked?.role?.trim() || "";
+        const image = mediaSrc(
+          expert?.image || linked?.photoOne,
+          defaultHeroImage,
+        );
+        const cleanMemberSlugFinal = cleanMemberSlug || "";
+        const defaultHref = cleanMemberSlugFinal ? `/team/${cleanMemberSlugFinal}` : "#";
+        const href = expert?.readMoreUrl?.trim() || defaultHref;
 
-      return {
-        image,
-        date,
-        readTime,
-        title,
-        href,
-        key: `related-${index}`,
-      };
-    })
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+        return {
+          image,
+          name,
+          role,
+          key: `expert-${index}`,
+          href,
+        };
+      }),
+    )
+  ).filter((e): e is NonNullable<typeof e> => Boolean(e));
+
+  const posts = (
+    await Promise.all(
+      (doc.relatedBlogs || []).map(async (post, index) => {
+        let linked = post?.post && typeof post.post === "object" ? post.post : null;
+        let cleanPostSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
+
+        if (!cleanPostSlug && post?.post && payload) {
+          const postId =
+            typeof post.post === "object"
+              ? (post.post as { id?: string | number }).id
+              : post.post;
+          if (postId) {
+            try {
+              const postDoc = await payload.findByID({
+                collection: "blog-posts",
+                id: postId,
+                depth: 0,
+              });
+              if (postDoc) {
+                cleanPostSlug = postDoc.slug?.replace(/^\/+|\/+$/g, "").trim();
+                if (!linked) {
+                  linked = postDoc as unknown as typeof linked;
+                }
+              }
+            } catch {}
+          }
+        }
+
+        const title = post?.title?.trim() || linked?.title?.trim() || "";
+        if (!title) return null;
+        const date = post?.date?.trim() || linked?.date?.trim() || "";
+        const readTime = post?.readTime?.trim() || linked?.readTime?.trim() || "";
+        const image = mediaSrc(
+          post?.image || linked?.heroImage || linked?.image,
+          defaultHeroImage,
+        );
+        const href = cleanPostSlug ? `/blogs/${cleanPostSlug}` : (post?.href?.trim() || "#");
+
+        return {
+          image,
+          date,
+          readTime,
+          title,
+          href,
+          key: `related-${index}`,
+        };
+      }),
+    )
+  ).filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   const logos = (doc.logos || [])
     .map((logo, index) => {
       const linked =
-        logo?.clientLogo && typeof logo.clientLogo === "object"
+        logo && "clientLogo" in logo && logo.clientLogo && typeof logo.clientLogo === "object"
           ? (logo.clientLogo as { name?: string; image?: unknown })
           : null;
       const name = logo?.name?.trim() || linked?.name?.trim() || "";
@@ -285,7 +367,7 @@ function parseServiceDoc(
   }): ClientLogo => ({ name, image, width, height });
 
   const distributed = (() => {
-    if (!logos.length) return { row1: fallback.logoRow1, row2: fallback.logoRow2 };
+    if (!logos.length) return { row1: [], row2: [] };
     if (logos.length <= 3) {
       return distributeLogosTriangle(logos.map(toLogo));
     }
@@ -300,30 +382,30 @@ function parseServiceDoc(
   })();
 
   const resolvedBreadcrumb =
-    doc.breadcrumbCurrent?.trim() || doc.title?.trim() || fallback.breadcrumbCurrent;
+    doc.breadcrumbCurrent?.trim() || doc.title?.trim() || "";
 
   return {
     breadcrumbCurrent: resolvedBreadcrumb,
-    heroTitle: text(doc.heroTitle, fallback.heroTitle),
-    heroIntro: text(doc.heroIntro, fallback.heroIntro),
-    heroImage: mediaSrc(doc.heroImage, fallback.heroImage),
-    lead: text(doc.lead, fallback.lead),
-    sections: sections ?? fallback.sections,
+    heroTitle: doc.heroTitle?.trim() || doc.title?.trim() || "",
+    heroIntro: doc.heroIntro?.trim() || "",
+    heroImage: resolveMediaUrl(doc.heroImage) || defaultHeroImage,
+    lead: doc.lead?.trim() || "",
+    sections: sections,
     logoRow1: distributed.row1,
     logoRow2: distributed.row2,
-    clientsBefore: text(doc.clientsBefore, fallback.clientsBefore),
-    clientsAccent: text(doc.clientsAccent, fallback.clientsAccent),
-    clientsAfter: text(doc.clientsAfter, fallback.clientsAfter),
-    clientTabs: tabs.length ? tabs : fallback.clientTabs,
-    projects: projects.length ? projects : fallback.projects,
-    faqs: faqs.length ? faqs : fallback.faqs,
-    expertsBefore: text(doc.expertsBefore, fallback.expertsBefore),
-    expertsAccent: text(doc.expertsAccent, fallback.expertsAccent),
-    expertsSubheading: text(doc.expertsSubheading, fallback.expertsSubheading),
-    experts: experts.length ? experts : fallback.experts,
-    relatedBefore: text(doc.relatedBefore, fallback.relatedBefore),
-    relatedAccent: text(doc.relatedAccent, fallback.relatedAccent),
-    relatedBlogs: posts.length ? posts : fallback.relatedBlogs,
+    clientsBefore: doc.clientsBefore?.trim() || fallback.clientsBefore,
+    clientsAccent: doc.clientsAccent?.trim() || fallback.clientsAccent,
+    clientsAfter: doc.clientsAfter?.trim() || fallback.clientsAfter,
+    clientTabs: tabs,
+    projects: projects,
+    faqs: faqs,
+    expertsBefore: doc.expertsBefore?.trim() || fallback.expertsBefore,
+    expertsAccent: doc.expertsAccent?.trim() || fallback.expertsAccent,
+    expertsSubheading: doc.expertsSubheading?.trim() || fallback.expertsSubheading,
+    experts: experts,
+    relatedBefore: doc.relatedBefore?.trim() || fallback.relatedBefore,
+    relatedAccent: doc.relatedAccent?.trim() || fallback.relatedAccent,
+    relatedBlogs: posts,
   };
 }
 
@@ -350,7 +432,7 @@ export const getServicePageBySlug = cache(
         })) as unknown as { docs: RawServiceDoc[] };
 
         if (res.docs && res.docs.length > 0 && res.docs[0]) {
-          return parseServiceDoc(res.docs[0], blueprintFallback);
+          return await parseServiceDoc(res.docs[0], blueprintFallback, payload);
         }
       } catch (error) {
         console.warn("[cms] service-pages collection query error:", error);

@@ -1,10 +1,4 @@
-import {
-  articleSections,
-  introduction,
-  tocItems,
-  type ArticleSection,
-  type TocItem,
-} from "@/data/brandingAgencyPage";
+import type { ArticleSection, TocItem } from "@/data/brandingAgencyPage";
 import {
   EditorialHeading,
   EditorialParagraph,
@@ -14,10 +8,10 @@ import {
 import { StickyTableOfContents } from "@/components/branding-agency/StickyTableOfContents";
 
 export function BrandingAgencyArticle({
-  lead = introduction,
+  lead,
   preface = [],
-  sections = articleSections,
-  toc = tocItems,
+  sections,
+  toc,
   spacing = "logos",
 }: {
   lead?: string;
@@ -31,6 +25,22 @@ export function BrandingAgencyArticle({
    */
   spacing?: "logos" | "cta";
 } = {}) {
+  const hasLead = Boolean(lead?.trim());
+  const hasPreface = Boolean(preface && preface.length > 0);
+  const hasSections = Boolean(sections && sections.length > 0);
+
+  if (!hasLead && !hasPreface && !hasSections) {
+    return null;
+  }
+
+  const derivedToc =
+    toc && toc.length > 0
+      ? toc
+      : (sections || []).map((section) => ({
+          id: section.id,
+          label: section.tocLabel || section.id,
+        }));
+
   return (
     <section
       className={
@@ -40,12 +50,14 @@ export function BrandingAgencyArticle({
       }
     >
       <div className="mx-auto flex w-full max-w-[1350px] flex-col gap-10 lg:flex-row lg:items-start lg:gap-[72px]">
-        <StickyTableOfContents items={toc} />
+        {derivedToc.length > 0 ? <StickyTableOfContents items={derivedToc} /> : null}
 
         <div className="flex min-w-0 flex-1 flex-col gap-12 lg:max-w-[931px] lg:gap-16">
-          <p className="max-w-[931px] font-figtree text-[22px] font-normal leading-[1.2] tracking-[-1px] text-[#05201F] sm:text-[28px] lg:text-[32px] lg:tracking-[-2.09px]">
-            {lead}
-          </p>
+          {hasLead ? (
+            <p className="max-w-[931px] font-figtree text-[22px] font-normal leading-[1.2] tracking-[-1px] text-[#05201F] sm:text-[28px] lg:text-[32px] lg:tracking-[-2.09px]">
+              {lead}
+            </p>
+          ) : null}
           {preface.length > 0 ? (
             <div className="flex flex-col gap-6">
               {preface.map((paragraph) => (
@@ -54,7 +66,7 @@ export function BrandingAgencyArticle({
             </div>
           ) : null}
 
-          {sections.map((section) => (
+          {(sections || []).map((section) => (
             <article
               key={section.id}
               id={section.id}

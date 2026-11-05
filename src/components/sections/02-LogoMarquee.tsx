@@ -81,6 +81,10 @@ export async function LogoMarquee({
     }
   }
 
+  if (logos !== undefined && allLogos.length === 0) {
+    return null;
+  }
+
   let marqueeRow1: ClientLogo[] = [];
   let marqueeRow2: ClientLogo[] = [];
 

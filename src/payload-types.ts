@@ -1236,9 +1236,6 @@ export interface BlogPost {
          * Leave empty to use date from selected blog post.
          */
         date?: string | null;
-        /**
-         * Leave empty to use read time from selected blog post.
-         */
         readTime?: string | null;
         /**
          * Leave empty to use title from selected blog post.
@@ -1391,10 +1388,7 @@ export interface IndustryPage {
          * Project image. Leave empty to use client hero image.
          */
         image?: (number | null) | Media;
-        /**
-         * Button text. Directs to the respective client.
-         */
-        ctaText?: string | null;
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1460,9 +1454,6 @@ export interface IndustryPage {
          * Leave empty to use date from selected blog post.
          */
         date?: string | null;
-        /**
-         * Leave empty to use read time from selected blog post.
-         */
         readTime?: string | null;
         /**
          * Leave empty to use blog post title.
@@ -1578,22 +1569,30 @@ export interface ServicePage {
   projects?:
     | {
         /**
-         * Select from clients list to automatically pull name, image, and link.
+         * Select from existing clients list to automatically pull heading, image, description, and link.
          */
         client?: (number | null) | Client;
-        image?: (number | null) | Media;
         /**
-         * Leave empty to use client name.
+         * Which category tab this project appears under. Defaults to Service.
          */
-        name?: string | null;
+        category?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
         /**
-         * Project summary or case study highlights.
+         * Display order. Lower numbers appear first.
+         */
+        order?: number | null;
+        /**
+         * Project heading. Leave empty to use client name.
+         */
+        heading?: string | null;
+        /**
+         * Project summary or highlights. Leave empty to use client description.
          */
         description?: string | null;
         /**
-         * Which tab this project appears under. Leave empty to show on all tabs.
+         * Project image. Leave empty to use client hero image.
          */
-        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        image?: (number | null) | Media;
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1619,9 +1618,12 @@ export interface ServicePage {
   experts?:
     | {
         /**
-         * Select from team members (leadership or team member) to automatically link profile.
+         * Select from team members to automatically pull name, role, photo, and link, with the option to edit.
          */
         member?: (number | null) | TeamMember;
+        /**
+         * Leave empty to use photo from selected team member.
+         */
         image?: (number | null) | Media;
         /**
          * Leave empty to use member name.
@@ -1648,17 +1650,19 @@ export interface ServicePage {
          * Select from all blogs list to automatically pull title, image, date, and link.
          */
         post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use hero image from selected blog post.
+         */
         image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
         date?: string | null;
         readTime?: string | null;
         /**
          * Leave empty to use blog post title.
          */
         title?: string | null;
-        /**
-         * Leave empty to use blog post link.
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1769,22 +1773,30 @@ export interface SolutionPage {
   projects?:
     | {
         /**
-         * Select from clients list to automatically pull name, image, and link.
+         * Select from existing clients list to automatically pull heading, image, description, and link.
          */
         client?: (number | null) | Client;
-        image?: (number | null) | Media;
         /**
-         * Leave empty to use client name.
+         * Which category tab this project appears under. Defaults to Solution.
          */
-        name?: string | null;
+        category?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
         /**
-         * Project summary or case study highlights.
+         * Display order. Lower numbers appear first.
+         */
+        order?: number | null;
+        /**
+         * Project heading. Leave empty to use client name.
+         */
+        heading?: string | null;
+        /**
+         * Project summary or highlights. Leave empty to use client description.
          */
         description?: string | null;
         /**
-         * Which tab this project appears under. Leave empty to show on all tabs.
+         * Project image. Leave empty to use client hero image.
          */
-        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        image?: (number | null) | Media;
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1810,9 +1822,12 @@ export interface SolutionPage {
   experts?:
     | {
         /**
-         * Select from team members (leadership or team member) to automatically link profile.
+         * Select from team members to automatically pull name, role, photo, and link, with the option to edit.
          */
         member?: (number | null) | TeamMember;
+        /**
+         * Leave empty to use photo from selected team member.
+         */
         image?: (number | null) | Media;
         /**
          * Leave empty to use member name.
@@ -1839,17 +1854,19 @@ export interface SolutionPage {
          * Select from all blogs list to automatically pull title, image, date, and link.
          */
         post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use hero image from selected blog post.
+         */
         image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
         date?: string | null;
         readTime?: string | null;
         /**
          * Leave empty to use blog post title.
          */
         title?: string | null;
-        /**
-         * Leave empty to use blog post link.
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1960,22 +1977,30 @@ export interface WorkServicePage {
   projects?:
     | {
         /**
-         * Select from clients list to automatically pull name, image, and link.
+         * Select from existing clients list to automatically pull heading, image, description, and link.
          */
         client?: (number | null) | Client;
-        image?: (number | null) | Media;
         /**
-         * Leave empty to use client name.
+         * Which category tab this project appears under. Defaults to Service.
          */
-        name?: string | null;
+        category?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
         /**
-         * Project summary or case study highlights.
+         * Display order. Lower numbers appear first.
+         */
+        order?: number | null;
+        /**
+         * Project heading. Leave empty to use client name.
+         */
+        heading?: string | null;
+        /**
+         * Project summary or highlights. Leave empty to use client description.
          */
         description?: string | null;
         /**
-         * Which tab this project appears under. Leave empty to show on all tabs.
+         * Project image. Leave empty to use client hero image.
          */
-        tab?: ('solution' | 'service' | 'industry' | 'branding-projects') | null;
+        image?: (number | null) | Media;
+        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -2001,9 +2026,12 @@ export interface WorkServicePage {
   experts?:
     | {
         /**
-         * Select from team members (leadership or team member) to automatically link profile.
+         * Select from team members to automatically pull name, role, photo, and link, with the option to edit.
          */
         member?: (number | null) | TeamMember;
+        /**
+         * Leave empty to use photo from selected team member.
+         */
         image?: (number | null) | Media;
         /**
          * Leave empty to use member name.
@@ -2030,17 +2058,19 @@ export interface WorkServicePage {
          * Select from all blogs list to automatically pull title, image, date, and link.
          */
         post?: (number | null) | BlogPost;
+        /**
+         * Leave empty to use hero image from selected blog post.
+         */
         image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
         date?: string | null;
         readTime?: string | null;
         /**
          * Leave empty to use blog post title.
          */
         title?: string | null;
-        /**
-         * Leave empty to use blog post link.
-         */
-        href?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3186,7 +3216,7 @@ export interface IndustryPagesSelect<T extends boolean = true> {
         heading?: T;
         description?: T;
         image?: T;
-        ctaText?: T;
+        href?: T;
         id?: T;
       };
   faqs?:
@@ -3289,10 +3319,12 @@ export interface ServicePagesSelect<T extends boolean = true> {
     | T
     | {
         client?: T;
-        image?: T;
-        name?: T;
+        category?: T;
+        order?: T;
+        heading?: T;
         description?: T;
-        tab?: T;
+        image?: T;
+        href?: T;
         id?: T;
       };
   faqs?:
@@ -3324,7 +3356,6 @@ export interface ServicePagesSelect<T extends boolean = true> {
         date?: T;
         readTime?: T;
         title?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -3396,10 +3427,12 @@ export interface SolutionPagesSelect<T extends boolean = true> {
     | T
     | {
         client?: T;
-        image?: T;
-        name?: T;
+        category?: T;
+        order?: T;
+        heading?: T;
         description?: T;
-        tab?: T;
+        image?: T;
+        href?: T;
         id?: T;
       };
   faqs?:
@@ -3431,7 +3464,6 @@ export interface SolutionPagesSelect<T extends boolean = true> {
         date?: T;
         readTime?: T;
         title?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -3503,10 +3535,12 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
     | T
     | {
         client?: T;
-        image?: T;
-        name?: T;
+        category?: T;
+        order?: T;
+        heading?: T;
         description?: T;
-        tab?: T;
+        image?: T;
+        href?: T;
         id?: T;
       };
   faqs?:
@@ -3538,7 +3572,6 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
         date?: T;
         readTime?: T;
         title?: T;
-        href?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -4114,9 +4147,6 @@ export interface BlogArticle {
          * Leave empty to use date from selected blog post.
          */
         date?: string | null;
-        /**
-         * Leave empty to use read time from selected blog post.
-         */
         readTime?: string | null;
         /**
          * Leave empty to use title from selected blog post.

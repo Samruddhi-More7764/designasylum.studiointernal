@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
   Field,
 } from "payload";
+import { autofillBlueprintFields } from "../cms/sharedBlueprintAutofill";
 
 const slugify = (value: string) =>
   value
@@ -36,122 +37,6 @@ const imageUpload: Field = {
   filterOptions: { mimeType: { contains: "image/" } },
 };
 
-const autofillIndustryPageFields: CollectionBeforeValidateHook = async ({ data, req }) => {
-  if (!data) return data;
-
-  // 1. Logos autofill from clientLogo
-  if (Array.isArray(data.logos)) {
-    for (const row of data.logos) {
-      if (!row || !row.clientLogo) continue;
-      const logoId = typeof row.clientLogo === "object" ? row.clientLogo.id : row.clientLogo;
-      if (!logoId) continue;
-      if (!row.image || !row.name) {
-        try {
-          const logoDoc = await req.payload.findByID({
-            collection: "client-logos",
-            id: logoId,
-            depth: 0,
-          });
-          if (logoDoc) {
-            if (!row.image && logoDoc.image) row.image = logoDoc.image;
-            if (!row.name && logoDoc.name) row.name = logoDoc.name;
-          }
-        } catch {}
-      }
-    }
-  }
-
-  // 2. Clients tab projects autofill from client
-  if (Array.isArray(data.projects)) {
-    for (let i = 0; i < data.projects.length; i++) {
-      const row = data.projects[i];
-      if (!row) continue;
-      if (row.order == null) row.order = i;
-      if (!row.client) continue;
-      const clientId = typeof row.client === "object" ? row.client.id : row.client;
-      if (!clientId) continue;
-      if (!row.heading || !row.name || !row.image || !row.description || !row.href) {
-        try {
-          const clientDoc = await req.payload.findByID({
-            collection: "clients",
-            id: clientId,
-            depth: 0,
-          });
-          if (clientDoc) {
-            if (!row.heading && clientDoc.name) row.heading = clientDoc.name;
-            if (!row.name && clientDoc.name) row.name = clientDoc.name;
-            const heroImg = clientDoc.hero?.image;
-            if (!row.image && heroImg) row.image = heroImg;
-            if (!row.description) {
-              row.description =
-                clientDoc.adminTitle || clientDoc.hero?.subheading || clientDoc.hero?.heading || "";
-            }
-            if (clientDoc.slug) {
-              const cleanSlug = clientDoc.slug.replace(/^\/+|\/+$/g, "").trim();
-              row.href = `/clients/${cleanSlug}`;
-            }
-          }
-        } catch {}
-      }
-    }
-  }
-
-  // 3. Experts autofill from member
-  if (Array.isArray(data.experts)) {
-    for (const row of data.experts) {
-      if (!row || !row.member) continue;
-      const memberId = typeof row.member === "object" ? row.member.id : row.member;
-      if (!memberId) continue;
-      if (!row.name || !row.role || !row.image) {
-        try {
-          const memberDoc = await req.payload.findByID({
-            collection: "team-members",
-            id: memberId,
-            depth: 0,
-          });
-          if (memberDoc) {
-            if (!row.name && memberDoc.name) row.name = memberDoc.name;
-            if (!row.role && memberDoc.role) row.role = memberDoc.role;
-            if (!row.image) {
-              const defaultPhoto = memberDoc.photoOne || memberDoc.photoTwo;
-              if (defaultPhoto) row.image = defaultPhoto;
-            }
-          }
-        } catch {}
-      }
-    }
-  }
-
-  // 4. Related blogs autofill from post
-  if (Array.isArray(data.relatedBlogs)) {
-    for (const row of data.relatedBlogs) {
-      if (!row || !row.post) continue;
-      const postId = typeof row.post === "object" ? row.post.id : row.post;
-      if (!postId) continue;
-      if (!row.image || !row.title || !row.date || !row.readTime) {
-        try {
-          const postDoc = await req.payload.findByID({
-            collection: "blog-posts",
-            id: postId,
-            depth: 0,
-          });
-          if (postDoc) {
-            if (!row.image) {
-              const defaultImg = postDoc.heroImage || postDoc.image;
-              if (defaultImg) row.image = defaultImg;
-            }
-            if (!row.title && postDoc.title) row.title = postDoc.title;
-            if (!row.date && postDoc.date) row.date = postDoc.date;
-            if (!row.readTime && postDoc.readTime) row.readTime = postDoc.readTime;
-          }
-        } catch {}
-      }
-    }
-  }
-
-  return data;
-};
-
 export const IndustryPages: CollectionConfig = {
   slug: "industry-pages",
   labels: {
@@ -165,7 +50,7 @@ export const IndustryPages: CollectionConfig = {
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug, autofillIndustryPageFields],
+    beforeValidate: [ensureSlug, autofillBlueprintFields],
   },
   fields: [
     {

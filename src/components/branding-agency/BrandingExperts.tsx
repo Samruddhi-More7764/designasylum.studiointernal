@@ -6,13 +6,37 @@ import {
   brandingExpertsHeading,
 } from "@/data/brandingAgencyPage";
 
+export type BrandingExpertItem = {
+  key: string;
+  name: string;
+  role: string;
+  image: string;
+  href?: string;
+};
+
 export function BrandingExperts({
   heading = brandingExpertsHeading,
-  members = brandingExperts,
+  members,
 }: {
   heading?: typeof brandingExpertsHeading;
-  members?: ReadonlyArray<(typeof brandingExperts)[number] & { href?: string }>;
+  members?: ReadonlyArray<BrandingExpertItem>;
 } = {}) {
+  const resolvedMembers: ReadonlyArray<BrandingExpertItem> = members ?? brandingExperts;
+  if (!resolvedMembers || resolvedMembers.length === 0) return null;
+
+  const count = resolvedMembers.length;
+  const containerClasses =
+    count === 1
+      ? "flex w-full justify-center"
+      : count === 2
+        ? "flex w-full flex-col sm:flex-row justify-center items-center sm:items-start gap-8 sm:gap-6"
+        : "flex w-full flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12";
+
+  const cardClasses =
+    count === 1 || count === 2
+      ? "flex w-full max-w-[330px] flex-col gap-4"
+      : "flex w-full flex-col gap-4";
+
   return (
     <section className="overflow-x-clip bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center gap-8 lg:gap-10">
@@ -25,11 +49,11 @@ export function BrandingExperts({
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-8 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12">
-          {members.map((member) => (
+        <div className={containerClasses}>
+          {resolvedMembers.map((member) => (
             <article
               key={member.key}
-              className="flex w-full flex-col gap-4"
+              className={cardClasses}
             >
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-[#e7e7e7]">
                 <Image

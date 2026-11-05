@@ -6,13 +6,23 @@ import { ResourceButton } from "@/components/branding-agency/ResourceButton";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { brandingProjects, clientBrandingTabs } from "@/data/brandingAgencyPage";
 
+export type ClientBrandingProjectItem = {
+  key: string;
+  name: string;
+  description: string;
+  href: string;
+  image: string;
+  tab?: string;
+  ctaText?: string;
+};
+
 export function ClientBrandingSection({
   heading,
   headingBefore = "Clients we did ",
   headingAccent = "branding",
   headingAfter = " for",
   tabs = clientBrandingTabs,
-  projects = brandingProjects,
+  projects,
   flushTop = false,
 }: {
   heading?: ReactNode;
@@ -20,14 +30,19 @@ export function ClientBrandingSection({
   headingAccent?: string;
   headingAfter?: string;
   tabs?: readonly { id: string; label: string }[];
-  projects?: ReadonlyArray<
-    (typeof brandingProjects)[number] & { tab?: string; ctaText?: string }
-  >;
+  projects?: ReadonlyArray<ClientBrandingProjectItem>;
   /** Drop the desktop top padding when the section sits under the hero. */
   flushTop?: boolean;
 } = {}) {
+  const resolvedProjects: ReadonlyArray<ClientBrandingProjectItem> = projects ?? brandingProjects;
   const [active, setActive] = useState(tabs[0]?.id ?? "solution");
-  const visible = projects.filter((project) => !project.tab || project.tab === active);
+
+  if (!resolvedProjects || resolvedProjects.length === 0) return null;
+
+  const visible = tabs.length > 0
+    ? resolvedProjects.filter((project) => !project.tab || project.tab === active)
+    : resolvedProjects;
+  const displayProjects = visible.length > 0 ? visible : resolvedProjects;
 
   return (
     <section
@@ -44,42 +59,44 @@ export function ClientBrandingSection({
           )}
         </h2>
 
-        <div
-          role="tablist"
-          aria-label="Client branding filters"
-          className="mx-auto flex h-10 w-fit max-w-full items-end justify-center overflow-x-auto lg:max-w-[421px] lg:gap-5"
-        >
-          {tabs.map((tab) => {
-            const selected = tab.id === active;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                id={`client-tab-${tab.id}`}
-                aria-selected={selected}
-                aria-controls="client-branding-panel"
-                onClick={() => setActive(tab.id)}
-                className={[
-                  "shrink-0 border-b-2 px-2 pb-2 font-satoshi text-[12px] font-medium uppercase leading-4 tracking-[-0.5px] whitespace-nowrap lg:px-0 lg:text-[14px]",
-                  selected
-                    ? "border-footer-orange text-black"
-                    : "border-transparent text-black/45",
-                ].join(" ")}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+        {tabs.length > 1 ? (
+          <div
+            role="tablist"
+            aria-label="Client branding filters"
+            className="mx-auto flex h-10 w-fit max-w-full items-end justify-center overflow-x-auto lg:max-w-[421px] lg:gap-5"
+          >
+            {tabs.map((tab) => {
+              const selected = tab.id === active;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={`client-tab-${tab.id}`}
+                  aria-selected={selected}
+                  aria-controls="client-branding-panel"
+                  onClick={() => setActive(tab.id)}
+                  className={[
+                    "shrink-0 border-b-2 px-2 pb-2 font-satoshi text-[12px] font-medium uppercase leading-4 tracking-[-0.5px] whitespace-nowrap lg:px-0 lg:text-[14px]",
+                    selected
+                      ? "border-footer-orange text-black"
+                      : "border-transparent text-black/45",
+                  ].join(" ")}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
 
         <div
           role="tabpanel"
           id="client-branding-panel"
-          aria-labelledby={`client-tab-${active}`}
+          aria-labelledby={tabs.length > 1 ? `client-tab-${active}` : undefined}
           className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-12"
         >
-          {visible.map((project) => (
+          {displayProjects.map((project) => (
             <article
               key={`${active}-${project.key}`}
               className="flex w-full flex-col gap-4"

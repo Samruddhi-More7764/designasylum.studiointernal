@@ -6,11 +6,27 @@ import { relatedBlogs, relatedBlogsHeading } from "@/data/brandingAgencyPage";
 
 export function RelatedBlogs({
   heading,
-  posts = relatedBlogs,
+  posts,
 }: {
   heading?: ReactNode;
   posts?: typeof relatedBlogs;
 } = {}) {
+  const resolvedPosts = posts ?? relatedBlogs;
+  if (!resolvedPosts || resolvedPosts.length === 0) return null;
+
+  const count = resolvedPosts.length;
+  const containerClasses =
+    count === 1
+      ? "flex w-full justify-center"
+      : count === 2
+        ? "flex w-full flex-col sm:flex-row justify-center items-center sm:items-start gap-8 sm:gap-6"
+        : "flex w-full flex-col gap-8 sm:grid sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12";
+
+  const cardClasses =
+    count === 1 || count === 2
+      ? "w-full max-w-[330px]"
+      : "w-full";
+
   return (
     <section className="overflow-x-clip bg-white px-5 py-14 sm:px-8 sm:py-16 lg:px-[60px] lg:py-20">
       <div className="mx-auto flex w-full max-w-[1038px] flex-col items-center gap-8 lg:gap-10">
@@ -22,9 +38,9 @@ export function RelatedBlogs({
           )}
         </h2>
 
-        <div className="flex w-full flex-col gap-8 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12">
-          {posts.map((post) => (
-            <article key={post.key} className="w-full">
+        <div className={containerClasses}>
+          {resolvedPosts.map((post) => (
+            <article key={post.key} className={cardClasses}>
               <Link href={post.href} className="group flex flex-col gap-4">
                 <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-[#eef2f8]">
                   <Image

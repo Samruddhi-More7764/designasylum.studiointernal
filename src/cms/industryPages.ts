@@ -113,11 +113,6 @@ type RawIndustryDoc = {
   } | null> | null;
 };
 
-function text(value: string | null | undefined, fallback: string): string {
-  const trimmed = value?.trim();
-  return trimmed || fallback;
-}
-
 function linesOf(rows: TextRow[] | null | undefined): string[] {
   if (!rows?.length) return [];
   return rows.map((row) => row?.text?.trim() || "").filter(Boolean);
@@ -240,55 +235,106 @@ async function parseIndustryDoc(
     }))
     .filter((item) => item.question);
 
-  const experts = (doc.experts || [])
-    .map((expert, index) => {
-      const linked =
-        expert?.member && typeof expert.member === "object" ? expert.member : null;
-      const name = expert?.name?.trim() || linked?.name?.trim() || "";
-      if (!name) return null;
-      const role = expert?.role?.trim() || linked?.role?.trim() || "";
-      const image = mediaSrc(
-        expert?.image || linked?.photoOne,
-        fallback.experts[index]?.image || defaultHeroImage,
-      );
-      const cleanMemberSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const defaultHref = cleanMemberSlug ? `/team/${cleanMemberSlug}` : "#";
-      const href = expert?.readMoreUrl?.trim() || defaultHref;
+  const experts = (
+    await Promise.all(
+      (doc.experts || []).map(async (expert, index) => {
+        let linked =
+          expert?.member && typeof expert.member === "object" ? expert.member : null;
+        let cleanMemberSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
 
-      return {
-        image,
-        name,
-        role,
-        key: `expert-${index}`,
-        href,
-      };
-    })
-    .filter((e): e is NonNullable<typeof e> => Boolean(e));
+        if (!cleanMemberSlug && expert?.member && payload) {
+          const memberId =
+            typeof expert.member === "object"
+              ? (expert.member as { id?: string | number }).id
+              : expert.member;
+          if (memberId) {
+            try {
+              const memberDoc = await payload.findByID({
+                collection: "team-members" as "users",
+                id: memberId,
+                depth: 0,
+              });
+              if (memberDoc) {
+                cleanMemberSlug = (memberDoc as unknown as { slug?: string }).slug?.replace(/^\/+|\/+$/g, "").trim();
+                if (!linked) {
+                  linked = memberDoc as unknown as typeof linked;
+                }
+              }
+            } catch {}
+          }
+        }
 
-  const posts = (doc.relatedBlogs || [])
-    .map((post, index) => {
-      const linked = post?.post && typeof post.post === "object" ? post.post : null;
-      const title = post?.title?.trim() || linked?.title?.trim() || "";
-      if (!title) return null;
-      const date = post?.date?.trim() || linked?.date?.trim() || "";
-      const readTime = post?.readTime?.trim() || linked?.readTime?.trim() || "";
-      const image = mediaSrc(
-        post?.image || linked?.heroImage || linked?.image,
-        fallback.relatedBlogs[index]?.image || defaultHeroImage,
-      );
-      const cleanPostSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
-      const href = cleanPostSlug ? `/blogs/${cleanPostSlug}` : "#";
+        const name = expert?.name?.trim() || linked?.name?.trim() || "";
+        if (!name) return null;
+        const role = expert?.role?.trim() || linked?.role?.trim() || "";
+        const image = mediaSrc(
+          expert?.image || linked?.photoOne,
+          defaultHeroImage,
+        );
+        const cleanMemberSlugFinal = cleanMemberSlug || "";
+        const defaultHref = cleanMemberSlugFinal ? `/team/${cleanMemberSlugFinal}` : "#";
+        const href = expert?.readMoreUrl?.trim() || defaultHref;
 
-      return {
-        image,
-        date,
-        readTime,
-        title,
-        href,
-        key: `related-${index}`,
-      };
-    })
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+        return {
+          image,
+          name,
+          role,
+          key: `expert-${index}`,
+          href,
+        };
+      }),
+    )
+  ).filter((e): e is NonNullable<typeof e> => Boolean(e));
+
+  const posts = (
+    await Promise.all(
+      (doc.relatedBlogs || []).map(async (post, index) => {
+        let linked = post?.post && typeof post.post === "object" ? post.post : null;
+        let cleanPostSlug = linked?.slug?.replace(/^\/+|\/+$/g, "").trim();
+
+        if (!cleanPostSlug && post?.post && payload) {
+          const postId =
+            typeof post.post === "object"
+              ? (post.post as { id?: string | number }).id
+              : post.post;
+          if (postId) {
+            try {
+              const postDoc = await payload.findByID({
+                collection: "blog-posts",
+                id: postId,
+                depth: 0,
+              });
+              if (postDoc) {
+                cleanPostSlug = postDoc.slug?.replace(/^\/+|\/+$/g, "").trim();
+                if (!linked) {
+                  linked = postDoc as unknown as typeof linked;
+                }
+              }
+            } catch {}
+          }
+        }
+
+        const title = post?.title?.trim() || linked?.title?.trim() || "";
+        if (!title) return null;
+        const date = post?.date?.trim() || linked?.date?.trim() || "";
+        const readTime = post?.readTime?.trim() || linked?.readTime?.trim() || "";
+        const image = mediaSrc(
+          post?.image || linked?.heroImage || linked?.image,
+          defaultHeroImage,
+        );
+        const href = cleanPostSlug ? `/blogs/${cleanPostSlug}` : (post?.href?.trim() || "#");
+
+        return {
+          image,
+          date,
+          readTime,
+          title,
+          href,
+          key: `related-${index}`,
+        };
+      }),
+    )
+  ).filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   const logos = (doc.logos || [])
     .map((logo, index) => {
@@ -325,18 +371,18 @@ async function parseIndustryDoc(
   }): ClientLogo => ({ name, image, width, height });
 
   const resolvedBreadcrumb =
-    doc.breadcrumbCurrent?.trim() || doc.title?.trim() || fallback.breadcrumbCurrent;
+    doc.breadcrumbCurrent?.trim() || doc.title?.trim() || "";
 
   return {
     breadcrumbCurrent: resolvedBreadcrumb,
-    heroTitle: text(doc.heroTitle, fallback.heroTitle),
-    heroIntro: text(doc.heroIntro, fallback.heroIntro),
-    heroImage: mediaSrc(doc.heroImage, fallback.heroImage),
-    lead: text(doc.lead, fallback.lead),
-    preface: preface.length ? preface : fallback.preface,
-    sections: sections ?? fallback.sections,
+    heroTitle: doc.heroTitle?.trim() || doc.title?.trim() || "",
+    heroIntro: doc.heroIntro?.trim() || "",
+    heroImage: resolveMediaUrl(doc.heroImage) || defaultHeroImage,
+    lead: doc.lead?.trim() || "",
+    preface: preface,
+    sections: sections ?? [],
     logos: (() => {
-      if (!logos.length) return fallback.logos;
+      if (!logos.length) return null;
       if (logos.length <= 3) {
         return distributeLogosTriangle(logos.map(toLogo));
       }
@@ -349,19 +395,19 @@ async function parseIndustryDoc(
       }
       return distributeLogosTriangle(logos.map(toLogo));
     })(),
-    clientsBefore: text(doc.clientsBefore, fallback.clientsBefore),
-    clientsAccent: text(doc.clientsAccent, fallback.clientsAccent),
-    clientsAfter: text(doc.clientsAfter, fallback.clientsAfter),
-    clientTabs: tabs.length ? tabs : fallback.clientTabs,
-    projects: projects.length ? projects : fallback.projects,
-    faqs: faqs.length ? faqs : fallback.faqs,
-    expertsBefore: text(doc.expertsBefore, fallback.expertsBefore),
-    expertsAccent: text(doc.expertsAccent, fallback.expertsAccent),
-    expertsSubheading: text(doc.expertsSubheading, fallback.expertsSubheading),
-    experts: experts.length ? experts : fallback.experts,
-    relatedBefore: text(doc.relatedBefore, fallback.relatedBefore),
-    relatedAccent: text(doc.relatedAccent, fallback.relatedAccent),
-    relatedBlogs: posts.length ? posts : fallback.relatedBlogs,
+    clientsBefore: doc.clientsBefore?.trim() || fallback.clientsBefore,
+    clientsAccent: doc.clientsAccent?.trim() || fallback.clientsAccent,
+    clientsAfter: doc.clientsAfter?.trim() || fallback.clientsAfter,
+    clientTabs: tabs,
+    projects: projects,
+    faqs: faqs,
+    expertsBefore: doc.expertsBefore?.trim() || fallback.expertsBefore,
+    expertsAccent: doc.expertsAccent?.trim() || fallback.expertsAccent,
+    expertsSubheading: doc.expertsSubheading?.trim() || fallback.expertsSubheading,
+    experts: experts,
+    relatedBefore: doc.relatedBefore?.trim() || fallback.relatedBefore,
+    relatedAccent: doc.relatedAccent?.trim() || fallback.relatedAccent,
+    relatedBlogs: posts,
   };
 }
 

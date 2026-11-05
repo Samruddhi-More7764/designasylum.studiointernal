@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
   Field,
 } from "payload";
+import { autofillBlueprintFields } from "../cms/sharedBlueprintAutofill";
 
 const slugify = (value: string) =>
   value
@@ -49,7 +50,7 @@ export const ServicePages: CollectionConfig = {
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug],
+    beforeValidate: [ensureSlug, autofillBlueprintFields],
   },
   fields: [
     {
@@ -212,24 +213,15 @@ export const ServicePages: CollectionConfig = {
                   type: "relationship",
                   relationTo: "clients",
                   admin: {
-                    description: "Select from clients list to automatically pull name, image, and link.",
+                    description:
+                      "Select from existing clients list to automatically pull heading, image, description, and link.",
                   },
                 },
-                imageUpload,
                 {
-                  name: "name",
-                  type: "text",
-                  admin: { description: "Leave empty to use client name." },
-                },
-                {
-                  name: "description",
-                  type: "textarea",
-                  admin: { description: "Project summary or case study highlights." },
-                },
-                {
-                  name: "tab",
-                  label: "Client tab",
+                  name: "category",
+                  label: "Category",
                   type: "select",
+                  defaultValue: "service",
                   options: [
                     { label: "Solution", value: "solution" },
                     { label: "Service", value: "service" },
@@ -237,8 +229,38 @@ export const ServicePages: CollectionConfig = {
                     { label: "Branding Projects", value: "branding-projects" },
                   ],
                   admin: {
-                    description: "Which tab this project appears under. Leave empty to show on all tabs.",
+                    description: "Which category tab this project appears under. Defaults to Service.",
                   },
+                },
+                {
+                  name: "order",
+                  label: "Order",
+                  type: "number",
+                  defaultValue: 0,
+                  admin: {
+                    description: "Display order. Lower numbers appear first.",
+                  },
+                },
+                {
+                  name: "heading",
+                  label: "Heading",
+                  type: "text",
+                  admin: { description: "Project heading. Leave empty to use client name." },
+                },
+                {
+                  name: "description",
+                  label: "Description",
+                  type: "textarea",
+                  admin: { description: "Project summary or highlights. Leave empty to use client description." },
+                },
+                {
+                  ...imageUpload,
+                  admin: { description: "Project image. Leave empty to use client hero image." },
+                },
+                {
+                  name: "href",
+                  type: "text",
+                  admin: { hidden: true },
                 },
               ],
             },
@@ -289,10 +311,14 @@ export const ServicePages: CollectionConfig = {
                   type: "relationship",
                   relationTo: "team-members",
                   admin: {
-                    description: "Select from team members (leadership or team member) to automatically link profile.",
+                    description:
+                      "Select from team members to automatically pull name, role, photo, and link, with the option to edit.",
                   },
                 },
-                imageUpload,
+                {
+                  ...imageUpload,
+                  admin: { description: "Leave empty to use photo from selected team member." },
+                },
                 {
                   name: "name",
                   type: "text",
@@ -336,19 +362,24 @@ export const ServicePages: CollectionConfig = {
                     description: "Select from all blogs list to automatically pull title, image, date, and link.",
                   },
                 },
-                imageUpload,
-                { name: "date", type: "text" },
-                { name: "readTime", label: "Read time", type: "text" },
+                {
+                  ...imageUpload,
+                  admin: { description: "Leave empty to use hero image from selected blog post." },
+                },
+                {
+                  name: "date",
+                  type: "text",
+                  admin: { description: "Leave empty to use date from selected blog post." },
+                },
+                {
+                  name: "readTime",
+                  label: "Read time",
+                  type: "text",
+                },
                 {
                   name: "title",
                   type: "text",
                   admin: { description: "Leave empty to use blog post title." },
-                },
-                {
-                  name: "href",
-                  label: "Custom URL",
-                  type: "text",
-                  admin: { description: "Leave empty to use blog post link." },
                 },
               ],
             },
