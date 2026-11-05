@@ -264,6 +264,16 @@ export const WorkServicePages: CollectionConfig = {
                   type: "text",
                   admin: { hidden: true },
                 },
+                {
+                  name: "name",
+                  type: "text",
+                  admin: { hidden: true },
+                },
+                {
+                  name: "tab",
+                  type: "text",
+                  admin: { hidden: true },
+                },
               ],
             },
           ],

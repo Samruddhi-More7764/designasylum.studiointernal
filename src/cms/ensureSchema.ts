@@ -107,7 +107,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v6_blog_enhancements_columns"];
+  const lines: string[] = ["migration_v7_cascade_foreign_keys_and_blueprint_fixes"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -249,6 +249,7 @@ function quoteLiteral(value: string): string {
 
 async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
   const cascades = [
+    // Open roles
     {
       table: "open_roles_page_roles_responsibilities",
       constraint: "open_roles_page_roles_responsibilities_parent_fk",
@@ -259,6 +260,418 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
       constraint: "open_roles_page_roles_requirements_parent_fk",
       parentTable: "open_roles_page_roles",
     },
+
+    // Service pages
+    {
+      table: "service_pages_sections_paragraphs",
+      constraint: "service_pages_sections_paragraphs_parent_fk",
+      parentTable: "service_pages_sections",
+    },
+    {
+      table: "service_pages_sections_pointers",
+      constraint: "service_pages_sections_pointers_parent_fk",
+      parentTable: "service_pages_sections",
+    },
+    {
+      table: "service_pages_sections_closing",
+      constraint: "service_pages_sections_closing_parent_fk",
+      parentTable: "service_pages_sections",
+    },
+    {
+      table: "service_pages_sections",
+      constraint: "service_pages_sections_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_logos",
+      constraint: "service_pages_logos_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_client_tabs",
+      constraint: "service_pages_client_tabs_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_clientTabs",
+      constraint: "service_pages_clientTabs_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_projects",
+      constraint: "service_pages_projects_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_faqs",
+      constraint: "service_pages_faqs_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_experts",
+      constraint: "service_pages_experts_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_related_blogs",
+      constraint: "service_pages_related_blogs_parent_fk",
+      parentTable: "service_pages",
+    },
+    {
+      table: "service_pages_relatedBlogs",
+      constraint: "service_pages_relatedBlogs_parent_fk",
+      parentTable: "service_pages",
+    },
+
+    // Solution pages
+    {
+      table: "solution_pages_sections_paragraphs",
+      constraint: "solution_pages_sections_paragraphs_parent_fk",
+      parentTable: "solution_pages_sections",
+    },
+    {
+      table: "solution_pages_sections_pointers",
+      constraint: "solution_pages_sections_pointers_parent_fk",
+      parentTable: "solution_pages_sections",
+    },
+    {
+      table: "solution_pages_sections_closing",
+      constraint: "solution_pages_sections_closing_parent_fk",
+      parentTable: "solution_pages_sections",
+    },
+    {
+      table: "solution_pages_sections",
+      constraint: "solution_pages_sections_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_logos",
+      constraint: "solution_pages_logos_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_client_tabs",
+      constraint: "solution_pages_client_tabs_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_clientTabs",
+      constraint: "solution_pages_clientTabs_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_projects",
+      constraint: "solution_pages_projects_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_faqs",
+      constraint: "solution_pages_faqs_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_experts",
+      constraint: "solution_pages_experts_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_related_blogs",
+      constraint: "solution_pages_related_blogs_parent_fk",
+      parentTable: "solution_pages",
+    },
+    {
+      table: "solution_pages_relatedBlogs",
+      constraint: "solution_pages_relatedBlogs_parent_fk",
+      parentTable: "solution_pages",
+    },
+
+    // Work service pages
+    {
+      table: "work_service_pages_sections_paragraphs",
+      constraint: "work_service_pages_sections_paragraphs_parent_fk",
+      parentTable: "work_service_pages_sections",
+    },
+    {
+      table: "work_service_pages_sections_pointers",
+      constraint: "work_service_pages_sections_pointers_parent_fk",
+      parentTable: "work_service_pages_sections",
+    },
+    {
+      table: "work_service_pages_sections_closing",
+      constraint: "work_service_pages_sections_closing_parent_fk",
+      parentTable: "work_service_pages_sections",
+    },
+    {
+      table: "work_service_pages_sections",
+      constraint: "work_service_pages_sections_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_logos",
+      constraint: "work_service_pages_logos_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_client_tabs",
+      constraint: "work_service_pages_client_tabs_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_clientTabs",
+      constraint: "work_service_pages_clientTabs_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_projects",
+      constraint: "work_service_pages_projects_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_faqs",
+      constraint: "work_service_pages_faqs_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_experts",
+      constraint: "work_service_pages_experts_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_related_blogs",
+      constraint: "work_service_pages_related_blogs_parent_fk",
+      parentTable: "work_service_pages",
+    },
+    {
+      table: "work_service_pages_relatedBlogs",
+      constraint: "work_service_pages_relatedBlogs_parent_fk",
+      parentTable: "work_service_pages",
+    },
+
+    // Industry pages
+    {
+      table: "industry_pages_sections_paragraphs",
+      constraint: "industry_pages_sections_paragraphs_parent_fk",
+      parentTable: "industry_pages_sections",
+    },
+    {
+      table: "industry_pages_sections_pointers",
+      constraint: "industry_pages_sections_pointers_parent_fk",
+      parentTable: "industry_pages_sections",
+    },
+    {
+      table: "industry_pages_sections_closing",
+      constraint: "industry_pages_sections_closing_parent_fk",
+      parentTable: "industry_pages_sections",
+    },
+    {
+      table: "industry_pages_sections",
+      constraint: "industry_pages_sections_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_logos",
+      constraint: "industry_pages_logos_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_client_tabs",
+      constraint: "industry_pages_client_tabs_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_clientTabs",
+      constraint: "industry_pages_clientTabs_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_projects",
+      constraint: "industry_pages_projects_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_faqs",
+      constraint: "industry_pages_faqs_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_experts",
+      constraint: "industry_pages_experts_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_related_blogs",
+      constraint: "industry_pages_related_blogs_parent_fk",
+      parentTable: "industry_pages",
+    },
+    {
+      table: "industry_pages_relatedBlogs",
+      constraint: "industry_pages_relatedBlogs_parent_fk",
+      parentTable: "industry_pages",
+    },
+
+    // Location pages
+    {
+      table: "location_pages_sections_paragraphs",
+      constraint: "location_pages_sections_paragraphs_parent_fk",
+      parentTable: "location_pages_sections",
+    },
+    {
+      table: "location_pages_sections_pointers",
+      constraint: "location_pages_sections_pointers_parent_fk",
+      parentTable: "location_pages_sections",
+    },
+    {
+      table: "location_pages_sections_blocks_paragraphs",
+      constraint: "location_pages_sections_blocks_paragraphs_parent_fk",
+      parentTable: "location_pages_sections_blocks",
+    },
+    {
+      table: "location_pages_sections_blocks",
+      constraint: "location_pages_sections_blocks_parent_fk",
+      parentTable: "location_pages_sections",
+    },
+    {
+      table: "location_pages_sections",
+      constraint: "location_pages_sections_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_logos",
+      constraint: "location_pages_logos_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_client_tabs",
+      constraint: "location_pages_client_tabs_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_clientTabs",
+      constraint: "location_pages_clientTabs_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_projects",
+      constraint: "location_pages_projects_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_faqs",
+      constraint: "location_pages_faqs_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_related_blogs",
+      constraint: "location_pages_related_blogs_parent_fk",
+      parentTable: "location_pages",
+    },
+    {
+      table: "location_pages_relatedBlogs",
+      constraint: "location_pages_relatedBlogs_parent_fk",
+      parentTable: "location_pages",
+    },
+
+    // Blog posts
+    {
+      table: "blog_posts_blocks_arrows_items",
+      constraint: "blog_posts_blocks_arrows_items_parent_fk",
+      parentTable: "blog_posts_blocks_arrows",
+    },
+    {
+      table: "blog_posts_blocks_arrows",
+      constraint: "blog_posts_blocks_arrows_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_gallery_images",
+      constraint: "blog_posts_blocks_gallery_images_parent_fk",
+      parentTable: "blog_posts_blocks_gallery",
+    },
+    {
+      table: "blog_posts_blocks_gallery",
+      constraint: "blog_posts_blocks_gallery_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_image",
+      constraint: "blog_posts_blocks_image_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_links_items",
+      constraint: "blog_posts_blocks_links_items_parent_fk",
+      parentTable: "blog_posts_blocks_links",
+    },
+    {
+      table: "blog_posts_blocks_links",
+      constraint: "blog_posts_blocks_links_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_note",
+      constraint: "blog_posts_blocks_note_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_paragraphs_items",
+      constraint: "blog_posts_blocks_paragraphs_items_parent_fk",
+      parentTable: "blog_posts_blocks_paragraphs",
+    },
+    {
+      table: "blog_posts_blocks_paragraphs",
+      constraint: "blog_posts_blocks_paragraphs_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_quote",
+      constraint: "blog_posts_blocks_quote_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_rich_parts",
+      constraint: "blog_posts_blocks_rich_parts_parent_fk",
+      parentTable: "blog_posts_blocks_rich",
+    },
+    {
+      table: "blog_posts_blocks_rich",
+      constraint: "blog_posts_blocks_rich_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_rows_items",
+      constraint: "blog_posts_blocks_rows_items_parent_fk",
+      parentTable: "blog_posts_blocks_rows",
+    },
+    {
+      table: "blog_posts_blocks_rows",
+      constraint: "blog_posts_blocks_rows_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_blocks_subhead",
+      constraint: "blog_posts_blocks_subhead_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_faqs",
+      constraint: "blog_posts_faqs_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_related_blogs",
+      constraint: "blog_posts_related_blogs_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_sections",
+      constraint: "blog_posts_sections_parent_fk",
+      parentTable: "blog_posts",
+    },
+    {
+      table: "blog_posts_topics",
+      constraint: "blog_posts_topics_parent_fk",
+      parentTable: "blog_posts",
+    },
   ];
 
   for (const item of cascades) {
@@ -267,6 +680,19 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
       [item.table],
     );
     if (tableExists.rows.length === 0) continue;
+
+    const parentTableExists = await client.query(
+      `SELECT 1 FROM information_schema.tables WHERE table_name = $1`,
+      [item.parentTable],
+    );
+    if (parentTableExists.rows.length === 0) continue;
+
+    // Clean up any orphaned rows before attempting constraint addition
+    await client.query(`
+      DELETE FROM ${quoteIdent(item.table)}
+      WHERE _parent_id IS NOT NULL
+        AND _parent_id NOT IN (SELECT id FROM ${quoteIdent(item.parentTable)})
+    `).catch(() => undefined);
 
     const { rows } = await client.query(
       `SELECT 1 FROM pg_constraint WHERE conname = $1`,
@@ -278,7 +704,7 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
          ADD CONSTRAINT ${quoteIdent(item.constraint)}
          FOREIGN KEY (_parent_id) REFERENCES ${quoteIdent(item.parentTable)}(id)
          ON DELETE CASCADE`,
-      );
+      ).catch(() => undefined);
     }
   }
 }
@@ -574,9 +1000,24 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
 
     DO $$ BEGIN
       ALTER TABLE IF EXISTS "service_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "service_pages_projects" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "service_pages_projects" ALTER COLUMN "description" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "service_pages_faqs" ALTER COLUMN "answer" DROP NOT NULL;
+
       ALTER TABLE IF EXISTS "solution_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_projects" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_projects" ALTER COLUMN "description" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_faqs" ALTER COLUMN "answer" DROP NOT NULL;
+
       ALTER TABLE IF EXISTS "work_service_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_projects" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_projects" ALTER COLUMN "description" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_faqs" ALTER COLUMN "answer" DROP NOT NULL;
+
       ALTER TABLE IF EXISTS "industry_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_projects" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_projects" ALTER COLUMN "description" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_faqs" ALTER COLUMN "answer" DROP NOT NULL;
 
       ALTER TABLE IF EXISTS "service_pages_experts" ALTER COLUMN "name" DROP NOT NULL;
       ALTER TABLE IF EXISTS "service_pages_experts" ALTER COLUMN "role" DROP NOT NULL;

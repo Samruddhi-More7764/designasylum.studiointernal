@@ -575,17 +575,21 @@ async function fillEmptyEntries(payload: Payload): Promise<void> {
 
   const filled: string[] = [];
   for (const entry of entries) {
-    const current = (await payload.findGlobal({
-      slug: entry.slug as "site-footer",
-      depth: 0,
-      overrideAccess: true,
-    })) as unknown as Record<string, unknown>;
-    if (hasSavedContent(current, entry.data)) continue;
-    await payload.updateGlobal({
-      slug: entry.slug as "site-footer",
-      data: entry.data,
-    } as Parameters<typeof payload.updateGlobal>[0]);
-    filled.push(entry.slug);
+    try {
+      const current = (await payload.findGlobal({
+        slug: entry.slug as "site-footer",
+        depth: 0,
+        overrideAccess: true,
+      })) as unknown as Record<string, unknown>;
+      if (hasSavedContent(current, entry.data)) continue;
+      await payload.updateGlobal({
+        slug: entry.slug as "site-footer",
+        data: entry.data,
+      } as Parameters<typeof payload.updateGlobal>[0]);
+      filled.push(entry.slug);
+    } catch {
+      // ignore if global is missing or migrated to collections
+    }
   }
 
   const writer = (await db.pool.connect()) as QueryClient;

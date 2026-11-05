@@ -126,7 +126,6 @@ export interface Config {
   globals: {
     'site-footer': SiteFooter;
     'blog-index': BlogIndex;
-    'blog-article': BlogArticle;
     'contact-page': ContactPage;
     'faq-page': FaqPage;
     'careers-page': CareersPage;
@@ -140,7 +139,6 @@ export interface Config {
   globalsSelect: {
     'site-footer': SiteFooterSelect<false> | SiteFooterSelect<true>;
     'blog-index': BlogIndexSelect<false> | BlogIndexSelect<true>;
-    'blog-article': BlogArticleSelect<false> | BlogArticleSelect<true>;
     'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
     'faq-page': FaqPageSelect<false> | FaqPageSelect<true>;
     'careers-page': CareersPageSelect<false> | CareersPageSelect<true>;
@@ -1033,32 +1031,14 @@ export interface TeamMember {
  */
 export interface BlogPost {
   id: number;
+  /**
+   * Post title (used for admin listing, SEO, and card display).
+   */
   title: string;
   /**
-   * URL slug, e.g. 'branding-agency-in-pune' (accessible at /blogs/[slug]).
+   * URL slug, e.g. 'sevenloop-brand-website-redesign' (accessible at /blogs/[slug]).
    */
   slug: string;
-  /**
-   * e.g. 'September 7, 2026'
-   */
-  date?: string | null;
-  /**
-   * e.g. '10 min read'
-   */
-  readTime?: string | null;
-  /**
-   * Category filter.
-   */
-  category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
-  /**
-   * Listing card thumbnail image.
-   */
-  image?: (number | null) | Media;
-  /**
-   * Optional card badge, e.g. 'Hot Right Now'
-   */
-  badge?: string | null;
-  badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
   breadcrumbCurrent?: string | null;
   titleBefore?: string | null;
   titleAccent?: string | null;
@@ -1072,6 +1052,27 @@ export interface BlogPost {
   bylineName?: string | null;
   bylineDate?: string | null;
   bylineAvatar?: (number | null) | Media;
+  /**
+   * Publish date, e.g. 'September 7, 2026'
+   */
+  date?: string | null;
+  /**
+   * e.g. '10 min read'
+   */
+  readTime?: string | null;
+  /**
+   * Category filter.
+   */
+  category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
+  /**
+   * Listing card thumbnail image. Leave empty to use the Hero Image.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Optional card badge, e.g. 'Hot Right Now'
+   */
+  badge?: string | null;
+  badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
   lead?: string | null;
   /**
    * Each section is a heading, its content blocks, and a table-of-contents item.
@@ -1203,14 +1204,34 @@ export interface BlogPost {
         id?: string | null;
       }[]
     | null;
-  authorImage?: (number | null) | Media;
-  authorName?: string | null;
-  authorRole?: string | null;
-  authorBio?: string | null;
   /**
-   * Optional: Select a team member profile to automatically link the author to /team/[slug].
+   * Select an existing team member or leader. Author name, role, photo, and bio will automatically populate below, and can be customized.
    */
   authorMember?: (number | null) | TeamMember;
+  /**
+   * Leave empty to use profile photo from the selected team member or leader.
+   */
+  authorImage?: (number | null) | Media;
+  /**
+   * Leave empty to use name from the selected team member or leader.
+   */
+  authorName?: string | null;
+  /**
+   * Leave empty to use role from the selected team member or leader.
+   */
+  authorRole?: string | null;
+  /**
+   * Leave empty to use bio from the selected team member or leader.
+   */
+  authorBio?: string | null;
+  /**
+   * Optional: Associate an existing Client with this blog post.
+   */
+  client?: (number | null) | Client;
+  /**
+   * Optional: Override the 24x24 icon shown on topic badges. If left empty, the post's Hero Image will be used automatically.
+   */
+  topicIcon?: (number | null) | Media;
   topicsBefore?: string | null;
   topicsAccent?: string | null;
   topicsAfter?: string | null;
@@ -1389,6 +1410,8 @@ export interface IndustryPage {
          */
         image?: (number | null) | Media;
         href?: string | null;
+        name?: string | null;
+        tab?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1593,6 +1616,8 @@ export interface ServicePage {
          */
         image?: (number | null) | Media;
         href?: string | null;
+        name?: string | null;
+        tab?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1797,6 +1822,8 @@ export interface SolutionPage {
          */
         image?: (number | null) | Media;
         href?: string | null;
+        name?: string | null;
+        tab?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -2001,6 +2028,8 @@ export interface WorkServicePage {
          */
         image?: (number | null) | Media;
         href?: string | null;
+        name?: string | null;
+        tab?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -2138,17 +2167,33 @@ export interface LocationPage {
     | null;
   projects?:
     | {
+        /**
+         * Select from existing clients list to automatically pull heading, image, description, and link.
+         */
+        client?: (number | null) | Client;
+        /**
+         * Which category tab this project appears under. Defaults to Location.
+         */
+        category?: ('solution' | 'service' | 'industry' | 'location' | 'branding-projects') | null;
+        /**
+         * Display order. Lower numbers appear first.
+         */
+        order?: number | null;
+        /**
+         * Project heading. Leave empty to use client name.
+         */
+        heading?: string | null;
+        /**
+         * Project summary or highlights. Leave empty to use client description.
+         */
+        description?: string | null;
+        /**
+         * Project image. Leave empty to use client hero image.
+         */
         image?: (number | null) | Media;
-        name: string;
-        description: string;
-        /**
-         * Where the View website button goes. Leave empty until that page exists.
-         */
         href?: string | null;
-        /**
-         * Which tab this project appears under. Leave empty to show it on every tab.
-         */
-        tab?: ('solution' | 'service' | 'industry' | 'location') | null;
+        name?: string | null;
+        tab?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -2161,8 +2206,15 @@ export interface LocationPage {
    */
   logos?:
     | {
+        /**
+         * Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.
+         */
+        clientLogo?: (number | null) | ClientLogo;
         image?: (number | null) | Media;
-        name: string;
+        /**
+         * Leave empty to use client logo name.
+         */
+        name?: string | null;
         /**
          * Desktop row placement.
          */
@@ -2217,12 +2269,6 @@ export interface LocationPage {
         id?: string | null;
       }[]
     | null;
-  ctaHeadingBefore?: string | null;
-  ctaHeadingAccent?: string | null;
-  ctaHeadingAfter?: string | null;
-  ctaBody?: string | null;
-  ctaButtonLabel?: string | null;
-  ctaButtonHref?: string | null;
   faqs?:
     | {
         question: string;
@@ -2238,10 +2284,20 @@ export interface LocationPage {
   relatedAfter?: string | null;
   relatedBlogs?:
     | {
+        /**
+         * Select from all blogs list to automatically pull title, image, date, and link.
+         */
+        post?: (number | null) | BlogPost;
         image?: (number | null) | Media;
+        /**
+         * Leave empty to use date from selected blog post.
+         */
         date?: string | null;
         readTime?: string | null;
-        title: string;
+        /**
+         * Leave empty to use blog post title.
+         */
+        title?: string | null;
         href?: string | null;
         id?: string | null;
       }[]
@@ -2960,12 +3016,6 @@ export interface TeamMembersSelect<T extends boolean = true> {
 export interface BlogPostsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
-  date?: T;
-  readTime?: T;
-  category?: T;
-  image?: T;
-  badge?: T;
-  badgeIcon?: T;
   breadcrumbCurrent?: T;
   titleBefore?: T;
   titleAccent?: T;
@@ -2976,6 +3026,12 @@ export interface BlogPostsSelect<T extends boolean = true> {
   bylineName?: T;
   bylineDate?: T;
   bylineAvatar?: T;
+  date?: T;
+  readTime?: T;
+  category?: T;
+  image?: T;
+  badge?: T;
+  badgeIcon?: T;
   lead?: T;
   sections?:
     | T
@@ -3111,11 +3167,13 @@ export interface BlogPostsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  authorMember?: T;
   authorImage?: T;
   authorName?: T;
   authorRole?: T;
   authorBio?: T;
-  authorMember?: T;
+  client?: T;
+  topicIcon?: T;
   topicsBefore?: T;
   topicsAccent?: T;
   topicsAfter?: T;
@@ -3217,6 +3275,8 @@ export interface IndustryPagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         href?: T;
+        name?: T;
+        tab?: T;
         id?: T;
       };
   faqs?:
@@ -3325,6 +3385,8 @@ export interface ServicePagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         href?: T;
+        name?: T;
+        tab?: T;
         id?: T;
       };
   faqs?:
@@ -3433,6 +3495,8 @@ export interface SolutionPagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         href?: T;
+        name?: T;
+        tab?: T;
         id?: T;
       };
   faqs?:
@@ -3541,6 +3605,8 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         href?: T;
+        name?: T;
+        tab?: T;
         id?: T;
       };
   faqs?:
@@ -3621,10 +3687,14 @@ export interface LocationPagesSelect<T extends boolean = true> {
   projects?:
     | T
     | {
-        image?: T;
-        name?: T;
+        client?: T;
+        category?: T;
+        order?: T;
+        heading?: T;
         description?: T;
+        image?: T;
         href?: T;
+        name?: T;
         tab?: T;
         id?: T;
       };
@@ -3635,6 +3705,7 @@ export interface LocationPagesSelect<T extends boolean = true> {
   logos?:
     | T
     | {
+        clientLogo?: T;
         image?: T;
         name?: T;
         row?: T;
@@ -3675,12 +3746,6 @@ export interface LocationPagesSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  ctaHeadingBefore?: T;
-  ctaHeadingAccent?: T;
-  ctaHeadingAfter?: T;
-  ctaBody?: T;
-  ctaButtonLabel?: T;
-  ctaButtonHref?: T;
   faqs?:
     | T
     | {
@@ -3694,6 +3759,7 @@ export interface LocationPagesSelect<T extends boolean = true> {
   relatedBlogs?:
     | T
     | {
+        post?: T;
         image?: T;
         date?: T;
         readTime?: T;
@@ -3902,6 +3968,10 @@ export interface BlogIndex {
          */
         post?: (number | null) | BlogPost;
         /**
+         * Optional custom route override. Leave empty to automatically link to /blogs/[slug] of the selected post.
+         */
+        href?: string | null;
+        /**
          * Leave empty to use the image from the selected blog post.
          */
         image?: (number | null) | Media;
@@ -3941,6 +4011,10 @@ export interface BlogIndex {
          */
         post?: (number | null) | BlogPost;
         /**
+         * Optional custom route override. Leave empty to automatically link to /blogs/[slug] of the selected post.
+         */
+        href?: string | null;
+        /**
          * Leave empty to use the image from the selected blog post.
          */
         image?: (number | null) | Media;
@@ -3958,200 +4032,6 @@ export interface BlogIndex {
         category?: ('Brand' | 'Digital' | 'Strategy' | 'Studio') | null;
         badge?: string | null;
         badgeIcon?: ('rocket' | 'fire' | 'medal' | 'smile' | 'timer') | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blog-article".
- */
-export interface BlogArticle {
-  id: number;
-  breadcrumbCurrent?: string | null;
-  titleBefore?: string | null;
-  titleAccent?: string | null;
-  titleMiddle?: string | null;
-  titleLine?: string | null;
-  intro?: string | null;
-  /**
-   * The wide image under the heading. Leave empty to use the card image.
-   */
-  heroImage?: (number | null) | Media;
-  bylineName?: string | null;
-  bylineDate?: string | null;
-  bylineAvatar?: (number | null) | Media;
-  lead?: string | null;
-  /**
-   * Each section is a heading, its content blocks, and a table-of-contents item.
-   */
-  sections?:
-    | {
-        anchor: string;
-        tocLabel: string;
-        headingBefore?: string | null;
-        headingAccent?: string | null;
-        headingAfter?: string | null;
-        blocks?:
-          | (
-              | {
-                  items?:
-                    | {
-                        text: string;
-                        id?: string | null;
-                      }[]
-                    | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'paragraphs';
-                }
-              | {
-                  parts?:
-                    | {
-                        text: string;
-                        strong?: boolean | null;
-                        id?: string | null;
-                      }[]
-                    | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'rich';
-                }
-              | {
-                  title: string;
-                  body?: string | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'subhead';
-                }
-              | {
-                  items?:
-                    | {
-                        lead?: string | null;
-                        rest: string;
-                        id?: string | null;
-                      }[]
-                    | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'arrows';
-                }
-              | {
-                  items?:
-                    | {
-                        label: string;
-                        value: string;
-                        id?: string | null;
-                      }[]
-                    | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'rows';
-                }
-              | {
-                  image?: (number | null) | Media;
-                  src?: string | null;
-                  alt?: string | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'image';
-                }
-              | {
-                  alt?: string | null;
-                  images?:
-                    | {
-                        image?: (number | null) | Media;
-                        src: string;
-                        id?: string | null;
-                      }[]
-                    | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'gallery';
-                }
-              | {
-                  quote: string;
-                  name: string;
-                  role?: string | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'quote';
-                }
-              | {
-                  kicker?: string | null;
-                  body: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'note';
-                }
-              | {
-                  kicker?: string | null;
-                  items?:
-                    | {
-                        label: string;
-                        href: string;
-                        id?: string | null;
-                      }[]
-                    | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'links';
-                }
-            )[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  faqs?:
-    | {
-        question: string;
-        /**
-         * Leave empty to keep the question closed.
-         */
-        answer?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  authorImage?: (number | null) | Media;
-  authorName?: string | null;
-  authorRole?: string | null;
-  authorBio?: string | null;
-  /**
-   * Optional: Select a team member profile to automatically link the author to /team/[slug].
-   */
-  authorMember?: (number | null) | TeamMember;
-  topicsBefore?: string | null;
-  topicsAccent?: string | null;
-  topicsAfter?: string | null;
-  topics?:
-    | {
-        label: string;
-        id?: string | null;
-      }[]
-    | null;
-  relatedBefore?: string | null;
-  relatedAccent?: string | null;
-  relatedBlogs?:
-    | {
-        /**
-         * Select a post from Collections > Blog Posts. Title, date, read time, image, and link will auto-fill from it.
-         */
-        post?: (number | null) | BlogPost;
-        /**
-         * Leave empty to use hero image from selected blog post.
-         */
-        image?: (number | null) | Media;
-        /**
-         * Leave empty to use date from selected blog post.
-         */
-        date?: string | null;
-        readTime?: string | null;
-        /**
-         * Leave empty to use title from selected blog post.
-         */
-        title?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -4730,6 +4610,7 @@ export interface BlogIndexSelect<T extends boolean = true> {
     | T
     | {
         post?: T;
+        href?: T;
         image?: T;
         title?: T;
         date?: T;
@@ -4751,192 +4632,13 @@ export interface BlogIndexSelect<T extends boolean = true> {
     | T
     | {
         post?: T;
+        href?: T;
         image?: T;
         title?: T;
         date?: T;
         category?: T;
         badge?: T;
         badgeIcon?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blog-article_select".
- */
-export interface BlogArticleSelect<T extends boolean = true> {
-  breadcrumbCurrent?: T;
-  titleBefore?: T;
-  titleAccent?: T;
-  titleMiddle?: T;
-  titleLine?: T;
-  intro?: T;
-  heroImage?: T;
-  bylineName?: T;
-  bylineDate?: T;
-  bylineAvatar?: T;
-  lead?: T;
-  sections?:
-    | T
-    | {
-        anchor?: T;
-        tocLabel?: T;
-        headingBefore?: T;
-        headingAccent?: T;
-        headingAfter?: T;
-        blocks?:
-          | T
-          | {
-              paragraphs?:
-                | T
-                | {
-                    items?:
-                      | T
-                      | {
-                          text?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                    blockName?: T;
-                  };
-              rich?:
-                | T
-                | {
-                    parts?:
-                      | T
-                      | {
-                          text?: T;
-                          strong?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                    blockName?: T;
-                  };
-              subhead?:
-                | T
-                | {
-                    title?: T;
-                    body?: T;
-                    id?: T;
-                    blockName?: T;
-                  };
-              arrows?:
-                | T
-                | {
-                    items?:
-                      | T
-                      | {
-                          lead?: T;
-                          rest?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                    blockName?: T;
-                  };
-              rows?:
-                | T
-                | {
-                    items?:
-                      | T
-                      | {
-                          label?: T;
-                          value?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                    blockName?: T;
-                  };
-              image?:
-                | T
-                | {
-                    image?: T;
-                    src?: T;
-                    alt?: T;
-                    id?: T;
-                    blockName?: T;
-                  };
-              gallery?:
-                | T
-                | {
-                    alt?: T;
-                    images?:
-                      | T
-                      | {
-                          image?: T;
-                          src?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                    blockName?: T;
-                  };
-              quote?:
-                | T
-                | {
-                    quote?: T;
-                    name?: T;
-                    role?: T;
-                    id?: T;
-                    blockName?: T;
-                  };
-              note?:
-                | T
-                | {
-                    kicker?: T;
-                    body?: T;
-                    id?: T;
-                    blockName?: T;
-                  };
-              links?:
-                | T
-                | {
-                    kicker?: T;
-                    items?:
-                      | T
-                      | {
-                          label?: T;
-                          href?: T;
-                          id?: T;
-                        };
-                    id?: T;
-                    blockName?: T;
-                  };
-            };
-        id?: T;
-      };
-  faqs?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  authorImage?: T;
-  authorName?: T;
-  authorRole?: T;
-  authorBio?: T;
-  authorMember?: T;
-  topicsBefore?: T;
-  topicsAccent?: T;
-  topicsAfter?: T;
-  topics?:
-    | T
-    | {
-        label?: T;
-        id?: T;
-      };
-  relatedBefore?: T;
-  relatedAccent?: T;
-  relatedBlogs?:
-    | T
-    | {
-        post?: T;
-        image?: T;
-        date?: T;
-        readTime?: T;
-        title?: T;
         id?: T;
       };
   updatedAt?: T;

@@ -1,21 +1,8 @@
-import {
-  brandingProjects,
-  relatedBlogs,
-} from "../data/brandingAgencyPage";
 import { blogCategories, blogPosts, featuredPosts, type BlogPost } from "../data/blogIndexPage";
 import { faqCategories, faqEntries } from "../data/faqPage";
 import { faqDetails } from "../data/faqDetailPage";
 import { FOOTER_COLUMNS } from "../data/footer";
 import { clientCards, clientsHeading } from "../data/clientsIndexPage";
-import {
-  ahmedabadBreadcrumbCurrent,
-  ahmedabadCallout,
-  ahmedabadFaqItems,
-  ahmedabadHero,
-  ahmedabadLead,
-  ahmedabadProjectTabs,
-  ahmedabadSections,
-} from "../data/ahmedabadLocationPage";
 import {
   studioFit,
   studioHero,
@@ -81,56 +68,6 @@ export function pageEntries(): PageEntry[] {
           ];
         }),
       ),
-    },
-    {
-      slug: "ahmedabad-location",
-      data: {
-        breadcrumbCurrent: ahmedabadBreadcrumbCurrent,
-        heroTitle: ahmedabadHero.title,
-        heroIntro: ahmedabadHero.intro,
-        clientsBefore: "Design projects for ",
-        clientsAccent: "Ahmedabad",
-        clientsAfter: " brands",
-        clientTabs: ahmedabadProjectTabs.map((tab) => ({
-          tabId: tab.id,
-          label: tab.label,
-        })),
-        projects: brandingProjects.map((project) => ({
-          name: project.name,
-          description: project.description,
-        })),
-        calloutBefore: ahmedabadCallout.before,
-        calloutAccent: ahmedabadCallout.accent,
-        calloutAfter: ahmedabadCallout.after,
-        calloutBody: ahmedabadCallout.body,
-        lead: ahmedabadLead,
-        sections: ahmedabadSections.map((section) => ({
-          anchor: section.id,
-          tocLabel: section.tocLabel,
-          headingBefore: section.before,
-          headingAccent: section.accent,
-          headingAfter: section.after,
-          paragraphs: section.paragraphs.map((text) => ({ text })),
-          blocks: (section.blocks ?? []).map((block) => ({
-            title: block.title,
-            paragraphs: block.paragraphs.map((text) => ({ text })),
-          })),
-          pointers: (section.pointers ?? []).map((pointer) => ({ text: pointer.text })),
-        })),
-        faqs: ahmedabadFaqItems.map((item) => ({
-          question: item.question,
-          answer: item.answer,
-        })),
-        relatedBefore: "",
-        relatedAccent: "Related ",
-        relatedAfter: "blogs",
-        relatedBlogs: relatedBlogs.map((post) => ({
-          date: post.date,
-          readTime: post.readTime,
-          title: post.title,
-          href: post.href,
-        })),
-      },
     },
     {
       slug: "blog-index",
