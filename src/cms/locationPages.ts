@@ -366,7 +366,7 @@ export const getLocationPageBySlug = cache(
               : null,
             lead: text(doc.lead, fallback.lead),
             sections: sections ?? fallback.sections,
-            faqs: faqs.length ? faqs : fallback.faqs,
+            faqs: faqs.length ? faqs : (cleanSlug === "ahmedabad" ? fallback.faqs : []),
             relatedBefore: text(doc.relatedBefore, fallback.relatedBefore),
             relatedAccent: text(doc.relatedAccent, fallback.relatedAccent),
             relatedAfter: text(doc.relatedAfter, fallback.relatedAfter),

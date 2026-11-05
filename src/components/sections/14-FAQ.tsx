@@ -22,23 +22,24 @@ export function FAQ({
   heading?: ReactNode;
   showCta?: boolean;
 }) {
-  const resolvedItems = items ?? fallbackFaqItems;
+  const sourceItems = items ?? fallbackFaqItems;
+  const resolvedItems = sourceItems.filter((item) => Boolean(item?.question?.trim()));
   if (!resolvedItems || resolvedItems.length === 0) return null;
 
   const firstOpen = resolvedItems.findIndex((item) => Boolean(item.answer?.trim()));
 
   return (
     <section className="bg-white px-5 py-14 sm:px-6 sm:py-20 lg:px-[60px]">
-      <div className="mx-auto grid max-w-[1332px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,655px)_1fr] lg:gap-16">
+      <div className="mx-auto grid max-w-[1332px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,440px)_1fr] lg:gap-16 xl:gap-20">
         <div className="flex flex-col items-start gap-4 lg:gap-6">
-          <SectionHeading className="max-w-[720px] text-[32px] font-medium leading-[1.15] tracking-[-0.8px] text-ink sm:text-[36px] lg:h-[44px] lg:w-[655px] lg:text-[40px] lg:leading-[44px] lg:whitespace-nowrap">
+          <SectionHeading className="max-w-[720px] font-figtree text-[32px] font-medium leading-[1.15] tracking-[-0.8px] text-ink break-words sm:text-[36px] lg:text-[40px]">
             {heading ?? (
               <>
                 Common <Accent>questions</Accent>
               </>
             )}
           </SectionHeading>
-          <p className="max-w-[420px] font-satoshi text-[15px] leading-[26px] text-muted lg:h-[52px] lg:w-[420px]">
+          <p className="max-w-[420px] font-satoshi text-[15px] leading-[26px] text-muted">
             This is different we get that, you may have questions, here are
             some answers.
           </p>
@@ -56,43 +57,40 @@ export function FAQ({
 
         <div className="flex flex-col">
           {resolvedItems.map((item, i) => {
+            const question = item.question.trim();
             const answer = item.answer?.trim();
 
             if (!answer) {
               return (
                 <div
-                  key={`${item.question}-${i}`}
-                  className="flex items-center justify-between gap-6 border-b border-hairline py-5"
+                  key={`${question}-${i}`}
+                  className="flex items-start justify-between gap-4 border-b border-hairline py-5 text-left sm:gap-6"
                 >
-                  <span className="font-figtree text-[15px] font-medium text-black sm:text-base">
-                    {item.question}
+                  <span className="cursor-default font-figtree text-[15px] font-medium leading-[1.4] text-black break-words select-text sm:text-base lg:text-[18px]">
+                    {question}
                   </span>
-                  <ChevronDown
-                    className="h-4 w-4 shrink-0 text-black/40"
-                    aria-hidden="true"
-                  />
                 </div>
               );
             }
 
             return (
               <details
-                key={`${item.question}-${i}`}
+                key={`${question}-${i}`}
                 open={i === firstOpen}
                 className="group border-b border-hairline"
               >
-                <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-6 py-5 text-left [&::-webkit-details-marker]:hidden">
-                  <span className="font-figtree text-[15px] font-medium text-black sm:text-base">
-                    {item.question}
+                <summary className="flex w-full cursor-pointer list-none items-start justify-between gap-4 py-5 text-left transition-colors hover:text-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:gap-6 [&::-webkit-details-marker]:hidden">
+                  <span className="font-figtree text-[15px] font-medium leading-[1.4] text-black break-words sm:text-base lg:text-[18px]">
+                    {question}
                   </span>
                   <ChevronDown
-                    className="h-4 w-4 shrink-0 text-black transition-transform group-open:rotate-180"
+                    className="mt-1 h-4 w-4 shrink-0 text-black transition-transform duration-200 group-open:rotate-180"
                     aria-hidden="true"
                   />
                 </summary>
-                <p className="pb-5 font-satoshi text-sm leading-relaxed text-muted">
+                <div className="pb-5 font-satoshi text-sm leading-relaxed text-muted break-words whitespace-pre-line sm:text-base">
                   {answer}
-                </p>
+                </div>
               </details>
             );
           })}

@@ -157,6 +157,7 @@ async function parseIndustryDoc(
   fallback: ManufacturingContent,
   payload?: NonNullable<Awaited<ReturnType<typeof getPayloadClient>>>,
 ): Promise<ManufacturingContent> {
+  const cleanSlug = doc.slug?.replace(/^\/+|\/+$/g, "").trim().toLowerCase() || "";
   const sections = sectionsFrom(doc.sections);
   const preface = linesOf(doc.preface);
 
@@ -400,7 +401,7 @@ async function parseIndustryDoc(
     clientsAfter: doc.clientsAfter?.trim() || fallback.clientsAfter,
     clientTabs: tabs,
     projects: projects,
-    faqs: faqs,
+    faqs: faqs.length ? faqs : (cleanSlug === "manufacturing" ? fallback.faqs : []),
     expertsBefore: doc.expertsBefore?.trim() || fallback.expertsBefore,
     expertsAccent: doc.expertsAccent?.trim() || fallback.expertsAccent,
     expertsSubheading: doc.expertsSubheading?.trim() || fallback.expertsSubheading,

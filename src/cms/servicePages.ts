@@ -155,6 +155,7 @@ async function parseServiceDoc(
   fallback: BrandingStrategyContent,
   payload?: NonNullable<Awaited<ReturnType<typeof getPayloadClient>>>,
 ): Promise<BrandingStrategyContent> {
+  const cleanSlug = doc.slug?.replace(/^\/+|\/+$/g, "").trim().toLowerCase() || "";
   const sections = sectionsFrom(doc.sections) || [];
 
   const tabs = (doc.clientTabs || [])
@@ -398,7 +399,7 @@ async function parseServiceDoc(
     clientsAfter: doc.clientsAfter?.trim() || fallback.clientsAfter,
     clientTabs: tabs,
     projects: projects,
-    faqs: faqs,
+    faqs: faqs.length ? faqs : (cleanSlug === "brand-systems" || cleanSlug === "branding-agency" ? fallback.faqs : []),
     expertsBefore: doc.expertsBefore?.trim() || fallback.expertsBefore,
     expertsAccent: doc.expertsAccent?.trim() || fallback.expertsAccent,
     expertsSubheading: doc.expertsSubheading?.trim() || fallback.expertsSubheading,

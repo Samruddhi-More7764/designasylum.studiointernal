@@ -67,7 +67,9 @@ export default async function AhmedabadLocationPage() {
             label: section.tocLabel,
           }))}
         />
-        <FAQ items={page.faqs} heading="FAQs" showCta={false} />
+        {page.faqs && page.faqs.length > 0 ? (
+          <FAQ items={page.faqs} heading="FAQs" showCta={false} />
+        ) : null}
         <RelatedBlogs
           heading={
             <>
