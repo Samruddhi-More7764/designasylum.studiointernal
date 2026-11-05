@@ -70,6 +70,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             accent={page.topicsAccent}
             after={page.topicsAfter}
             topics={page.topics}
+            iconSrc={page.topicIcon || page.heroImage}
           />
         ) : null}
         {page.relatedBlogs && page.relatedBlogs.length > 0 ? (

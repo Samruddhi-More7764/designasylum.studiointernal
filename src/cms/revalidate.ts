@@ -132,7 +132,6 @@ export function revalidateForGlobal(globalSlug: string) {
         revalidatePath("/contact");
         break;
       case "blog-index":
-      case "blog-article":
         revalidatePath("/blog");
         revalidatePath("/blogs");
         break;

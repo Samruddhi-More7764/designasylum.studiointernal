@@ -107,7 +107,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v5_location_pages_blueprint_columns"];
+  const lines: string[] = ["migration_v6_blog_enhancements_columns"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -658,6 +658,40 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
       ALTER TABLE IF EXISTS "location_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
       ALTER TABLE IF EXISTS "location_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
     EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+  `).catch(() => undefined);
+
+  // 6. Blog posts enhancements and Blog Index routing columns
+  await client.query(`
+    ALTER TABLE IF EXISTS "blog_posts"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "topic_icon_id" integer;
+
+    ALTER TABLE IF EXISTS "blog_posts_topics"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "icon_id" integer,
+      ADD COLUMN IF NOT EXISTS "topic_icon_id" integer;
+
+    ALTER TABLE IF EXISTS "blog_index_featured_posts"
+      ADD COLUMN IF NOT EXISTS "href" varchar;
+
+    ALTER TABLE IF EXISTS "blog_index_posts"
+      ADD COLUMN IF NOT EXISTS "href" varchar;
+
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "blog_posts"
+        ADD CONSTRAINT "blog_posts_client_id_fkey"
+        FOREIGN KEY ("client_id") REFERENCES "clients"("id") ON DELETE SET NULL;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    WHEN OTHERS THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "blog_posts"
+        ADD CONSTRAINT "blog_posts_topic_icon_id_fkey"
+        FOREIGN KEY ("topic_icon_id") REFERENCES "media"("id") ON DELETE SET NULL;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    WHEN OTHERS THEN NULL;
     END $$;
   `).catch(() => undefined);
 }

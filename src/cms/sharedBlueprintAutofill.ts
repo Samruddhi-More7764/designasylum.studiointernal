@@ -196,3 +196,67 @@ export const autofillBlueprintFields: CollectionBeforeValidateHook = async ({ da
   return data;
 };
 
+/**
+ * Autofill helper for Blog Post Author & Byline fields when a Team Member / Leader is selected.
+ * Keeps all fields editable, preserves custom values, and only updates if the author changes or fields are empty.
+ */
+export const autofillBlogAuthor: CollectionBeforeValidateHook = async ({ data, req, originalDoc }) => {
+  if (!data || !req?.payload) return data;
+  if (!data.authorMember) return data;
+
+  const memberId =
+    typeof data.authorMember === "object" && data.authorMember !== null && "id" in data.authorMember
+      ? (data.authorMember as { id: string | number }).id
+      : (data.authorMember as string | number);
+  if (!memberId) return data;
+
+  // Check if authorMember changed
+  const prevMemberId =
+    originalDoc?.authorMember && typeof originalDoc.authorMember === "object"
+      ? (originalDoc.authorMember as { id?: string | number }).id
+      : originalDoc?.authorMember;
+  const memberChanged = prevMemberId !== undefined && prevMemberId !== memberId;
+
+  const shouldPopulateName = memberChanged || !data.authorName;
+  const shouldPopulateRole = memberChanged || !data.authorRole;
+  const shouldPopulateImage = memberChanged || !data.authorImage;
+  const shouldPopulateBio = memberChanged || !data.authorBio;
+  const shouldPopulateBylineName = memberChanged || !data.bylineName;
+  const shouldPopulateBylineAvatar = memberChanged || !data.bylineAvatar;
+
+  if (
+    shouldPopulateName ||
+    shouldPopulateRole ||
+    shouldPopulateImage ||
+    shouldPopulateBio ||
+    shouldPopulateBylineName ||
+    shouldPopulateBylineAvatar
+  ) {
+    try {
+      const member = await req.payload.findByID({
+        collection: "team-members",
+        id: memberId,
+        depth: 0,
+      });
+      if (member) {
+        if (shouldPopulateName && member.name) data.authorName = member.name;
+        if (shouldPopulateRole && member.role) data.authorRole = member.role;
+        const photo = member.photoOne || member.photoTwo;
+        if (shouldPopulateImage && photo) data.authorImage = photo;
+        if (shouldPopulateBio && Array.isArray(member.paragraphs) && member.paragraphs.length > 0) {
+          const firstPara = member.paragraphs[0];
+          const text =
+            typeof firstPara === "object" && firstPara && "text" in firstPara ? firstPara.text : "";
+          if (text) data.authorBio = text;
+        }
+        if (shouldPopulateBylineName && member.name) data.bylineName = member.name;
+        if (shouldPopulateBylineAvatar && photo) data.bylineAvatar = photo;
+      }
+    } catch {
+      // ignore lookup error
+    }
+  }
+
+  return data;
+};
+

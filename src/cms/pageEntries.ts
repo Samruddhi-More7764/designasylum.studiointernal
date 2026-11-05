@@ -1,17 +1,8 @@
 import {
-  articleSections,
-  brandingExperts,
-  brandingExpertsHeading,
   brandingProjects,
-  breadcrumbCurrent,
-  clientBrandingTabs,
-  introduction,
   relatedBlogs,
-  relatedBlogsHeading,
-  serviceFaqItems,
 } from "../data/brandingAgencyPage";
 import { blogCategories, blogPosts, featuredPosts, type BlogPost } from "../data/blogIndexPage";
-import { marqueeRow1, marqueeRow2 } from "../data/clients";
 import { faqCategories, faqEntries } from "../data/faqPage";
 import { faqDetails } from "../data/faqDetailPage";
 import { FOOTER_COLUMNS } from "../data/footer";
@@ -25,14 +16,6 @@ import {
   ahmedabadProjectTabs,
   ahmedabadSections,
 } from "../data/ahmedabadLocationPage";
-import {
-  manufacturingBreadcrumbCurrent,
-  manufacturingFaqItems,
-  manufacturingHero,
-  manufacturingLead,
-  manufacturingPreface,
-  manufacturingSections,
-} from "../data/manufacturingIndustryPage";
 import {
   studioFit,
   studioHero,
@@ -53,13 +36,6 @@ import {
   whyBenefits,
   whyHero,
 } from "../data/whyDesignAsylumPage";
-import {
-  sevenloopFaqItems,
-  sevenloopLead,
-  sevenloopSections,
-  sevenloopTopics,
-  type ArticleBlock,
-} from "../data/sevenloopArticle";
 
 export type PageEntry = {
   slug: string;
@@ -84,45 +60,6 @@ function seedPost(post: BlogPost) {
     ...(post.badge ? { badge: post.badge } : {}),
     ...(post.badgeIcon ? { badgeIcon: post.badgeIcon } : {}),
   };
-}
-
-function seedBlock(block: ArticleBlock) {
-  switch (block.kind) {
-    case "paragraphs":
-      return { blockType: "paragraphs", items: block.items.map((text) => ({ text })) };
-    case "rich":
-      return {
-        blockType: "rich",
-        parts: block.parts.map((part) =>
-          typeof part === "string"
-            ? { text: part, strong: false }
-            : { text: part.strong, strong: true },
-        ),
-      };
-    case "subhead":
-      return { blockType: "subhead", title: block.title, body: block.body ?? "" };
-    case "arrows":
-      return {
-        blockType: "arrows",
-        items: block.items.map((item) => ({ lead: item.lead ?? "", rest: item.rest })),
-      };
-    case "rows":
-      return { blockType: "rows", items: block.items };
-    case "image":
-      return { blockType: "image", src: block.src, alt: block.alt };
-    case "gallery":
-      return {
-        blockType: "gallery",
-        alt: block.alt,
-        images: block.srcs.map((src) => ({ src })),
-      };
-    case "quote":
-      return { blockType: "quote", quote: block.quote, name: block.name, role: block.role };
-    case "note":
-      return { blockType: "note", kicker: block.kicker, body: block.body };
-    case "links":
-      return { blockType: "links", kicker: block.kicker, items: block.items };
-  }
 }
 
 /** Copy already shown on the public pages. Photos and some URLs stay empty. */
@@ -213,49 +150,6 @@ export function pageEntries(): PageEntry[] {
         listingAfter: "?",
         categories: blogCategories.map((label) => ({ label })),
         posts: blogPosts.map(seedPost),
-      },
-    },
-    {
-      slug: "blog-article",
-      data: {
-        breadcrumbCurrent: "Sevenloop Brand Website Redesign",
-        titleBefore: "Sevenloop ",
-        titleAccent: "Rebrand",
-        titleMiddle: " & Webflow Site: ",
-        titleLine: "A 5-Month Case Study",
-        intro:
-          "How Sevenloop went from B2B product company to enterprise-ready brand in 5 months — repositioning, identity, Webflow build, and the conversations it opened.",
-        bylineName: "Tanmaya Rao",
-        bylineDate: "Sept 28, 2026",
-        lead: sevenloopLead,
-        sections: sevenloopSections.map((section) => ({
-          anchor: section.id,
-          tocLabel: section.label,
-          headingBefore: section.before ?? "",
-          headingAccent: section.accent ?? "",
-          headingAfter: section.after ?? "",
-          blocks: section.blocks.map(seedBlock),
-        })),
-        faqs: sevenloopFaqItems.map((item) => ({
-          question: item.question,
-          ...(item.answer ? { answer: item.answer } : {}),
-        })),
-        authorName: "Athira Krishnan",
-        authorRole: "Lead Designer | Content Strategist",
-        authorBio:
-          "Articulate with a clear thought process, she excels in content writing, driving design in B2B SaaS and B2C websites.",
-        topicsBefore: "Solutions ",
-        topicsAccent: "we ",
-        topicsAfter: "offer",
-        topics: sevenloopTopics.map((label) => ({ label })),
-        relatedBefore: relatedBlogsHeading.before,
-        relatedAccent: relatedBlogsHeading.accent,
-        relatedBlogs: relatedBlogs.map((post) => ({
-          date: post.date,
-          readTime: post.readTime,
-          title: post.title,
-          href: post.href,
-        })),
       },
     },
     {

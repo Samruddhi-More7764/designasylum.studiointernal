@@ -19,6 +19,15 @@ const postFields: Field[] = [
     },
   },
   {
+    name: "href",
+    label: "Custom Link URL",
+    type: "text",
+    admin: {
+      description:
+        "Optional custom route override. Leave empty to automatically link to /blogs/[slug] of the selected post.",
+    },
+  },
+  {
     ...image,
     admin: {
       description: "Leave empty to use the image from the selected blog post.",
@@ -87,10 +96,15 @@ export const BlogIndex: GlobalConfig = {
                 depth: 0,
               });
               if (post) {
+                if (!row.href && post.slug) {
+                  const cleanSlug = String(post.slug).replace(/^\/+|\/+$/g, "").trim();
+                  row.href = `/blogs/${cleanSlug}`;
+                }
                 if (!row.title && post.title) row.title = post.title;
                 if (!row.date && post.date) row.date = post.date;
                 if (!row.category && post.category) row.category = post.category;
-                if (!row.image && post.image) row.image = post.image;
+                const postImg = post.heroImage || post.image;
+                if (!row.image && postImg) row.image = postImg;
                 if (!row.badge && post.badge) row.badge = post.badge;
                 if (!row.badgeIcon && post.badgeIcon) row.badgeIcon = post.badgeIcon;
               }

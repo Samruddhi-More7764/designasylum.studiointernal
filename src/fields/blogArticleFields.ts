@@ -178,23 +178,69 @@ export const blogArticleFaqFields: Field[] = [
 ];
 
 export const blogArticleAuthorFields: Field[] = [
-  { ...blogUploadImage, name: "authorImage", label: "Photo" },
-  { name: "authorName", type: "text" },
-  { name: "authorRole", label: "Role", type: "text" },
-  { name: "authorBio", label: "Bio", type: "textarea" },
   {
     name: "authorMember",
-    label: "Linked Team Member Profile",
+    label: "Select Team Member or Leader",
     type: "relationship",
     relationTo: "team-members",
     admin: {
       description:
-        "Optional: Select a team member profile to automatically link the author to /team/[slug].",
+        "Select an existing team member or leader. Author name, role, photo, and bio will automatically populate below, and can be customized.",
+    },
+  },
+  {
+    ...blogUploadImage,
+    name: "authorImage",
+    label: "Photo",
+    admin: {
+      description: "Leave empty to use profile photo from the selected team member or leader.",
+    },
+  },
+  {
+    name: "authorName",
+    label: "Author Name",
+    type: "text",
+    admin: {
+      description: "Leave empty to use name from the selected team member or leader.",
+    },
+  },
+  {
+    name: "authorRole",
+    label: "Designation / Position",
+    type: "text",
+    admin: {
+      description: "Leave empty to use role from the selected team member or leader.",
+    },
+  },
+  {
+    name: "authorBio",
+    label: "Bio",
+    type: "textarea",
+    admin: {
+      description: "Leave empty to use bio from the selected team member or leader.",
     },
   },
 ];
 
 export const blogArticleTopicFields: Field[] = [
+  {
+    name: "client",
+    label: "Select Client",
+    type: "relationship",
+    relationTo: "clients",
+    admin: {
+      description: "Optional: Associate an existing Client with this blog post.",
+    },
+  },
+  {
+    ...blogUploadImage,
+    name: "topicIcon",
+    label: "Topic Icon Override",
+    admin: {
+      description:
+        "Optional: Override the 24x24 icon shown on topic badges. If left empty, the post's Hero Image will be used automatically.",
+    },
+  },
   { name: "topicsBefore", label: "Heading", type: "text" },
   { name: "topicsAccent", label: "Italic word", type: "text" },
   { name: "topicsAfter", label: "Heading ending", type: "text" },

@@ -55,6 +55,7 @@ export type BlogArticleContent = {
   topicsAccent: string;
   topicsAfter: string;
   topics: string[];
+  topicIcon: string | null;
   relatedBefore: string;
   relatedAccent: string;
   relatedBlogs: {
@@ -189,6 +190,7 @@ const fallback: BlogArticleContent = {
   topicsAccent: "we ",
   topicsAfter: "offer",
   topics: [...sevenloopTopics],
+  topicIcon: null,
   relatedBefore: relatedBlogsHeading.before,
   relatedAccent: relatedBlogsHeading.accent,
   relatedBlogs,
@@ -292,6 +294,8 @@ export function parseBlogArticleDoc(
     topicsAccent: text(doc.topicsAccent as string, fb?.topicsAccent || ""),
     topicsAfter: text(doc.topicsAfter as string, fb?.topicsAfter || ""),
     topics: topics.length ? topics : (fb?.topics || []),
+    topicIcon:
+      storedImage(doc.topicIcon, "") || storedImage(doc.heroImage || doc.image, "") || null,
     relatedBefore: text(doc.relatedBefore as string, fb?.relatedBefore || relatedBlogsHeading.before),
     relatedAccent: text(doc.relatedAccent as string, fb?.relatedAccent || relatedBlogsHeading.accent),
     relatedBlogs: posts.length ? posts : (fb?.relatedBlogs || []),
@@ -323,7 +327,7 @@ export const getBlogPostBySlug = cache(async (slug: string): Promise<BlogArticle
     }
 
     if (cleanSlug === "sevenloop-brand-website-redesign") {
-      return getBlogArticle();
+      return fallback;
     }
     return null;
   } catch (error) {
@@ -334,30 +338,6 @@ export const getBlogPostBySlug = cache(async (slug: string): Promise<BlogArticle
 });
 
 export const getBlogArticle = cache(async (): Promise<BlogArticleContent> => {
-  const payload = await getPayloadClient();
-  if (!payload) return fallback;
-
-  try {
-    // Check collection first
-    const fromCollection = await payload.find({
-      collection: "blog-posts",
-      where: { slug: { equals: "sevenloop-brand-website-redesign" } },
-      limit: 1,
-      depth: 2,
-    });
-    if (fromCollection.docs.length) {
-      return parseBlogArticleDoc(fromCollection.docs[0] as unknown as Record<string, unknown>, fallback);
-    }
-
-    // Check global
-    const doc = (await payload.findGlobal({
-      slug: "blog-article" as "site-footer",
-      depth: 2,
-    })) as unknown as Record<string, unknown>;
-
-    return parseBlogArticleDoc(doc, fallback);
-  } catch (error) {
-    console.warn("[cms] blog article fallback", error);
-    return fallback;
-  }
+  const post = await getBlogPostBySlug("sevenloop-brand-website-redesign");
+  return post || fallback;
 });

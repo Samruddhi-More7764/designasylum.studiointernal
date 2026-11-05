@@ -31,7 +31,6 @@ import { FaqDetails } from "./collections/FaqDetails";
 import { LocationPages } from "./collections/LocationPages";
 import { SiteFooter } from "./globals/SiteFooter";
 import { BlogIndex } from "./globals/BlogIndex";
-import { BlogArticleGlobal } from "./globals/BlogArticle";
 import { ContactPage } from "./globals/ContactPage";
 import { FaqPage } from "./globals/FaqPage";
 import { CareersPage } from "./globals/CareersPage";
@@ -139,7 +138,6 @@ export default buildConfig({
   globals: [
     SiteFooter,
     BlogIndex,
-    BlogArticleGlobal,
     ContactPage,
     FaqPage,
     CareersPage,

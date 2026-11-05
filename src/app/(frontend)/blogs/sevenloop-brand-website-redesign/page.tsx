@@ -50,6 +50,7 @@ export default async function SevenloopArticlePage() {
           accent={page.topicsAccent}
           after={page.topicsAfter}
           topics={page.topics}
+          iconSrc={page.topicIcon || page.heroImage}
         />
         <RelatedBlogs
           heading={

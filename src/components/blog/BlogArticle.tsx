@@ -286,11 +286,13 @@ export function ArticleTopics({
   accent = "we ",
   after = "offer",
   topics = sevenloopTopics,
+  iconSrc,
 }: {
   before?: string;
   accent?: string;
   after?: string;
   topics?: readonly string[];
+  iconSrc?: string | null;
 } = {}) {
   return (
     <section className="bg-white px-5 pt-16 pb-4 sm:px-8 lg:px-[60px] lg:pt-[120px] lg:pb-10">
@@ -304,7 +306,17 @@ export function ArticleTopics({
               key={topic}
               className="inline-flex items-center gap-2 rounded-xl border border-black/30 px-3"
             >
-              <span className="size-6 shrink-0 rounded bg-[#D9D9D9]" aria-hidden="true" />
+              {iconSrc ? (
+                <Image
+                  src={iconSrc}
+                  alt=""
+                  width={24}
+                  height={24}
+                  className="size-6 shrink-0 rounded object-cover"
+                />
+              ) : (
+                <span className="size-6 shrink-0 rounded bg-[#D9D9D9]" aria-hidden="true" />
+              )}
               <span
                 className={`font-figtree text-[16px] leading-[45px] font-normal tracking-[-1px] text-black lg:text-[20px] lg:tracking-[-1.51px] ${index === 0 ? "capitalize" : ""}`}
               >
