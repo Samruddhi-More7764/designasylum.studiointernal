@@ -5,7 +5,6 @@ import { Footer } from "@/components/sections/15-Footer";
 import { LogoMarquee } from "@/components/sections/02-LogoMarquee";
 import { ServiceResourceHero } from "@/components/branding-agency/ServiceResourceHero";
 import { BrandingAgencyArticle } from "@/components/branding-agency/BrandingAgencyArticle";
-import { ResourceCta } from "@/components/branding-agency/ResourceCta";
 import { ClientBrandingSection } from "@/components/branding-agency/ClientBrandingSection";
 import { LocationCallout } from "@/components/branding-agency/LocationCallout";
 import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
@@ -52,8 +51,6 @@ export default async function DynamicLocationPage({ params }: Props) {
     notFound();
   }
 
-  const ctaId = `location-cta-${page.slug}`;
-
   return (
     <>
       <NavBar />
@@ -88,32 +85,10 @@ export default async function DynamicLocationPage({ params }: Props) {
         <BrandingAgencyArticle
           lead={page.lead}
           sections={page.sections}
-          toc={[
-            ...page.sections.map((section) => ({
-              id: section.id,
-              label: section.tocLabel,
-            })),
-            {
-              id: ctaId,
-              label: `${page.ctaHeadingBefore}${page.ctaHeadingAccent}${page.ctaHeadingAfter}`.trim(),
-            },
-          ]}
-          spacing="cta"
-        />
-        <ResourceCta
-          id={ctaId}
-          variant="location"
-          heading={
-            <>
-              {page.ctaHeadingBefore}
-              <span className="font-playfair italic px-[0.08em]">{page.ctaHeadingAccent}</span>
-              {page.ctaHeadingAfter}
-            </>
-          }
-          body={page.ctaBody}
-          buttonLabel={page.ctaButtonLabel}
-          buttonHref={page.ctaButtonHref}
-          buttonClassName="!h-11 !min-h-11 !w-[214px] lg:!h-14 lg:!min-h-14 lg:!w-[243px]"
+          toc={page.sections.map((section) => ({
+            id: section.id,
+            label: section.tocLabel,
+          }))}
         />
         <FAQ items={page.faqs} heading="FAQs" showCta={false} />
         <RelatedBlogs

@@ -1,6 +1,5 @@
 import { cache } from "react";
 import { getPayloadClient } from "@/cms/getPayload";
-import { resolveMediaUrl } from "@/cms/media";
 import { storedImage } from "@/cms/storedImage";
 import {
   brandingProjects,
@@ -9,10 +8,8 @@ import {
 } from "@/data/brandingAgencyPage";
 import type { ClientLogo } from "@/data/clients";
 import {
-  ahmedabadBreadcrumbCurrent,
   ahmedabadCallout,
   ahmedabadFaqItems,
-  ahmedabadHero,
   ahmedabadLead,
   ahmedabadProjectTabs,
   ahmedabadSections,
@@ -35,6 +32,30 @@ type CmsSection = {
   pointers?: TextRow[] | null;
 };
 
+type LinkedClient = {
+  id?: string | number;
+  name?: string | null;
+  slug?: string | null;
+  hero?: { image?: unknown; heading?: string | null; subheading?: string | null } | null;
+  adminTitle?: string | null;
+};
+
+type LinkedLogo = {
+  id?: string | number;
+  name?: string | null;
+  image?: unknown;
+};
+
+type LinkedBlogPost = {
+  id?: string | number;
+  title?: string | null;
+  slug?: string | null;
+  date?: string | null;
+  readTime?: string | null;
+  heroImage?: unknown;
+  image?: unknown;
+};
+
 export type LocationPageContent = {
   title: string;
   slug: string;
@@ -54,12 +75,6 @@ export type LocationPageContent = {
   logos: { row1: ClientLogo[]; row2: ClientLogo[] } | null;
   lead: string;
   sections: ArticleSection[];
-  ctaHeadingBefore: string;
-  ctaHeadingAccent: string;
-  ctaHeadingAfter: string;
-  ctaBody: string;
-  ctaButtonLabel: string;
-  ctaButtonHref: string;
   faqs: { question: string; answer?: string }[];
   relatedBefore: string;
   relatedAccent: string;
@@ -130,13 +145,6 @@ function createFallbackLocation(slug: string, title?: string): LocationPageConte
     logos: null,
     lead: ahmedabadLead,
     sections: ahmedabadSections,
-    ctaHeadingBefore: "Ready to ",
-    ctaHeadingAccent: "transform",
-    ctaHeadingAfter: ` your ${locationName} brand?`,
-    ctaBody:
-      "Most rebranding conversations begin when enterprise expansion reveals the gap between what you have built and how you look.",
-    ctaButtonLabel: "Book an intro call",
-    ctaButtonHref: "/contact",
     faqs: ahmedabadFaqItems,
     relatedBefore: "",
     relatedAccent: "Related ",
@@ -153,7 +161,7 @@ export const getLocationPageBySlug = cache(
     if (payload) {
       try {
         const found = await payload.find({
-          collection: "location-pages" as any,
+          collection: "location-pages" as "users",
           where: { slug: { equals: cleanSlug } },
           limit: 1,
           depth: 2,
@@ -172,6 +180,10 @@ export const getLocationPageBySlug = cache(
             clientsAfter?: string | null;
             clientTabs?: Array<{ tabId?: string | null; label?: string | null } | null> | null;
             projects?: Array<{
+              client?: unknown;
+              category?: string | null;
+              order?: number | null;
+              heading?: string | null;
               image?: unknown;
               name?: string | null;
               description?: string | null;
@@ -183,23 +195,19 @@ export const getLocationPageBySlug = cache(
             calloutAfter?: string | null;
             calloutBody?: string | null;
             logos?: Array<{
+              clientLogo?: unknown;
               image?: unknown;
               name?: string | null;
               row?: string | null;
             } | null> | null;
             lead?: string | null;
             sections?: CmsSection[] | null;
-            ctaHeadingBefore?: string | null;
-            ctaHeadingAccent?: string | null;
-            ctaHeadingAfter?: string | null;
-            ctaBody?: string | null;
-            ctaButtonLabel?: string | null;
-            ctaButtonHref?: string | null;
             faqs?: Array<{ question?: string | null; answer?: string | null } | null> | null;
             relatedBefore?: string | null;
             relatedAccent?: string | null;
             relatedAfter?: string | null;
             relatedBlogs?: Array<{
+              post?: unknown;
               image?: unknown;
               date?: string | null;
               readTime?: string | null;
@@ -218,15 +226,50 @@ export const getLocationPageBySlug = cache(
             .filter((tab) => tab.id && tab.label);
 
           const projects = (doc.projects || [])
-            .map((project, index) => ({
-              image: storedImage(project?.image, brandingProjects[index]?.image || defaultHeroImage),
-              name: project?.name?.trim() || "",
-              description: project?.description?.trim() || "",
-              href: project?.href?.trim() || "",
-              key: `project-${index}`,
-              tab: project?.tab?.trim() || undefined,
-            }))
-            .filter((project) => project.name && project.description);
+            .map((project, index) => {
+              const linkedClient =
+                project?.client && typeof project.client === "object"
+                  ? (project.client as LinkedClient)
+                  : null;
+
+              const name =
+                project?.heading?.trim() ||
+                project?.name?.trim() ||
+                linkedClient?.name?.trim() ||
+                "";
+              const description =
+                project?.description?.trim() ||
+                linkedClient?.adminTitle?.trim() ||
+                linkedClient?.hero?.subheading?.trim() ||
+                linkedClient?.hero?.heading?.trim() ||
+                "";
+              const image = storedImage(
+                project?.image || linkedClient?.hero?.image,
+                brandingProjects[index]?.image || defaultHeroImage,
+              );
+              const cleanClientSlug = linkedClient?.slug
+                ? linkedClient.slug.replace(/^\/+|\/+$/g, "").trim()
+                : "";
+              const href =
+                project?.href?.trim() ||
+                (cleanClientSlug ? `/clients/${cleanClientSlug}` : "");
+              const tab =
+                project?.category?.trim() ||
+                project?.tab?.trim() ||
+                "location";
+
+              return {
+                name,
+                description,
+                image,
+                href,
+                key: `project-${index}`,
+                tab,
+                order: project?.order ?? index,
+              };
+            })
+            .filter((project) => project.name && project.description)
+            .sort((a, b) => a.order - b.order);
 
           const faqs = (doc.faqs || [])
             .map((item) => ({
@@ -236,23 +279,46 @@ export const getLocationPageBySlug = cache(
             .filter((item) => item.question);
 
           const posts = (doc.relatedBlogs || [])
-            .map((post, index) => ({
-              image: storedImage(post?.image, relatedBlogs[0]?.image || defaultHeroImage),
-              date: post?.date?.trim() || "",
-              readTime: post?.readTime?.trim() || "",
-              title: post?.title?.trim() || "",
-              href: post?.href?.trim() || "/",
-              key: `related-${index}`,
-            }))
+            .map((post, index) => {
+              const linkedPost =
+                post?.post && typeof post.post === "object"
+                  ? (post.post as LinkedBlogPost)
+                  : null;
+
+              const title = post?.title?.trim() || linkedPost?.title?.trim() || "";
+              const cleanPostSlug = linkedPost?.slug
+                ? linkedPost.slug.replace(/^\/+|\/+$/g, "").trim()
+                : "";
+              const href =
+                post?.href?.trim() ||
+                (cleanPostSlug ? `/blogs/${cleanPostSlug}` : "/");
+
+              return {
+                image: storedImage(
+                  post?.image || linkedPost?.heroImage || linkedPost?.image,
+                  relatedBlogs[0]?.image || defaultHeroImage,
+                ),
+                date: post?.date?.trim() || linkedPost?.date?.trim() || "",
+                readTime: post?.readTime?.trim() || linkedPost?.readTime?.trim() || "",
+                title,
+                href,
+                key: `related-${index}`,
+              };
+            })
             .filter((post) => post.title);
 
           const logos = (doc.logos || [])
             .map((logo, index) => {
-              const name = logo?.name?.trim() || "";
+              const linkedLogo =
+                logo?.clientLogo && typeof logo.clientLogo === "object"
+                  ? (logo.clientLogo as LinkedLogo)
+                  : null;
+
+              const name = logo?.name?.trim() || linkedLogo?.name?.trim() || "";
               if (!name) return null;
               return {
                 name,
-                image: storedImage(logo?.image, defaultHeroImage),
+                image: storedImage(logo?.image || linkedLogo?.image, defaultHeroImage),
                 width: 160,
                 height: 48,
                 row: logo?.row === "2" ? "2" : logo?.row === "1" ? "1" : "",
@@ -300,12 +366,6 @@ export const getLocationPageBySlug = cache(
               : null,
             lead: text(doc.lead, fallback.lead),
             sections: sections ?? fallback.sections,
-            ctaHeadingBefore: text(doc.ctaHeadingBefore, fallback.ctaHeadingBefore),
-            ctaHeadingAccent: text(doc.ctaHeadingAccent, fallback.ctaHeadingAccent),
-            ctaHeadingAfter: text(doc.ctaHeadingAfter, fallback.ctaHeadingAfter),
-            ctaBody: text(doc.ctaBody, fallback.ctaBody),
-            ctaButtonLabel: text(doc.ctaButtonLabel, fallback.ctaButtonLabel),
-            ctaButtonHref: text(doc.ctaButtonHref, fallback.ctaButtonHref),
             faqs: faqs.length ? faqs : fallback.faqs,
             relatedBefore: text(doc.relatedBefore, fallback.relatedBefore),
             relatedAccent: text(doc.relatedAccent, fallback.relatedAccent),
@@ -333,13 +393,14 @@ export const getAllLocationSlugs = cache(async (): Promise<string[]> => {
   if (payload) {
     try {
       const res = await payload.find({
-        collection: "location-pages" as any,
+        collection: "location-pages" as "users",
         limit: 100,
         depth: 0,
       });
       for (const doc of res.docs) {
-        if ((doc as any)?.slug) {
-          slugs.add(String((doc as any).slug).trim().toLowerCase());
+        const item = doc as { slug?: string | null };
+        if (item?.slug) {
+          slugs.add(String(item.slug).trim().toLowerCase());
         }
       }
     } catch {}

@@ -4,7 +4,6 @@ import { Footer } from "@/components/sections/15-Footer";
 import { LogoMarquee } from "@/components/sections/02-LogoMarquee";
 import { ServiceResourceHero } from "@/components/branding-agency/ServiceResourceHero";
 import { BrandingAgencyArticle } from "@/components/branding-agency/BrandingAgencyArticle";
-import { ResourceCta } from "@/components/branding-agency/ResourceCta";
 import { ClientBrandingSection } from "@/components/branding-agency/ClientBrandingSection";
 import { LocationCallout } from "@/components/branding-agency/LocationCallout";
 import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
@@ -12,11 +11,7 @@ import { FAQ } from "@/components/sections/14-FAQ";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getLocationPageBySlug } from "@/cms/locationPages";
-import {
-  AHMEDABAD_CTA_ID,
-  ahmedabadBreadcrumbs,
-  ahmedabadCta,
-} from "@/data/ahmedabadLocationPage";
+import { ahmedabadBreadcrumbs } from "@/data/ahmedabadLocationPage";
 
 export const revalidate = 120;
 
@@ -67,31 +62,10 @@ export default async function AhmedabadLocationPage() {
         <BrandingAgencyArticle
           lead={page.lead}
           sections={page.sections}
-          toc={[
-            ...page.sections.map((section) => ({
-              id: section.id,
-              label: section.tocLabel,
-            })),
-            {
-              id: AHMEDABAD_CTA_ID,
-              label: "Ready to transform your Ahmedabad brand?",
-            },
-          ]}
-          spacing="cta"
-        />
-        <ResourceCta
-          id={AHMEDABAD_CTA_ID}
-          variant="location"
-          heading={
-            <>
-              Ready to <span className="font-playfair italic px-[0.08em]">transform</span> your
-              Ahmedabad brand?
-            </>
-          }
-          body={ahmedabadCta.body}
-          buttonLabel={ahmedabadCta.button}
-          buttonHref={ahmedabadCta.href}
-          buttonClassName="!h-11 !min-h-11 !w-[214px] lg:!h-14 lg:!min-h-14 lg:!w-[243px]"
+          toc={page.sections.map((section) => ({
+            id: section.id,
+            label: section.tocLabel,
+          }))}
         />
         <FAQ items={page.faqs} heading="FAQs" showCta={false} />
         <RelatedBlogs

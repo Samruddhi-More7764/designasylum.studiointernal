@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
   Field,
 } from "payload";
+import { autofillBlueprintFields } from "../cms/sharedBlueprintAutofill";
 
 const slugify = (value: string) =>
   value
@@ -49,7 +50,7 @@ export const LocationPages: CollectionConfig = {
   },
   access: { read: () => true },
   hooks: {
-    beforeValidate: [ensureSlug],
+    beforeValidate: [ensureSlug, autofillBlueprintFields],
   },
   fields: [
     {
@@ -93,8 +94,8 @@ export const LocationPages: CollectionConfig = {
         {
           label: "Clients",
           fields: [
-            { name: "clientsBefore", label: "Heading", type: "text" },
-            { name: "clientsAccent", label: "Italic word", type: "text" },
+            { name: "clientsBefore", label: "Heading before italic", type: "text" },
+            { name: "clientsAccent", label: "Italic heading word", type: "text" },
             { name: "clientsAfter", label: "Heading ending", type: "text" },
             {
               name: "clientTabs",
@@ -107,34 +108,75 @@ export const LocationPages: CollectionConfig = {
             },
             {
               name: "projects",
+              label: "Client Projects (Select from Clients)",
+              labels: { singular: "Client Project", plural: "Client Projects" },
               type: "array",
               fields: [
-                imageUpload,
-                { name: "name", type: "text", required: true },
-                { name: "description", type: "textarea", required: true },
                 {
-                  name: "href",
-                  label: "URL",
-                  type: "text",
+                  name: "client",
+                  label: "Select Client",
+                  type: "relationship",
+                  relationTo: "clients",
                   admin: {
                     description:
-                      "Where the View website button goes. Leave empty until that page exists.",
+                      "Select from existing clients list to automatically pull heading, image, description, and link.",
                   },
                 },
                 {
-                  name: "tab",
-                  label: "Client tab",
+                  name: "category",
+                  label: "Client Category",
                   type: "select",
+                  defaultValue: "location",
                   options: [
                     { label: "Solution", value: "solution" },
                     { label: "Service", value: "service" },
                     { label: "Industry", value: "industry" },
                     { label: "Location", value: "location" },
+                    { label: "Branding Projects", value: "branding-projects" },
                   ],
                   admin: {
-                    description:
-                      "Which tab this project appears under. Leave empty to show it on every tab.",
+                    description: "Which category tab this project appears under. Defaults to Location.",
                   },
+                },
+                {
+                  name: "order",
+                  label: "Order",
+                  type: "number",
+                  defaultValue: 0,
+                  admin: {
+                    description: "Display order. Lower numbers appear first.",
+                  },
+                },
+                {
+                  name: "heading",
+                  label: "Heading",
+                  type: "text",
+                  admin: { description: "Project heading. Leave empty to use client name." },
+                },
+                {
+                  name: "description",
+                  label: "Description",
+                  type: "textarea",
+                  admin: { description: "Project summary or highlights. Leave empty to use client description." },
+                },
+                {
+                  ...imageUpload,
+                  admin: { description: "Project image. Leave empty to use client hero image." },
+                },
+                {
+                  name: "href",
+                  type: "text",
+                  admin: { hidden: true },
+                },
+                {
+                  name: "name",
+                  type: "text",
+                  admin: { hidden: true },
+                },
+                {
+                  name: "tab",
+                  type: "text",
+                  admin: { hidden: true },
                 },
               ],
             },
@@ -161,8 +203,22 @@ export const LocationPages: CollectionConfig = {
                   "Logos on this location page only. Leave empty to keep using homepage logos.",
               },
               fields: [
+                {
+                  name: "clientLogo",
+                  label: "Select Client Logo",
+                  type: "relationship",
+                  relationTo: "client-logos",
+                  admin: {
+                    description:
+                      "Optionally pick a logo from Collections > Client Logos. Leave image upload and name empty to use it automatically.",
+                  },
+                },
                 imageUpload,
-                { name: "name", type: "text", required: true },
+                {
+                  name: "name",
+                  type: "text",
+                  admin: { description: "Leave empty to use client logo name." },
+                },
                 {
                   name: "row",
                   type: "select",
@@ -227,17 +283,6 @@ export const LocationPages: CollectionConfig = {
           ],
         },
         {
-          label: "CTA Banner",
-          fields: [
-            { name: "ctaHeadingBefore", label: "Heading before italic", type: "text", defaultValue: "Ready to " },
-            { name: "ctaHeadingAccent", label: "Italic word", type: "text", defaultValue: "transform" },
-            { name: "ctaHeadingAfter", label: "Heading ending", type: "text" },
-            { name: "ctaBody", label: "Body copy", type: "textarea" },
-            { name: "ctaButtonLabel", label: "Button label", type: "text", defaultValue: "Book an intro call" },
-            { name: "ctaButtonHref", label: "Button URL", type: "text", defaultValue: "/contact" },
-          ],
-        },
-        {
           label: "FAQs",
           fields: [
             {
@@ -258,19 +303,45 @@ export const LocationPages: CollectionConfig = {
         {
           label: "Related blogs",
           fields: [
-            { name: "relatedBefore", label: "Heading", type: "text" },
+            { name: "relatedBefore", label: "Heading before italic", type: "text" },
             { name: "relatedAccent", label: "Italic word", type: "text" },
             { name: "relatedAfter", label: "Heading ending", type: "text" },
             {
               name: "relatedBlogs",
-              label: "Posts",
+              label: "Related Blogs (Select from all blogs list)",
+              labels: { singular: "Blog Post", plural: "Blog Posts" },
               type: "array",
               fields: [
+                {
+                  name: "post",
+                  label: "Select Blog Post",
+                  type: "relationship",
+                  relationTo: "blog-posts",
+                  admin: {
+                    description: "Select from all blogs list to automatically pull title, image, date, and link.",
+                  },
+                },
                 imageUpload,
-                { name: "date", type: "text" },
-                { name: "readTime", label: "Read time", type: "text" },
-                { name: "title", type: "text", required: true },
-                { name: "href", label: "URL", type: "text" },
+                {
+                  name: "date",
+                  type: "text",
+                  admin: { description: "Leave empty to use date from selected blog post." },
+                },
+                {
+                  name: "readTime",
+                  label: "Read time",
+                  type: "text",
+                },
+                {
+                  name: "title",
+                  type: "text",
+                  admin: { description: "Leave empty to use blog post title." },
+                },
+                {
+                  name: "href",
+                  type: "text",
+                  admin: { hidden: true },
+                },
               ],
             },
           ],

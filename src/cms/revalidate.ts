@@ -81,6 +81,7 @@ export function revalidateForCollection(collectionSlug: string, docSlug?: string
         break;
 
       case "location-pages":
+        revalidatePath("/locations/ahmedabad");
         if (cleanSlug) {
           revalidatePath(`/locations/${cleanSlug}`);
         }

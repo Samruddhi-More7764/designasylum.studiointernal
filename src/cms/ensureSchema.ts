@@ -4,9 +4,9 @@ import { getTableConfig, PgTable } from "drizzle-orm/pg-core";
 import type { Payload } from "payload";
 
 const FINGERPRINT_KEY = "cms-schema-fingerprint";
-const SAFE_IDENT = /^[a-z_][a-z0-9_]*$/;
+const SAFE_IDENT = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 const SAFE_SQL_TYPE =
-  /^(boolean|integer|jsonb|numeric(\(\d+,\s*\d+\))?|serial|text|varchar(\(\d+\))?|timestamp\(3\) with time zone|double precision|bigint|real|date)$/;
+  /^(boolean|integer|jsonb|numeric(\(\d+(,\s*\d+)?\))?|serial|text|varchar(\(\d+\))?|timestamp(\(\d+\))?( with time zone| without time zone)?|double precision|bigint|real|date)$/i;
 
 type QueryClient = {
   query: <T extends Record<string, unknown> = Record<string, unknown>>(
@@ -29,8 +29,6 @@ type SqlColumn = {
  * Existing rows are left in place. Columns are never dropped or rewritten.
  */
 export async function ensureSchema(payload: Payload): Promise<void> {
-  if (process.env.NEXT_PHASE === "phase-production-build") return;
-
   try {
     await addMissingColumns(payload);
   } catch (error) {
@@ -109,7 +107,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v3_drop_not_null_alt_fields"];
+  const lines: string[] = ["migration_v5_location_pages_blueprint_columns"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -160,7 +158,11 @@ async function ensureEnum(
   const labels = existing.get(name);
   if (!labels) {
     await client.query(
-      `CREATE TYPE ${quoteIdent(name)} AS ENUM (${values.map(quoteLiteral).join(", ")})`,
+      `DO $$ BEGIN
+        CREATE TYPE ${quoteIdent(name)} AS ENUM (${values.map(quoteLiteral).join(", ")});
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END $$;`,
     );
     existing.set(name, new Set(values));
     return;
@@ -260,6 +262,12 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
   ];
 
   for (const item of cascades) {
+    const tableExists = await client.query(
+      `SELECT 1 FROM information_schema.tables WHERE table_name = $1`,
+      [item.table],
+    );
+    if (tableExists.rows.length === 0) continue;
+
     const { rows } = await client.query(
       `SELECT 1 FROM pg_constraint WHERE conname = $1`,
       [item.constraint],
@@ -348,6 +356,308 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
       ALTER TABLE IF EXISTS testimonials ALTER COLUMN alt DROP NOT NULL;
     EXCEPTION WHEN OTHERS THEN
       NULL;
+    END $$;
+  `).catch(() => undefined);
+
+  // 4. Blueprint pages (Service, Solution, Work Service, Industry) columns and enums
+  await client.query(`
+    DO $$ BEGIN
+      CREATE TYPE "enum_service_pages_logos_row" AS ENUM ('1', '2');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+    DO $$ BEGIN
+      CREATE TYPE "enum_solution_pages_logos_row" AS ENUM ('1', '2');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+    DO $$ BEGIN
+      CREATE TYPE "enum_work_service_pages_logos_row" AS ENUM ('1', '2');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+    DO $$ BEGIN
+      CREATE TYPE "enum_industry_pages_logos_row" AS ENUM ('1', '2');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      CREATE TYPE "enum_service_pages_projects_category" AS ENUM ('solution', 'service', 'industry', 'branding-projects');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+    DO $$ BEGIN
+      CREATE TYPE "enum_solution_pages_projects_category" AS ENUM ('solution', 'service', 'industry', 'branding-projects');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+    DO $$ BEGIN
+      CREATE TYPE "enum_work_service_pages_projects_category" AS ENUM ('solution', 'service', 'industry', 'branding-projects');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+    DO $$ BEGIN
+      CREATE TYPE "enum_industry_pages_projects_category" AS ENUM ('solution', 'service', 'industry', 'branding-projects');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+
+    ALTER TABLE IF EXISTS "service_pages_logos"
+      ADD COLUMN IF NOT EXISTS "client_logo_id" integer,
+      ADD COLUMN IF NOT EXISTS "row" varchar;
+    ALTER TABLE IF EXISTS "solution_pages_logos"
+      ADD COLUMN IF NOT EXISTS "client_logo_id" integer,
+      ADD COLUMN IF NOT EXISTS "row" varchar;
+    ALTER TABLE IF EXISTS "work_service_pages_logos"
+      ADD COLUMN IF NOT EXISTS "client_logo_id" integer,
+      ADD COLUMN IF NOT EXISTS "row" varchar;
+    ALTER TABLE IF EXISTS "industry_pages_logos"
+      ADD COLUMN IF NOT EXISTS "client_logo_id" integer,
+      ADD COLUMN IF NOT EXISTS "row" varchar;
+
+    ALTER TABLE IF EXISTS "service_pages_projects"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "category" varchar DEFAULT 'service',
+      ADD COLUMN IF NOT EXISTS "order" numeric DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "heading" text,
+      ADD COLUMN IF NOT EXISTS "description" text,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "href" text;
+
+    ALTER TABLE IF EXISTS "solution_pages_projects"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "category" varchar DEFAULT 'solution',
+      ADD COLUMN IF NOT EXISTS "order" numeric DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "heading" text,
+      ADD COLUMN IF NOT EXISTS "description" text,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "href" text;
+
+    ALTER TABLE IF EXISTS "work_service_pages_projects"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "category" varchar DEFAULT 'service',
+      ADD COLUMN IF NOT EXISTS "order" numeric DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "heading" text,
+      ADD COLUMN IF NOT EXISTS "description" text,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "href" text;
+
+    ALTER TABLE IF EXISTS "industry_pages_projects"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "category" varchar DEFAULT 'industry',
+      ADD COLUMN IF NOT EXISTS "order" numeric DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "heading" text,
+      ADD COLUMN IF NOT EXISTS "description" text,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "href" text;
+
+    ALTER TABLE IF EXISTS "service_pages_experts"
+      ADD COLUMN IF NOT EXISTS "member_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "name" text,
+      ADD COLUMN IF NOT EXISTS "role" text;
+
+    ALTER TABLE IF EXISTS "solution_pages_experts"
+      ADD COLUMN IF NOT EXISTS "member_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "name" text,
+      ADD COLUMN IF NOT EXISTS "role" text;
+
+    ALTER TABLE IF EXISTS "work_service_pages_experts"
+      ADD COLUMN IF NOT EXISTS "member_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "name" text,
+      ADD COLUMN IF NOT EXISTS "role" text;
+
+    ALTER TABLE IF EXISTS "industry_pages_experts"
+      ADD COLUMN IF NOT EXISTS "member_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "name" text,
+      ADD COLUMN IF NOT EXISTS "role" text;
+
+    ALTER TABLE IF EXISTS "service_pages_relatedBlogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "service_pages_related_blogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "solution_pages_relatedBlogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "solution_pages_related_blogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "work_service_pages_relatedBlogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "work_service_pages_related_blogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "industry_pages_relatedBlogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "industry_pages_related_blogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "service_pages_clientTabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "service_pages_client_tabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "solution_pages_clientTabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "solution_pages_client_tabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "work_service_pages_clientTabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "work_service_pages_client_tabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "industry_pages_clientTabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "industry_pages_client_tabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "service_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+
+      ALTER TABLE IF EXISTS "service_pages_experts" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "service_pages_experts" ALTER COLUMN "role" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_experts" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_experts" ALTER COLUMN "role" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_experts" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_experts" ALTER COLUMN "role" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_experts" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_experts" ALTER COLUMN "role" DROP NOT NULL;
+
+      ALTER TABLE IF EXISTS "service_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "service_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "solution_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "work_service_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "industry_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+  `).catch(() => undefined);
+
+  // 5. Location pages columns, enums, and constraint relaxation
+  await client.query(`
+    DO $$ BEGIN
+      CREATE TYPE "enum_location_pages_logos_row" AS ENUM ('1', '2');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      CREATE TYPE "enum_location_pages_projects_category" AS ENUM ('solution', 'service', 'industry', 'location', 'branding-projects');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+
+    ALTER TABLE IF EXISTS "location_pages_logos"
+      ADD COLUMN IF NOT EXISTS "client_logo_id" integer,
+      ADD COLUMN IF NOT EXISTS "row" varchar;
+
+    ALTER TABLE IF EXISTS "location_pages_projects"
+      ADD COLUMN IF NOT EXISTS "client_id" integer,
+      ADD COLUMN IF NOT EXISTS "category" varchar DEFAULT 'location',
+      ADD COLUMN IF NOT EXISTS "order" numeric DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "heading" text,
+      ADD COLUMN IF NOT EXISTS "description" text,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "href" text;
+
+    ALTER TABLE IF EXISTS "location_pages_relatedBlogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "location_pages_related_blogs"
+      ADD COLUMN IF NOT EXISTS "post_id" integer,
+      ADD COLUMN IF NOT EXISTS "image_id" integer,
+      ADD COLUMN IF NOT EXISTS "date" text,
+      ADD COLUMN IF NOT EXISTS "read_time" text,
+      ADD COLUMN IF NOT EXISTS "readTime" text,
+      ADD COLUMN IF NOT EXISTS "title" text;
+
+    ALTER TABLE IF EXISTS "location_pages_clientTabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    ALTER TABLE IF EXISTS "location_pages_client_tabs"
+      ADD COLUMN IF NOT EXISTS "tab_id" text,
+      ADD COLUMN IF NOT EXISTS "tabId" text,
+      ADD COLUMN IF NOT EXISTS "label" text;
+
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "location_pages_logos" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "location_pages_projects" ALTER COLUMN "name" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "location_pages_projects" ALTER COLUMN "description" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "location_pages_projects" ALTER COLUMN "heading" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "location_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
+      ALTER TABLE IF EXISTS "location_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
     END $$;
   `).catch(() => undefined);
 }

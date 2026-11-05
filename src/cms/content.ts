@@ -1028,7 +1028,7 @@ export const getFooter = cache(async (): Promise<FooterContent> => {
   try {
     const global = (await payload.findGlobal({
       slug: "site-footer",
-      depth: 2,
+      depth: 1,
     })) as Partial<Record<(typeof FOOTER_LISTS)[keyof typeof FOOTER_LISTS], FooterListRow[] | null>>;
 
     const columns = await Promise.all(

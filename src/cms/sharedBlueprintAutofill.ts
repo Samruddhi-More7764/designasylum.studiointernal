@@ -53,6 +53,13 @@ export async function autofillBlueprintProjects(
     const item = row as Record<string, unknown>;
 
     if (item.order == null) item.order = i;
+
+    // Synchronize heading <-> name and category <-> tab for cross-collection compatibility
+    if (item.heading && !item.name) item.name = item.heading;
+    if (item.name && !item.heading) item.heading = item.name;
+    if (item.category && !item.tab) item.tab = item.category;
+    if (item.tab && !item.category) item.category = item.tab;
+
     if (!item.client) continue;
 
     const clientId =
