@@ -17,6 +17,10 @@ export type PersonProject = { id: string; name: string; body: string; image: str
 export type PersonPost = { id: string; title: string; href: string };
 
 export type TeamPersonContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   name: string;
   role: string;
@@ -129,6 +133,10 @@ function chips(
 }
 
 type RawPersonDoc = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent?: string | null;
   name?: string | null;
   role?: string | null;
@@ -203,6 +211,10 @@ function parseTeamPersonDoc(
   const personName = text(doc.name, fallbackName);
 
   return {
+    metaTitle: doc.metaTitle ? String(doc.metaTitle) : null,
+    metaDescription: doc.metaDescription ? String(doc.metaDescription) : null,
+    ogImage: doc.ogImage ?? null,
+    noIndex: Boolean(doc.noIndex),
     breadcrumbCurrent: text(doc.breadcrumbCurrent, personName || baseFallback.breadcrumbCurrent),
     name: personName,
     role: text(doc.role, baseFallback.role),

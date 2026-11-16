@@ -7,6 +7,7 @@ import {
   blogArticleRelatedFields,
   blogArticleTopicFields,
 } from "../fields/blogArticleFields";
+import { seoTab } from "../fields/seoFields";
 import {
   autofillBlogAuthor,
   autofillBlueprintRelatedBlogs,
@@ -141,6 +142,7 @@ export const BlogPosts: CollectionConfig = {
           label: "Related blogs",
           fields: blogArticleRelatedFields,
         },
+        seoTab,
       ],
     },
   ],

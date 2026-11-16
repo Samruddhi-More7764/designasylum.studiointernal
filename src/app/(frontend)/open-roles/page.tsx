@@ -5,13 +5,22 @@ import { SplitHeading } from "@/components/ui/SectionHeading";
 import { JobBoard } from "@/components/open-roles/JobBoard";
 import { getFooter } from "@/cms/content";
 import { getOpenRolesPage } from "@/cms/openRolesPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Open roles",
-  description: "Find your place at Design Asylum. Browse open roles across design, development, and the studio.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getOpenRolesPage();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Open Roles | Careers at Design Asylum",
+    fallbackDescription:
+      "Find your place at Design Asylum. Browse open roles across design, development, and the studio.",
+  });
+}
 
 export default async function OpenRolesPage() {
   const [page, footer] = await Promise.all([getOpenRolesPage(), getFooter()]);

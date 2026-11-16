@@ -13,6 +13,7 @@ import { FAQ } from "@/components/sections/14-FAQ";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getServicePageBySlug } from "@/cms/servicePages";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
@@ -30,10 +31,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  return {
-    title: page.heroTitle || `${page.breadcrumbCurrent} — Design Asylum`,
-    description: page.heroIntro || page.lead,
-  };
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: page.heroTitle || `${page.breadcrumbCurrent} — Design Asylum`,
+    fallbackDescription: page.heroIntro || page.lead,
+  });
 }
 
 export default async function ServiceDynamicPage({ params }: Props) {

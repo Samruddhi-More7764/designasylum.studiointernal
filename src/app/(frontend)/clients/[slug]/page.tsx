@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { NavBar } from "@/components/layout/NavBar";
 import { ClientHubHero } from "@/components/clients/01-ClientHubHero";
@@ -10,10 +11,34 @@ import { Services } from "@/components/sections/04-Services";
 import { Footer } from "@/components/sections/15-Footer";
 import { getClientBySlug, getFooter } from "@/cms/content";
 import { caseStudyPath } from "@/cms/urls";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
 type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const client = await getClientBySlug(slug);
+  if (!client) {
+    return {
+      title: "Client Case Study",
+      description: "Client work at Design Asylum.",
+    };
+  }
+
+  return buildMetadata({
+    metaTitle: client.metaTitle,
+    metaDescription: client.metaDescription,
+    ogImage: client.ogImage || client.heroImage,
+    noIndex: client.noIndex,
+    fallbackTitle: `${client.name} — Work & Case Study | Design Asylum`,
+    fallbackDescription:
+      client.heroSubheading ||
+      client.heroHeading ||
+      `${client.name} partnership and branding work with Design Asylum.`,
+  });
+}
 
 export default async function ClientPage({ params }: Props) {
   const { slug } = await params;

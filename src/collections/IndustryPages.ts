@@ -5,6 +5,7 @@ import type {
   Field,
 } from "payload";
 import { autofillBlueprintFields } from "../cms/sharedBlueprintAutofill";
+import { seoTab } from "../fields/seoFields";
 
 const slugify = (value: string) =>
   value
@@ -405,6 +406,7 @@ export const IndustryPages: CollectionConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

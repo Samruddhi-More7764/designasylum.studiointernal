@@ -1,4 +1,5 @@
 import type { Field, GlobalConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 function imageField(name = "image", label?: string, description?: string): Field {
   return {
@@ -165,6 +166,7 @@ export const StudioPage: GlobalConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

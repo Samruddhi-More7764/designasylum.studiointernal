@@ -4,6 +4,10 @@ import { storedImage } from "@/cms/storedImage";
 import { clientCards, clientsHeading } from "@/data/clientsIndexPage";
 
 export type ClientsIndexContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   heading: string;
   cards: {
@@ -222,6 +226,10 @@ export const getClientsIndex = cache(async (): Promise<ClientsIndexContent> => {
       .map(({ order: _order, ...card }) => card);
 
     return {
+      metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+      metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+      ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+      noIndex: Boolean((doc as Record<string, unknown>).noIndex),
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
       heading: text(doc.heading, fallback.heading),
       cards: cards.length ? cards : fallback.cards,

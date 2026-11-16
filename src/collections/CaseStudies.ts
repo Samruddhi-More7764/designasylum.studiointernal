@@ -6,6 +6,7 @@ import {
   type CollectionConfig,
 } from "payload";
 import { caseStudyFields } from "../fields/caseStudyFields";
+import { seoTab } from "../fields/seoFields";
 import type { CaseStudy } from "../payload-types";
 
 type GalleryRow = NonNullable<CaseStudy["gallery"]>[number];
@@ -330,27 +331,38 @@ export const CaseStudies: CollectionConfig = {
           "Shown in lists and dropdowns (e.g. Puma — Logo Design). Auto-generated from Client and Title if left empty.",
       },
     },
-    { name: "title", type: "text", required: true },
     {
-      name: "slug",
-      type: "text",
-      required: true,
-      index: true,
-      admin: {
-        description:
-          "URL: /clients/{client}/{slug}. Example: case-study, website, branding.",
-      },
+      type: "tabs",
+      tabs: [
+        {
+          label: "Case Study",
+          fields: [
+            { name: "title", type: "text", required: true },
+            {
+              name: "slug",
+              type: "text",
+              required: true,
+              index: true,
+              admin: {
+                description:
+                  "URL: /clients/{client}/{slug}. Example: case-study, website, branding.",
+              },
+            },
+            {
+              name: "client",
+              type: "relationship",
+              relationTo: "clients",
+              required: true,
+              admin: {
+                description:
+                  "The brand this study belongs to. If the Client does not exist yet, create and save it first — leave Featured study empty. After you save this Case study, Direct clients pick it up automatically.",
+              },
+            },
+            ...caseStudyFields,
+          ],
+        },
+        seoTab,
+      ],
     },
-    {
-      name: "client",
-      type: "relationship",
-      relationTo: "clients",
-      required: true,
-      admin: {
-        description:
-          "The brand this study belongs to. If the Client does not exist yet, create and save it first — leave Featured study empty. After you save this Case study, Direct clients pick it up automatically.",
-      },
-    },
-    ...caseStudyFields,
   ],
 };

@@ -5,7 +5,13 @@ import { faqEntries } from "@/data/faqPage";
 
 const designedCrumb = "Sevenloop Brand Website Redesign";
 
-export type FaqDetailContent = FaqDetail & { breadcrumbCurrent: string };
+export type FaqDetailContent = FaqDetail & {
+  breadcrumbCurrent: string;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
+};
 
 function text(value: string | null | undefined, fallback: string) {
   const trimmed = value?.trim();
@@ -67,6 +73,10 @@ export const getFaqDetail = cache(async (slug: string): Promise<FaqDetailContent
 
     if (fromCollection.docs.length) {
       const doc = fromCollection.docs[0] as unknown as {
+        metaTitle?: string | null;
+        metaDescription?: string | null;
+        ogImage?: unknown;
+        noIndex?: boolean | null;
         slug?: string | null;
         breadcrumbCurrent?: string | null;
         question?: string | null;
@@ -90,6 +100,10 @@ export const getFaqDetail = cache(async (slug: string): Promise<FaqDetailContent
       if (!question) return null;
 
       return {
+        metaTitle: doc.metaTitle ? String(doc.metaTitle) : null,
+        metaDescription: doc.metaDescription ? String(doc.metaDescription) : null,
+        ogImage: doc.ogImage ?? null,
+        noIndex: Boolean(doc.noIndex),
         slug: cleanSlug,
         question,
         lead: text(doc.lead, designed?.lead || ""),

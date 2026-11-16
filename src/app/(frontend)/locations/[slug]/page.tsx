@@ -12,6 +12,7 @@ import { FAQ } from "@/components/sections/14-FAQ";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getLocationPageBySlug, getAllLocationSlugs } from "@/cms/locationPages";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
@@ -34,10 +35,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  return {
-    title: page.heroTitle,
-    description: page.heroIntro || page.lead,
-  };
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: page.heroTitle,
+    fallbackDescription: page.heroIntro || page.lead,
+  });
 }
 
 export default async function DynamicLocationPage({ params }: Props) {

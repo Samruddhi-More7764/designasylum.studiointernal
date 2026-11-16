@@ -10,13 +10,22 @@ import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getStudioPage } from "@/cms/studioPage";
 import { studioOffer } from "@/data/studioPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Studio",
-  description: "We make B2B websites that communicate your value proposition in the most compelling way.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getStudioPage();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage || page.heroImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Studio | Design Asylum",
+    fallbackDescription:
+      "We make B2B websites that communicate your value proposition in the most compelling way.",
+  });
+}
 
 function Arrow({ src }: { src: string }) {
   return (

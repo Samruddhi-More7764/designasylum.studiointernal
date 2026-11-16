@@ -386,6 +386,10 @@ async function parseServiceDoc(
     doc.breadcrumbCurrent?.trim() || doc.title?.trim() || "";
 
   return {
+    metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+    metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+    ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+    noIndex: Boolean((doc as Record<string, unknown>).noIndex),
     breadcrumbCurrent: resolvedBreadcrumb,
     heroTitle: doc.heroTitle?.trim() || doc.title?.trim() || "",
     heroIntro: doc.heroIntro?.trim() || "",

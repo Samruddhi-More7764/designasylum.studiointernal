@@ -8,14 +8,23 @@ import { BlogListing } from "@/components/blog/BlogListing";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getBlogIndex } from "@/cms/blogIndex";
 import { getFooter } from "@/cms/content";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Things worth thinking about.",
-  description:
-    "Ideas, opinions, lessons and the occasional rabbit hole from the people behind Design Asylum.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getBlogIndex();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage || page.heroImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Things worth thinking about. | Design Asylum Blog",
+    fallbackDescription:
+      page.intro ||
+      "Ideas, opinions, lessons and the occasional rabbit hole from the people behind Design Asylum.",
+  });
+}
 
 export default async function BlogIndexPage() {
   const [page, footer] = await Promise.all([getBlogIndex(), getFooter()]);

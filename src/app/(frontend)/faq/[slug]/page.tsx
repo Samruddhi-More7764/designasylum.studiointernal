@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { StickyTableOfContents } from "@/components/branding-agency/StickyTableOfContents";
 import { getFaqDetail } from "@/cms/faqDetail";
 import { getFooter } from "@/cms/content";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
@@ -17,10 +18,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const detail = await getFaqDetail(slug);
   if (!detail) return { title: "FAQ" };
-  return {
-    title: detail.question,
-    description: detail.lead,
-  };
+  return buildMetadata({
+    metaTitle: detail.metaTitle,
+    metaDescription: detail.metaDescription,
+    ogImage: detail.ogImage,
+    noIndex: detail.noIndex,
+    fallbackTitle: `${detail.question} | Design Asylum FAQ`,
+    fallbackDescription: detail.lead || "Frequently asked questions at Design Asylum.",
+  });
 }
 
 export default async function FaqDetailPage({ params }: PageProps) {

@@ -1,4 +1,5 @@
 import type { Field, GlobalConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 function memberFields(isLeadership: boolean): Field[] {
   return [
@@ -137,6 +138,7 @@ export const TeamPage: GlobalConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

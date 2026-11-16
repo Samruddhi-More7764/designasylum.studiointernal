@@ -5,6 +5,10 @@ import { faqCategories, faqEntries, type FaqCategory, type FaqEntry } from "@/da
 const categoryIds = new Set<FaqCategory>(["about", "branding", "website", "marketing"]);
 
 export type FaqPageContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   titleBefore: string;
   titleAccent: string;
   titleAfter: string;
@@ -127,6 +131,10 @@ export const getFaqPage = cache(async (): Promise<FaqPageContent> => {
     ).filter((entry): entry is FaqEntry => Boolean(entry));
 
     return {
+      metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+      metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+      ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+      noIndex: Boolean((doc as Record<string, unknown>).noIndex),
       titleBefore: text(doc.titleBefore, fallback.titleBefore),
       titleAccent: text(doc.titleAccent, fallback.titleAccent),
       titleAfter: text(doc.titleAfter, fallback.titleAfter),

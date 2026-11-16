@@ -1,4 +1,5 @@
 import type { CollectionBeforeValidateHook, CollectionConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 const slugify = (value: string) =>
   value
@@ -69,6 +70,7 @@ export const FaqDetails: CollectionConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

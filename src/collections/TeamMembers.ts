@@ -3,6 +3,7 @@ import type {
   CollectionConfig,
   Field,
 } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 const slugify = (value: string) =>
   value
@@ -194,6 +195,7 @@ export const TeamMembers: CollectionConfig = {
             chips("industries"),
           ],
         },
+        seoTab,
       ],
     },
   ],

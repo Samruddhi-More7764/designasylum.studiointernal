@@ -5,13 +5,22 @@ import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { WorkGrid } from "@/components/work/WorkGrid";
 import { getFooter } from "@/cms/content";
 import { getWorkPage } from "@/cms/workPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Work",
-  description: "Worked with companies from a diverse set of industries.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getWorkPage();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Work | Design Asylum",
+    fallbackDescription:
+      page.heading || "Worked with companies from a diverse set of industries.",
+  });
+}
 
 export default async function WorkPage() {
   const [page, footer] = await Promise.all([getWorkPage(), getFooter()]);

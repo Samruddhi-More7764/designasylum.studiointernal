@@ -10,6 +10,7 @@ import { SplitHeading } from "@/components/ui/SectionHeading";
 import { distributeLogosTriangle, getFooter } from "@/cms/content";
 import { getTeamPersonBySlug, type PersonChip } from "@/cms/teamPerson";
 import { teamPersonCta } from "@/data/teamPersonPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
@@ -27,12 +28,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  return {
-    title: page.name,
-    description: page.role
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage || page.photos[0],
+    noIndex: page.noIndex,
+    fallbackTitle: `${page.name} | Design Asylum`,
+    fallbackDescription: page.role
       ? `${page.name} is the ${page.role} at Design Asylum.`
       : `${page.name} — Design Asylum Team.`,
-  };
+  });
 }
 
 function Arrow() {

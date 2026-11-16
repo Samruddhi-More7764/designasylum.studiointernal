@@ -57,6 +57,10 @@ type LinkedBlogPost = {
 };
 
 export type LocationPageContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   title: string;
   slug: string;
   breadcrumbCurrent: string;
@@ -343,6 +347,10 @@ export const getLocationPageBySlug = cache(
           }): ClientLogo => ({ name, image, width, height });
 
           return {
+            metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+            metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+            ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+            noIndex: Boolean((doc as Record<string, unknown>).noIndex),
             title: text(doc.title, fallback.title),
             slug: cleanSlug,
             breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),

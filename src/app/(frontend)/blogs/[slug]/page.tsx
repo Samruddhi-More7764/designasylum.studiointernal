@@ -7,6 +7,7 @@ import { RelatedBlogs } from "@/components/branding-agency/RelatedBlogs";
 import { ArticleAuthor, ArticleTopics, BlogArticle } from "@/components/blog/BlogArticle";
 import { getBlogPostBySlug } from "@/cms/blogArticle";
 import { getFooter } from "@/cms/content";
+import { buildMetadata } from "@/cms/seo";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 
 export const revalidate = 120;
@@ -20,10 +21,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const page = await getBlogPostBySlug(slug);
   if (!page) return { title: "Blog" };
   const fullTitle = `${page.titleBefore}${page.titleAccent ? ` ${page.titleAccent}` : ""}${page.titleMiddle}${page.titleLine}`.trim();
-  return {
-    title: fullTitle || "Blog",
-    description: page.intro || undefined,
-  };
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage || page.heroImage,
+    noIndex: page.noIndex,
+    fallbackTitle: fullTitle || "Blog",
+    fallbackDescription: page.intro || undefined,
+  });
 }
 
 export default async function BlogPostPage({ params }: PageProps) {

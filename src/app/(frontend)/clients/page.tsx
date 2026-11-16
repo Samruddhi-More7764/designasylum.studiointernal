@@ -6,13 +6,22 @@ import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { getClientsIndex } from "@/cms/clientsIndex";
 import { getFooter } from "@/cms/content";
 import { clientCards, clientsCta } from "@/data/clientsIndexPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Clients",
-  description: "Worked with companies from a diverse set of industries.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getClientsIndex();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Clients | Design Asylum",
+    fallbackDescription:
+      page.heading || "Worked with companies from a diverse set of industries.",
+  });
+}
 
 export default async function ClientsPage() {
   const [page, footer] = await Promise.all([getClientsIndex(), getFooter()]);

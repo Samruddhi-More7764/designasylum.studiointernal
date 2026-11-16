@@ -31,8 +31,21 @@ const doto = Doto({
 });
 
 export const metadata: Metadata = {
-  title: "Design Asylum",
-  description: "Design Asylum landing page — built from Figma design specs.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SERVER_URL || "https://designasylum.studio",
+  ),
+  title: "Design Asylum — Strategic Branding & Digital Design Studio",
+  description:
+    "Design Asylum is a strategic branding and digital design studio crafting high-impact identity systems and high-converting B2B websites.",
+  openGraph: {
+    title: "Design Asylum — Strategic Branding & Digital Design Studio",
+    description:
+      "Design Asylum is a strategic branding and digital design studio crafting high-impact identity systems and high-converting B2B websites.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 // Incremental Static Regeneration (ISR): Serve instant pre-rendered pages (<50ms)

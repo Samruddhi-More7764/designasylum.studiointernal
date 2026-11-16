@@ -107,7 +107,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v7_cascade_foreign_keys_and_blueprint_fixes"];
+  const lines: string[] = ["migration_v8_add_seo_metadata_fields"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -674,6 +674,33 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
     },
   ];
 
+  const sectionParentTables = [
+    "service_pages_sections",
+    "solution_pages_sections",
+    "work_service_pages_sections",
+    "industry_pages_sections",
+    "location_pages_sections",
+    "blog_posts_sections",
+  ];
+
+  for (const table of sectionParentTables) {
+    const tableExists = await client.query(
+      `SELECT 1 FROM information_schema.tables WHERE table_name = $1`,
+      [table],
+    );
+    if (tableExists.rows.length === 0) continue;
+
+    const hasKey = await client.query(
+      `SELECT 1 FROM pg_constraint WHERE conrelid = $1::regclass AND contype IN ('p', 'u')`,
+      [table],
+    );
+    if (hasKey.rows.length === 0) {
+      await client.query(
+        `ALTER TABLE ${quoteIdent(table)} ADD CONSTRAINT ${quoteIdent(table + "_pkey")} PRIMARY KEY (id)`,
+      );
+    }
+  }
+
   for (const item of cascades) {
     const tableExists = await client.query(
       `SELECT 1 FROM information_schema.tables WHERE table_name = $1`,
@@ -692,7 +719,7 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
       DELETE FROM ${quoteIdent(item.table)}
       WHERE _parent_id IS NOT NULL
         AND _parent_id NOT IN (SELECT id FROM ${quoteIdent(item.parentTable)})
-    `).catch(() => undefined);
+    `);
 
     const { rows } = await client.query(
       `SELECT 1 FROM pg_constraint WHERE conname = $1`,
@@ -704,7 +731,7 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
          ADD CONSTRAINT ${quoteIdent(item.constraint)}
          FOREIGN KEY (_parent_id) REFERENCES ${quoteIdent(item.parentTable)}(id)
          ON DELETE CASCADE`,
-      ).catch(() => undefined);
+      );
     }
   }
 }

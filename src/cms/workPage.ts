@@ -14,6 +14,10 @@ const projectCategories = new Set<Exclude<WorkFilterId, "all">>([
 ]);
 
 export type WorkContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   heading: string;
   filters: { id: WorkFilterId; label: string }[];
@@ -248,6 +252,10 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
       .map(({ order: _order, ...proj }) => proj);
 
     return {
+      metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+      metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+      ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+      noIndex: Boolean((doc as Record<string, unknown>).noIndex),
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
       heading: text(doc.heading, fallback.heading),
       filters: filters.length ? filters : fallback.filters,

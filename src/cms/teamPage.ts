@@ -18,6 +18,10 @@ export type TeamMember = {
 };
 
 export type TeamPageContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   heading: string;
   intro: string;
@@ -133,6 +137,10 @@ export const getTeamPage = cache(async (): Promise<TeamPageContent> => {
     };
 
     return {
+      metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+      metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+      ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+      noIndex: Boolean((doc as Record<string, unknown>).noIndex),
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
       heading: text(doc.heading, fallback.heading),
       intro: text(doc.intro, fallback.intro),

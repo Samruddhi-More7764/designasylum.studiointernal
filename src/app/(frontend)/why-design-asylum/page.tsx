@@ -11,14 +11,23 @@ import { BenefitCarousel } from "@/components/why-design-asylum/BenefitCarousel"
 import { LifeOutside } from "@/components/why-design-asylum/LifeOutside";
 import { getCareersPage } from "@/cms/careersPage";
 import { getFooter } from "@/cms/content";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Why Design Asylum",
-  description:
-    "Work alongside strategists, designers and developers on ambitious brands, complex problems and work that changes how companies are seen.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getCareersPage();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage || page.heroImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Why Design Asylum | Careers & Culture",
+    fallbackDescription:
+      page.intro ||
+      "Work alongside strategists, designers and developers on ambitious brands, complex problems and work that changes how companies are seen.",
+  });
+}
 
 /** Stops from careers frame 1454:128390. Both desktop radial layers share them. */
 const CAREERS_RADIAL_STOPS =

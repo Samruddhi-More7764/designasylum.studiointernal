@@ -46,6 +46,10 @@ type CmsSection = {
 };
 
 export type BrandingStrategyContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   heroTitle: string;
   heroIntro: string;

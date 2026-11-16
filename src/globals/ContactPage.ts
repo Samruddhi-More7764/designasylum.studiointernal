@@ -1,4 +1,5 @@
 import type { Field, GlobalConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 const image: Field = {
   name: "image",
@@ -72,6 +73,7 @@ export const ContactPage: GlobalConfig = {
             { name: "formBody", label: "Paragraph", type: "textarea" },
           ],
         },
+        seoTab,
       ],
     },
   ],

@@ -5,6 +5,7 @@ import type {
 } from "payload";
 import { clientHubFields } from "../fields/clientHubFields";
 import { clientPlacementsFields } from "../fields/clientPlacementsFields";
+import { seoTab } from "../fields/seoFields";
 import {
   syncClientPlacementsAfterChange,
   syncClientPlacementsAfterDelete,
@@ -276,6 +277,7 @@ export const Clients: CollectionConfig = {
           label: "Website Placements",
           fields: clientPlacementsFields,
         },
+        seoTab,
       ],
     },
   ],

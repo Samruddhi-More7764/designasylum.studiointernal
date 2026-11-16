@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/branding-agency/Breadcrumbs";
 import { CtaHoverLabel, ctaArrowClass } from "@/components/ui/CtaHoverLabel";
 import { getFooter } from "@/cms/content";
 import { getOpenRole } from "@/cms/openRolesPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
@@ -18,10 +19,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const detail = await getOpenRole(slug);
   if (!detail) return { title: "Open role" };
-  return {
-    title: detail.role.title,
-    description: detail.role.summary,
-  };
+  return buildMetadata({
+    fallbackTitle: `${detail.role.title} | Careers at Design Asylum`,
+    fallbackDescription: detail.role.summary || "Open role at Design Asylum.",
+  });
 }
 
 export default async function OpenRolePage({ params }: PageProps) {

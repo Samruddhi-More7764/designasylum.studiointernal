@@ -1,4 +1,5 @@
 import type { Field, GlobalConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 const image: Field = {
   name: "image",
@@ -172,6 +173,7 @@ export const BlogIndex: GlobalConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

@@ -33,6 +33,10 @@ type CmsBlock = {
 };
 
 export type BlogArticleContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   titleBefore: string;
   titleAccent: string;
@@ -272,6 +276,10 @@ export function parseBlogArticleDoc(
   const authorHref = authorSlug ? `/team/${authorSlug}#hero` : typeof doc.authorUrl === "string" ? doc.authorUrl.trim() : "";
 
   return {
+    metaTitle: (doc.metaTitle as string) || null,
+    metaDescription: (doc.metaDescription as string) || null,
+    ogImage: doc.ogImage || null,
+    noIndex: Boolean(doc.noIndex),
     breadcrumbCurrent: text(doc.breadcrumbCurrent as string, docTitle || fb?.breadcrumbCurrent || "Blog"),
     titleBefore: text(doc.titleBefore as string, docTitle ? `${docTitle} ` : fb?.titleBefore || ""),
     titleAccent: text(doc.titleAccent as string, docTitle ? "" : fb?.titleAccent || ""),

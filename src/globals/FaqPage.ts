@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 /**
  * The FAQ index at /faq.
@@ -89,6 +90,7 @@ export const FaqPage: GlobalConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

@@ -1083,6 +1083,10 @@ const fallbackClientHub: ClientHubContent = {
 };
 
 export type ClientHubMeta = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   slug: string;
   name: string;
   projectType: "hub" | "direct";
@@ -1176,6 +1180,10 @@ export const getClientBySlug = cache(
       const heroSubheading = doc.hero?.subheading ? String(doc.hero.subheading) : null;
 
       return {
+        metaTitle: doc.metaTitle ? String(doc.metaTitle) : null,
+        metaDescription: doc.metaDescription ? String(doc.metaDescription) : null,
+        ogImage: doc.ogImage ?? null,
+        noIndex: Boolean(doc.noIndex),
         slug: String(doc.slug),
         name: String(doc.name),
         projectType: doc.projectType === "hub" ? "hub" : "direct",
@@ -1360,6 +1368,10 @@ function viewAllHref(value: string | null | undefined, fallback: string) {
 }
 
 export type CaseStudyPageContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   clientSlug: string;
   studySlug: string;
   title: string;
@@ -1466,6 +1478,10 @@ export const getCaseStudyPage = cache(
       ];
 
       return {
+        metaTitle: g.metaTitle ? String(g.metaTitle) : null,
+        metaDescription: g.metaDescription ? String(g.metaDescription) : null,
+        ogImage: g.ogImage ?? null,
+        noIndex: Boolean(g.noIndex),
         clientSlug,
         studySlug,
         title: String(g.title),

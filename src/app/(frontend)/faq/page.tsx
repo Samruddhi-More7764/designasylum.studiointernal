@@ -4,13 +4,22 @@ import { Footer } from "@/components/sections/15-Footer";
 import { FaqExplorer } from "@/components/faq/FaqExplorer";
 import { getFaqPage } from "@/cms/faqPage";
 import { getFooter } from "@/cms/content";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Frequently Asked Questions",
-  description: "Answers on branding, websites, and marketing from Design Asylum.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getFaqPage();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Frequently Asked Questions | Design Asylum",
+    fallbackDescription:
+      "Answers on branding, websites, and marketing from Design Asylum.",
+  });
+}
 
 export default async function FaqPage() {
   const [page, footer] = await Promise.all([getFaqPage(), getFooter()]);

@@ -8,14 +8,23 @@ import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getTeamPage, type TeamMember } from "@/cms/teamPage";
 import { teamCta } from "@/data/teamPage";
+import { buildMetadata } from "@/cms/seo";
 
 export const revalidate = 120;
 
-export const metadata: Metadata = {
-  title: "Team",
-  description:
-    "Strategists, designers, writers, developers and motion artists — in the same room, on the same problem.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getTeamPage();
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: "Team | Design Asylum",
+    fallbackDescription:
+      page.intro ||
+      "Strategists, designers, writers, developers and motion artists — in the same room, on the same problem.",
+  });
+}
 
 function Arrow({ src }: { src: string }) {
   return (

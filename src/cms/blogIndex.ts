@@ -15,6 +15,10 @@ const badgeIcons = new Set<BlogBadgeIcon>(["rocket", "fire", "medal", "smile", "
 const categories = new Set<Exclude<BlogCategory, "All">>(["Brand", "Digital", "Strategy", "Studio"]);
 
 export type BlogIndexContent = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: unknown;
+  noIndex?: boolean | null;
   breadcrumbCurrent: string;
   titleBefore: string;
   titleAccent: string;
@@ -196,6 +200,10 @@ export const getBlogIndex = cache(async (): Promise<BlogIndexContent> => {
     }
 
     return {
+      metaTitle: (doc as Record<string, unknown>).metaTitle ? String((doc as Record<string, unknown>).metaTitle) : null,
+      metaDescription: (doc as Record<string, unknown>).metaDescription ? String((doc as Record<string, unknown>).metaDescription) : null,
+      ogImage: (doc as Record<string, unknown>).ogImage ?? null,
+      noIndex: Boolean((doc as Record<string, unknown>).noIndex),
       breadcrumbCurrent: text(doc.breadcrumbCurrent, fallback.breadcrumbCurrent),
       titleBefore: text(doc.titleBefore, fallback.titleBefore),
       titleAccent: text(doc.titleAccent, fallback.titleAccent),

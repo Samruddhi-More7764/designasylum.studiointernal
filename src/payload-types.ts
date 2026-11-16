@@ -630,6 +630,22 @@ export interface Client {
       order?: number | null;
     };
   };
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -768,6 +784,22 @@ export interface CaseStudy {
     label: string;
     href: string;
   };
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1020,6 +1052,22 @@ export interface TeamMember {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1265,6 +1313,22 @@ export interface BlogPost {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1485,6 +1549,22 @@ export interface IndustryPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1691,6 +1771,22 @@ export interface ServicePage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1897,6 +1993,22 @@ export interface SolutionPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2103,6 +2215,22 @@ export interface WorkServicePage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2132,6 +2260,22 @@ export interface FaqDetail {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2302,6 +2446,22 @@ export interface LocationPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2838,6 +2998,10 @@ export interface ClientsSelect<T extends boolean = true> {
               order?: T;
             };
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2923,6 +3087,10 @@ export interface CaseStudiesSelect<T extends boolean = true> {
         label?: T;
         href?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3006,6 +3174,10 @@ export interface TeamMembersSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3195,6 +3367,10 @@ export interface BlogPostsSelect<T extends boolean = true> {
         title?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3310,6 +3486,10 @@ export interface IndustryPagesSelect<T extends boolean = true> {
         title?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3420,6 +3600,10 @@ export interface ServicePagesSelect<T extends boolean = true> {
         title?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3530,6 +3714,10 @@ export interface SolutionPagesSelect<T extends boolean = true> {
         title?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3640,6 +3828,10 @@ export interface WorkServicePagesSelect<T extends boolean = true> {
         title?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3660,6 +3852,10 @@ export interface FaqDetailsSelect<T extends boolean = true> {
         body?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3767,6 +3963,10 @@ export interface LocationPagesSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4035,6 +4235,22 @@ export interface BlogIndex {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4075,6 +4291,22 @@ export interface ContactPage {
   formAccent?: string | null;
   formAfter?: string | null;
   formBody?: string | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4114,6 +4346,22 @@ export interface FaqPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4184,6 +4432,22 @@ export interface CareersPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4245,6 +4509,22 @@ export interface OpenRolesPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4292,6 +4572,22 @@ export interface WorkPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4325,6 +4621,22 @@ export interface ClientsIndex {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4414,6 +4726,22 @@ export interface StudioPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4479,6 +4807,22 @@ export interface TeamPage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Page title for search engines and social shares (50–60 characters recommended). If left empty, falls back to the page headline.
+   */
+  metaTitle?: string | null;
+  /**
+   * Snippet shown in search engine results and social cards (120–160 characters recommended). If left empty, falls back to the intro or lead text.
+   */
+  metaDescription?: string | null;
+  /**
+   * Preview image when this page is shared on LinkedIn, Twitter/X, WhatsApp, Slack, etc. Recommended dimensions: 1200 × 630 px.
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * Instructs search engine crawlers not to index this page (useful for drafts, unlaunched offerings, or internal testing).
+   */
+  noIndex?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4641,6 +4985,10 @@ export interface BlogIndexSelect<T extends boolean = true> {
         badgeIcon?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4675,6 +5023,10 @@ export interface ContactPageSelect<T extends boolean = true> {
   formAccent?: T;
   formAfter?: T;
   formBody?: T;
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4705,6 +5057,10 @@ export interface FaqPageSelect<T extends boolean = true> {
         detailSlug?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4769,6 +5125,10 @@ export interface CareersPageSelect<T extends boolean = true> {
         body?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4812,6 +5172,10 @@ export interface OpenRolesPageSelect<T extends boolean = true> {
         applyNowHref?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4841,6 +5205,10 @@ export interface WorkPageSelect<T extends boolean = true> {
         order?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4862,6 +5230,10 @@ export interface ClientsIndexSelect<T extends boolean = true> {
         order?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4927,6 +5299,10 @@ export interface StudioPageSelect<T extends boolean = true> {
         name?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -4962,6 +5338,10 @@ export interface TeamPageSelect<T extends boolean = true> {
         role?: T;
         id?: T;
       };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  noIndex?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

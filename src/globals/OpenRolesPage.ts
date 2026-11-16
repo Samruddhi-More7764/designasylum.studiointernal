@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { seoTab } from "../fields/seoFields";
 
 const departments = [
   { label: "UI/UX Design", value: "ui-ux" },
@@ -116,6 +117,7 @@ export const OpenRolesPage: GlobalConfig = {
             },
           ],
         },
+        seoTab,
       ],
     },
   ],

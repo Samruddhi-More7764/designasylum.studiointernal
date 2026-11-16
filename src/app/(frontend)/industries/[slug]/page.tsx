@@ -14,6 +14,7 @@ import { FAQ } from "@/components/sections/14-FAQ";
 import { SplitHeading } from "@/components/ui/SectionHeading";
 import { getFooter } from "@/cms/content";
 import { getIndustryPageBySlug } from "@/cms/industryPages";
+import { buildMetadata } from "@/cms/seo";
 import {
   manufacturingBreadcrumbs,
   RIGHT_TO_WIN_ID,
@@ -35,10 +36,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  return {
-    title: page.heroTitle || `${page.breadcrumbCurrent} Design Agency`,
-    description: page.heroIntro || page.lead,
-  };
+  return buildMetadata({
+    metaTitle: page.metaTitle,
+    metaDescription: page.metaDescription,
+    ogImage: page.ogImage,
+    noIndex: page.noIndex,
+    fallbackTitle: page.heroTitle || `${page.breadcrumbCurrent} Design Agency`,
+    fallbackDescription: page.heroIntro || page.lead,
+  });
 }
 
 export default async function IndustryDynamicPage({ params }: Props) {
