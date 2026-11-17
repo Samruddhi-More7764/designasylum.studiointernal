@@ -66,7 +66,7 @@ export const AhmedabadLocation: GlobalConfig = {
                   type: "text",
                   admin: {
                     description:
-                      "Where the View website button goes. Leave empty until that page exists.",
+                      "Where the View button goes. Leave empty until that page exists.",
                   },
                 },
                 {

@@ -1007,7 +1007,7 @@ export interface TeamMember {
         name: string;
         body?: string | null;
         /**
-         * Where View website goes. Leave empty until that page exists.
+         * Where View goes. Leave empty until that page exists.
          */
         href?: string | null;
         id?: string | null;
@@ -4461,11 +4461,14 @@ export interface OpenRolesPage {
   titleAccent?: string | null;
   titleAfter?: string | null;
   /**
-   * Include All roles first. Counts are added from the roles list.
+   * Category filters shown on /open-roles. Put 'All roles' first (ID: 'all'). Counts are automatically calculated from the roles list.
    */
   categories?:
     | {
-        categoryId: 'all' | 'ui-ux' | 'brand' | 'web' | 'video' | 'content' | 'project' | 'marketing';
+        /**
+         * Unique identifier used to match roles (e.g. 'all', 'ui-ux', 'brand', 'web', 'engineering'). Leave empty to automatically generate from the label.
+         */
+        categoryId?: string | null;
         label: string;
         id?: string | null;
       }[]
@@ -4481,7 +4484,10 @@ export interface OpenRolesPage {
         slug?: string | null;
         breadcrumb?: string | null;
         summary: string;
-        category: 'ui-ux' | 'brand' | 'web' | 'video' | 'content' | 'project' | 'marketing';
+        /**
+         * Category ID this role belongs to (e.g. 'ui-ux', 'brand', 'web', 'video', 'content', 'project', 'marketing', or any custom category ID defined under Categories).
+         */
+        category: string;
         location?: string | null;
         employment?: string | null;
         experience?: string | null;
@@ -4537,11 +4543,14 @@ export interface WorkPage {
   breadcrumbCurrent?: string | null;
   heading?: string | null;
   /**
-   * Include All first. Chip counts are not used here.
+   * Include All first (ID: 'all'). Filter ID is used to match project categories.
    */
   filters?:
     | {
-        filterId: 'all' | 'fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry';
+        /**
+         * Unique identifier used to match project categories (e.g. 'all', 'fashion', 'health', 'technology'). Leave empty to automatically generate from the label.
+         */
+        filterId?: string | null;
         label: string;
         id?: string | null;
       }[]
@@ -4562,9 +4571,9 @@ export interface WorkPage {
         name?: string | null;
         service?: string | null;
         /**
-         * Which filter this project appears under. All always shows every project.
+         * Filter ID this project appears under (e.g. 'fashion', 'health', 'technology', 'finance', 'home', 'industry', or any custom filter ID defined under Filters). 'All' always shows every project.
          */
-        category?: ('fashion' | 'health' | 'technology' | 'finance' | 'home' | 'industry') | null;
+        category?: string | null;
         /**
          * Card position order (lower numbers appear first).
          */

@@ -216,7 +216,7 @@ async function parseSolutionDoc(
           name,
           description,
           href,
-          ctaText: "View website",
+          ctaText: "View",
           key: `solution-proj-${index}`,
           tab: project?.category?.trim() || project?.tab?.trim() || undefined,
           order,

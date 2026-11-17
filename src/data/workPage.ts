@@ -8,7 +8,7 @@ export const workFilters = [
   { id: "industry", label: "Industry & Sustainability" },
 ] as const;
 
-export type WorkFilterId = (typeof workFilters)[number]["id"];
+export type WorkFilterId = (typeof workFilters)[number]["id"] | (string & {});
 
 export const workProjects = [
   {

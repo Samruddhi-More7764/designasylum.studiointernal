@@ -18,7 +18,9 @@ export function JobBoard({
   categories: { id: JobCategoryId; label: string }[];
   roles: JobRole[];
 }) {
-  const [filter, setFilter] = useState<JobCategoryId>("ui-ux");
+  const [filter, setFilter] = useState<JobCategoryId>(
+    () => (categories.some((c) => c.id === "ui-ux") ? "ui-ux" : categories[0]?.id || "all")
+  );
 
   const counts = useMemo(() => {
     const tally = new Map<JobCategoryId, number>();

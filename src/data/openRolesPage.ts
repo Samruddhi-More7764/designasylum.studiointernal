@@ -15,8 +15,8 @@ export const jobCategories = [
   { id: "marketing", label: "Marketing" },
 ] as const;
 
-export type JobCategoryId = (typeof jobCategories)[number]["id"];
-export type JobDepartment = Exclude<JobCategoryId, "all">;
+export type JobCategoryId = (typeof jobCategories)[number]["id"] | (string & {});
+export type JobDepartment = Exclude<(typeof jobCategories)[number]["id"], "all"> | (string & {});
 
 export const jobDetailHeadings = {
   duties: "What you’ll do",

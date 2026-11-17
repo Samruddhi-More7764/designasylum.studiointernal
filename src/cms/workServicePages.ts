@@ -216,7 +216,7 @@ async function parseWorkServiceDoc(
           name,
           description,
           href,
-          ctaText: "View website",
+          ctaText: "View",
           key: `work-service-proj-${index}`,
           tab: project?.category?.trim() || project?.tab?.trim() || undefined,
           order,

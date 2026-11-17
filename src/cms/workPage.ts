@@ -3,15 +3,13 @@ import { getPayloadClient } from "@/cms/getPayload";
 import { storedImage } from "@/cms/storedImage";
 import { workFilters, workProjects, type WorkFilterId } from "@/data/workPage";
 
-const filterIds = new Set<WorkFilterId>(workFilters.map((filter) => filter.id));
-const projectCategories = new Set<Exclude<WorkFilterId, "all">>([
-  "fashion",
-  "health",
-  "technology",
-  "finance",
-  "home",
-  "industry",
-]);
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export type WorkContent = {
   metaTitle?: string | null;
@@ -26,7 +24,7 @@ export type WorkContent = {
     name: string;
     service: string;
     image: string;
-    category: Exclude<WorkFilterId, "all">;
+    category: string;
     href: string;
   }[];
 };
@@ -69,9 +67,9 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
 
     const filters = (doc.filters || [])
       .map((row) => {
-        const id = row?.filterId?.trim() || "";
         const label = row?.label?.trim() || "";
-        if (!label || !filterIds.has(id as WorkFilterId)) return null;
+        const id = (row?.filterId?.trim() || slugify(label)).toLowerCase();
+        if (!label || !id) return null;
         return { id: id as WorkFilterId, label };
       })
       .filter((row): row is { id: WorkFilterId; label: string } => Boolean(row));
@@ -83,7 +81,7 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
             row?.client && typeof row.client === "object" ? row.client : null;
           const name = row?.name?.trim() || linkedClient?.name?.trim() || "";
           const category = row?.category?.trim() || "";
-          if (!name || !projectCategories.has(category as Exclude<WorkFilterId, "all">)) return null;
+          if (!name || !category) return null;
           const designed = fallback.projects[index];
           let imageSrc = storedImage(row?.image || linkedClient?.hero?.image, "");
 
@@ -240,7 +238,7 @@ export const getWorkPage = cache(async (): Promise<WorkContent> => {
             name,
             service: row?.service?.trim() || designed?.service || "",
             image: imageSrc,
-            category: category as Exclude<WorkFilterId, "all">,
+            category,
             href: row?.href?.trim() || defaultHref,
             order,
           };

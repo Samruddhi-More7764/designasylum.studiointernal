@@ -120,7 +120,7 @@ export default async function StudioPage() {
                         href={project.href || "#"}
                         className="group inline-flex items-center gap-2 rounded-pill border border-black px-[17px] py-[17px] font-satoshi text-[14px] leading-4 font-medium text-black uppercase"
                       >
-                        <CtaHoverLabel>View website</CtaHoverLabel>
+                        <CtaHoverLabel>View</CtaHoverLabel>
                         <Arrow src="/assets/images/branding-agency/arrow-up-right-black.png" />
                       </a>
                     </div>

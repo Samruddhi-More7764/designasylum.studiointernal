@@ -283,7 +283,7 @@ export default async function TeamPersonPage({ params }: Props) {
                             href={project.href || "#"}
                             className="group inline-flex h-11 w-[154px] items-center justify-center gap-2 rounded-pill border border-black font-satoshi text-[12px] leading-4 font-medium text-black uppercase lg:h-[50px] lg:text-[14px]"
                           >
-                            <CtaHoverLabel>View website</CtaHoverLabel>
+                            <CtaHoverLabel>View</CtaHoverLabel>
                             <Arrow />
                           </a>
                         </div>

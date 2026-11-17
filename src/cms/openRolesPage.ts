@@ -10,10 +10,13 @@ import {
   type JobRole,
 } from "@/data/openRolesPage";
 
-const categoryIds = new Set<JobCategoryId>(jobCategories.map((category) => category.id));
-const departments = new Set<JobDepartment>(
-  jobCategories.flatMap((category) => (category.id === "all" ? [] : [category.id])),
-);
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export type OpenRolesContent = {
   metaTitle?: string | null;
@@ -82,9 +85,9 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
 
     const categories = (doc.categories || [])
       .map((row) => {
-        const id = row?.categoryId?.trim() || "";
         const label = row?.label?.trim() || "";
-        if (!label || !categoryIds.has(id as JobCategoryId)) return null;
+        const id = (row?.categoryId?.trim() || slugify(label)).toLowerCase();
+        if (!label || !id) return null;
         return { id: id as JobCategoryId, label };
       })
       .filter((row): row is { id: JobCategoryId; label: string } => Boolean(row));
@@ -94,7 +97,7 @@ export const getOpenRolesPage = cache(async (): Promise<OpenRolesContent> => {
         const title = row?.title?.trim() || "";
         const summary = row?.summary?.trim() || "";
         const category = row?.category?.trim() || "";
-        if (!title || !summary || !departments.has(category as JobDepartment)) return null;
+        if (!title || !summary || !category) return null;
         const designed = fallback.roles[index];
         const slug = text(row?.slug, designed?.slug || slugFrom(title, index));
         const responsibilities = lines(row?.responsibilities);

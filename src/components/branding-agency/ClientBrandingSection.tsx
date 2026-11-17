@@ -122,7 +122,7 @@ export function ClientBrandingSection({
                   tone="outline"
                   className="!w-auto self-start"
                 >
-                  View website
+                  {project.ctaText || "View"}
                 </ResourceButton>
               </div>
             </article>

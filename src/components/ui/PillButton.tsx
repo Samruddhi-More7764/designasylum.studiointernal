@@ -20,7 +20,7 @@ interface PillButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 // dark    — design.md "Submit button": bg #000000, border 1px solid #FFFFFF.
 // light   — hero "GET STARTED": transparent fill, white border, on photo.
 // invert  — navbar "BOOK A CALL" (Group 63.png): white fill, black text.
-// outline — "VIEW WEBSITE" / "SEE OUTCOME" pills on white sections
+// outline — "VIEW" / "SEE OUTCOME" pills on white sections
 //           (Frame 2095587764.png / Container Nivaro.png): transparent fill,
 //           thin dark border, black text.
 const variantClasses: Record<PillButtonVariant, string> = {

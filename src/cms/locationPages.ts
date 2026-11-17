@@ -71,7 +71,7 @@ export type LocationPageContent = {
   clientsAccent: string;
   clientsAfter: string;
   clientTabs: { id: string; label: string }[];
-  projects: Array<(typeof brandingProjects)[number] & { tab?: string }>;
+  projects: Array<(typeof brandingProjects)[number] & { tab?: string; ctaText?: string }>;
   calloutBefore: string;
   calloutAccent: string;
   calloutAfter: string;
@@ -267,6 +267,7 @@ export const getLocationPageBySlug = cache(
                 description,
                 image,
                 href,
+                ctaText: "View",
                 key: `project-${index}`,
                 tab,
                 order: project?.order ?? index,

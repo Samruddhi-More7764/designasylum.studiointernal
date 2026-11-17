@@ -4,12 +4,21 @@ import { useState } from "react";
 import Image from "next/image";
 import { workFilters, workProjects, type WorkFilterId } from "@/data/workPage";
 
+export type WorkProjectItem = {
+  id: string;
+  name: string;
+  service: string;
+  image: string;
+  category: string;
+  href?: string;
+};
+
 export function WorkGrid({
   filters = workFilters,
   projects = workProjects.map((project) => ({ ...project, href: "#" })),
 }: {
   filters?: readonly { id: WorkFilterId; label: string }[];
-  projects?: (typeof workProjects[number] & { href: string })[];
+  projects?: WorkProjectItem[];
 } = {}) {
   const [filter, setFilter] = useState<WorkFilterId>("all");
   const visible =

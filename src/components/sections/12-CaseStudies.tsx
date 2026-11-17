@@ -5,7 +5,7 @@ import { getHomepageCaseStudies } from "@/cms/content";
 import type { CaseStudy } from "@/data/caseStudies";
 
 function CaseStudyRow({ study }: { study: CaseStudy }) {
-  // Header (281×45) with View website under it. Description (326×73) on the
+  // Header (281×45) with View under it. Description (326×73) on the
   // right, and the tag pills directly beneath that description.
   return (
     <div className="flex flex-col gap-4 border-b border-hairline py-8 first:pt-0 last:border-b-0 lg:flex-row lg:items-start lg:justify-between lg:gap-8 lg:py-10">
@@ -22,7 +22,7 @@ function CaseStudyRow({ study }: { study: CaseStudy }) {
           className="mt-6 h-[50px] w-[154px] !px-4 lg:absolute lg:top-[91.28px] lg:left-0 lg:mt-0"
           href={study.href}
         >
-          View website
+          View
         </PillButton>
       </div>
 

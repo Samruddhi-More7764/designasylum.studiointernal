@@ -214,7 +214,7 @@ async function parseServiceDoc(
           name,
           description,
           href,
-          ctaText: "View website",
+          ctaText: "View",
           key: `project-${index}`,
           tab: project?.category?.trim() || project?.tab?.trim() || undefined,
           order,

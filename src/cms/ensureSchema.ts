@@ -812,6 +812,18 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
     END $$;
   `).catch(() => undefined);
 
+  // 3b. Alter filter_id, category_id, and category columns to varchar to allow custom filters and categories
+  await client.query(`
+    DO $$
+    BEGIN
+      ALTER TABLE IF EXISTS work_page_filters ALTER COLUMN filter_id TYPE varchar USING filter_id::varchar;
+      ALTER TABLE IF EXISTS work_page_projects ALTER COLUMN category TYPE varchar USING category::varchar;
+      ALTER TABLE IF EXISTS open_roles_page_categories ALTER COLUMN category_id TYPE varchar USING category_id::varchar;
+      ALTER TABLE IF EXISTS open_roles_page_roles ALTER COLUMN category TYPE varchar USING category::varchar;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+  `).catch(() => undefined);
+
   // 4. Blueprint pages (Service, Solution, Work Service, Industry) columns and enums
   await client.query(`
     DO $$ BEGIN

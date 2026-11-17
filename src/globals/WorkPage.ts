@@ -1,6 +1,14 @@
 import type { Field, GlobalConfig } from "payload";
 import { seoTab } from "../fields/seoFields";
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 const image: Field = {
   name: "image",
   type: "upload",
@@ -16,6 +24,26 @@ export const WorkPage: GlobalConfig = {
   slug: "work-page",
   label: "Work",
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data;
+        if (Array.isArray(data.filters)) {
+          data.filters = data.filters.map((filter: Record<string, unknown>) => {
+            if (!filter) return filter;
+            const label = typeof filter.label === "string" ? filter.label.trim() : "";
+            const rawId = typeof filter.filterId === "string" ? filter.filterId.trim() : "";
+            const filterId = rawId ? slugify(rawId) : slugify(label);
+            return {
+              ...filter,
+              filterId,
+            };
+          });
+        }
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       type: "tabs",
@@ -33,24 +61,19 @@ export const WorkPage: GlobalConfig = {
             {
               name: "filters",
               type: "array",
-              admin: { description: "Include All first. Chip counts are not used here." },
+              admin: { description: "Include All first (ID: 'all'). Filter ID is used to match project categories." },
               fields: [
                 {
                   name: "filterId",
-                  label: "Id",
-                  type: "select",
-                  required: true,
-                  options: [
-                    { label: "All", value: "all" },
-                    { label: "Fashion & Beauty", value: "fashion" },
-                    { label: "Health & Wellness", value: "health" },
-                    { label: "Technology & Innovation", value: "technology" },
-                    { label: "Finance & Business", value: "finance" },
-                    { label: "Home & Living", value: "home" },
-                    { label: "Industry & Sustainability", value: "industry" },
-                  ],
+                  label: "Filter ID / Slug",
+                  type: "text",
+                  admin: {
+                    description:
+                      "Unique identifier used to match project categories (e.g. 'all', 'fashion', 'health', 'technology'). Leave empty to automatically generate from the label.",
+                    placeholder: "e.g. technology (or leave blank to auto-generate)",
+                  },
                 },
-                { name: "label", type: "text", required: true },
+                { name: "label", label: "Display Label", type: "text", required: true },
               ],
             },
           ],
@@ -88,16 +111,13 @@ export const WorkPage: GlobalConfig = {
                 { name: "service", label: "Service line", type: "text" },
                 {
                   name: "category",
-                  type: "select",
-                  options: [
-                    { label: "Fashion & Beauty", value: "fashion" },
-                    { label: "Health & Wellness", value: "health" },
-                    { label: "Technology & Innovation", value: "technology" },
-                    { label: "Finance & Business", value: "finance" },
-                    { label: "Home & Living", value: "home" },
-                    { label: "Industry & Sustainability", value: "industry" },
-                  ],
-                  admin: { description: "Which filter this project appears under. All always shows every project." },
+                  label: "Filter / Category ID",
+                  type: "text",
+                  admin: {
+                    description:
+                      "Filter ID this project appears under (e.g. 'fashion', 'health', 'technology', 'finance', 'home', 'industry', or any custom filter ID defined under Filters). 'All' always shows every project.",
+                    placeholder: "e.g. technology",
+                  },
                 },
                 {
                   name: "order",
@@ -108,7 +128,6 @@ export const WorkPage: GlobalConfig = {
                 },
               ],
             },
-
           ],
         },
         seoTab,

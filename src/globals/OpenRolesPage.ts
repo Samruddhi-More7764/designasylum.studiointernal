@@ -1,15 +1,13 @@
 import type { GlobalConfig } from "payload";
 import { seoTab } from "../fields/seoFields";
 
-const departments = [
-  { label: "UI/UX Design", value: "ui-ux" },
-  { label: "Brand & Graphic Design", value: "brand" },
-  { label: "Web Development", value: "web" },
-  { label: "Video Editing", value: "video" },
-  { label: "Content & Copy", value: "content" },
-  { label: "Project Management", value: "project" },
-  { label: "Marketing", value: "marketing" },
-];
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 /**
  * Job openings at /open-roles.
@@ -20,6 +18,26 @@ export const OpenRolesPage: GlobalConfig = {
   slug: "open-roles-page",
   label: "Open roles",
   access: { read: () => true },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return data;
+        if (Array.isArray(data.categories)) {
+          data.categories = data.categories.map((cat: Record<string, unknown>) => {
+            if (!cat) return cat;
+            const label = typeof cat.label === "string" ? cat.label.trim() : "";
+            const rawId = typeof cat.categoryId === "string" ? cat.categoryId.trim() : "";
+            const categoryId = rawId ? slugify(rawId) : slugify(label);
+            return {
+              ...cat,
+              categoryId,
+            };
+          });
+        }
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       type: "tabs",
@@ -38,16 +56,19 @@ export const OpenRolesPage: GlobalConfig = {
             {
               name: "categories",
               type: "array",
-              admin: { description: "Include All roles first. Counts are added from the roles list." },
+              admin: { description: "Category filters shown on /open-roles. Put 'All roles' first (ID: 'all'). Counts are automatically calculated from the roles list." },
               fields: [
                 {
                   name: "categoryId",
-                  label: "Id",
-                  type: "select",
-                  required: true,
-                  options: [{ label: "All roles", value: "all" }, ...departments],
+                  label: "Category ID / Slug",
+                  type: "text",
+                  admin: {
+                    description:
+                      "Unique identifier used to match roles (e.g. 'all', 'ui-ux', 'brand', 'web', 'engineering'). Leave empty to automatically generate from the label.",
+                    placeholder: "e.g. engineering (or leave blank to auto-generate)",
+                  },
                 },
-                { name: "label", type: "text", required: true },
+                { name: "label", label: "Display Label", type: "text", required: true },
               ],
             },
           ],
@@ -71,9 +92,14 @@ export const OpenRolesPage: GlobalConfig = {
                 { name: "summary", type: "textarea", required: true },
                 {
                   name: "category",
-                  type: "select",
+                  label: "Category ID",
+                  type: "text",
                   required: true,
-                  options: departments,
+                  admin: {
+                    description:
+                      "Category ID this role belongs to (e.g. 'ui-ux', 'brand', 'web', 'video', 'content', 'project', 'marketing', or any custom category ID defined under Categories).",
+                    placeholder: "e.g. ui-ux",
+                  },
                 },
                 { name: "location", label: "Card location", type: "text" },
                 { name: "employment", label: "Card employment type", type: "text" },

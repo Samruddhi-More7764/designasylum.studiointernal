@@ -35,7 +35,7 @@ function ProjectRow({ project }: { project: FeaturedProject }) {
           href={project.href}
           className="w-[154px] !px-4"
         >
-          View website
+          View
         </PillButton>
 
         {/* Mobile metric under CTA */}

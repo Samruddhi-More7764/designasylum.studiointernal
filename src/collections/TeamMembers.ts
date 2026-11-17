@@ -150,7 +150,7 @@ export const TeamMembers: CollectionConfig = {
                   name: "href",
                   label: "Website URL",
                   type: "text",
-                  admin: { description: "Where View website goes. Leave empty until that page exists." },
+                  admin: { description: "Where View goes. Leave empty until that page exists." },
                 },
               ],
             },
