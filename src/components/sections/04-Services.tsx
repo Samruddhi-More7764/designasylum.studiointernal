@@ -74,8 +74,8 @@ export function Services({
           </p>
         </div>
 
-        {/* Mobile: 2×3. Desktop: 930×624 3×2 */}
-        <div className="grid w-full grid-cols-2 justify-items-center gap-3 sm:gap-4 lg:h-[624px] lg:w-[930px] lg:grid-cols-3 lg:justify-items-start lg:gap-6">
+        {/* Mobile: 2×3. Tablet: 3×2. Desktop: 930×624 3×2 */}
+        <div className="grid w-full grid-cols-2 justify-items-center gap-3 sm:gap-4 md:grid-cols-3 lg:h-[624px] lg:w-[930px] lg:justify-items-start lg:gap-6">
           {services.map((service) => (
             <ServiceCard key={service.name} service={service} />
           ))}

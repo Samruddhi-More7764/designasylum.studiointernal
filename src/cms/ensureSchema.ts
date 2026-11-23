@@ -87,6 +87,10 @@ async function addMissingColumns(payload: Payload): Promise<void> {
     }
 
     await ensureCascadeForeignKeys(client);
+    // NOTE: errors from ensureDataMigrations are intentionally NOT swallowed
+    // here. If a migration step fails, we want the outer catch to roll back
+    // the transaction and skip writing the fingerprint — so the next cold boot
+    // retries all migrations rather than marking a broken run as "done".
     await ensureDataMigrations(client);
 
     await client.query("COMMIT");
@@ -107,7 +111,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v8_add_seo_metadata_fields"];
+  const lines: string[] = ["migration_v9_client_fk_set_null"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -1138,6 +1142,27 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
       ALTER TABLE IF EXISTS "location_pages_relatedBlogs" ALTER COLUMN "title" DROP NOT NULL;
       ALTER TABLE IF EXISTS "location_pages_related_blogs" ALTER COLUMN "title" DROP NOT NULL;
     EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+  `).catch(() => undefined);
+
+  // 7. FK from case_studies.client_id → clients.id with SET NULL on delete.
+  //    Without this, deleting a client leaves orphaned client_id values in
+  //    case_studies, causing the Payload list to show "document not found".
+  await client.query(`
+    DO $$ BEGIN
+      -- Drop the old FK if it was created without ON DELETE behaviour.
+      ALTER TABLE IF EXISTS "case_studies"
+        DROP CONSTRAINT IF EXISTS "case_studies_client_id_clients_id_fk";
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "case_studies"
+        ADD CONSTRAINT "case_studies_client_id_clients_id_fk"
+        FOREIGN KEY ("client_id") REFERENCES "clients"("id")
+        ON DELETE SET NULL;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    WHEN OTHERS THEN NULL;
     END $$;
   `).catch(() => undefined);
 

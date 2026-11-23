@@ -61,7 +61,7 @@ export async function ClientsGrid() {
           {rows.map((row, r) => (
             <div
               key={r}
-              className="grid grid-cols-2 gap-3 px-0 sm:gap-4 lg:grid-cols-4 lg:px-[33px]"
+              className="grid grid-cols-2 gap-3 px-0 sm:gap-4 md:grid-cols-4 lg:px-[33px]"
             >
               {row.map((item, c) => (
                 <ClientCard key={`${r}-${c}-${item.name}`} item={item} />

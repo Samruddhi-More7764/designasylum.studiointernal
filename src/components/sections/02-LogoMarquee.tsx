@@ -153,8 +153,10 @@ export async function LogoMarquee({
         )}
         {allLogos.length > 3 && (
           <div
-            className={`mx-auto grid w-full grid-cols-2 ${
-              service ? "max-w-[292px] gap-3" : "max-w-[358px] gap-3 sm:gap-4"
+            className={`mx-auto grid w-full grid-cols-2 md:grid-cols-4 ${
+              service
+                ? "max-w-[292px] md:max-w-[620px] gap-3"
+                : "max-w-[358px] sm:max-w-[480px] md:max-w-[680px] gap-3 sm:gap-4"
             }`}
           >
             {allLogos.map((logo, i) => (

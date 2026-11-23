@@ -58,9 +58,7 @@ export function ContactOffices({
               </p>
             </div>
 
-            <div
-              className={`flex items-center gap-2 ${office.links.length > 2 ? "flex-wrap" : "flex-nowrap"}`}
-            >
+            <div className="flex flex-wrap items-center gap-2">
               {office.links.map((link) => (
                 <a
                   key={link.href + link.label}

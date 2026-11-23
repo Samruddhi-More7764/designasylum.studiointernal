@@ -59,7 +59,15 @@ export default async function StudioPage() {
               />
             </h1>
           </div>
-          <img src={page.heroImage} alt="" loading="lazy" decoding="async" className="aspect-[390/220] h-auto w-full object-cover lg:aspect-auto lg:h-[831px]" />
+          <Image
+            src={page.heroImage}
+            alt=""
+            width={1470}
+            height={831}
+            priority
+            className="aspect-[390/220] h-auto w-full object-cover lg:aspect-auto lg:h-[831px]"
+            sizes="(max-width: 1023px) 100vw, 1470px"
+          />
         </section>
 
         <section className="px-4 py-16 lg:px-8 lg:py-[120px]">
@@ -85,7 +93,7 @@ export default async function StudioPage() {
                   {page.quoteName}
                 </p>
                 <p className="flex items-center gap-1 font-figtree text-[16px] leading-[1.2] tracking-[-1.5px] text-black/70 lg:gap-2 lg:font-satoshi lg:text-[20px] lg:tracking-normal lg:text-black/80">
-                  <img src="/assets/images/studio/masify.svg" alt="" loading="lazy" decoding="async" className="size-6" />
+                  <Image src="/assets/images/studio/masify.svg" alt="" width={24} height={24} className="size-6" />
                   {page.quoteRole}
                 </p>
               </div>
@@ -101,12 +109,13 @@ export default async function StudioPage() {
             {page.projects.map((project) => (
               <li key={project.id} className="border-b border-black/30 py-10 lg:py-14">
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-[60px]">
-                  <img
+                  <Image
                     src={project.image}
                     alt=""
-                    loading="lazy"
-                    decoding="async"
+                    width={496}
+                    height={279}
                     className="aspect-[358/201] h-auto w-full object-cover lg:aspect-auto lg:h-[279px] lg:w-[496px] lg:shrink-0"
+                    sizes="(max-width: 1023px) 100vw, 496px"
                   />
                   <div className="flex flex-1 flex-col gap-6 lg:h-[279px] lg:flex-row lg:items-start lg:justify-between">
                     <p className="font-figtree text-[32px] leading-none font-normal tracking-[-1.5px] text-black lg:text-[38px] lg:leading-[45px]">
@@ -180,7 +189,7 @@ export default async function StudioPage() {
               {page.people.map((person) => {
                 const chip = (
                   <>
-                    <img src={person.image} alt="" loading="lazy" decoding="async" className="size-6 rounded object-cover" />
+                    <Image src={person.image} alt="" width={24} height={24} className="size-6 rounded object-cover" />
                     <span className="font-figtree text-[18px] leading-[40px] tracking-[-0.8px] text-black lg:text-[20px] lg:leading-[45px] lg:tracking-[-1.5px]">
                       {person.name}
                     </span>

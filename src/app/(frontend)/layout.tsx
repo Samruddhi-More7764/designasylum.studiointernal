@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Doto, Figtree, Playfair_Display } from "next/font/google";
 import {
   GoogleTagManager,
@@ -29,6 +29,12 @@ const doto = Doto({
   subsets: ["latin"],
   weight: "900",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#ffffff",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(

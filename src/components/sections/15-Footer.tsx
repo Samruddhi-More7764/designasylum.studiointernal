@@ -41,13 +41,13 @@ export function Footer({
         <div className="flex flex-col">
           <a
             href="mailto:accounts@designasylum.in"
-            className="block whitespace-nowrap font-figtree text-[clamp(26px,7.8vw,32px)] leading-[1.2] font-normal tracking-[-1.38px] text-[#1D1D1D] lg:text-[55px] lg:leading-[73px]"
+            className="block font-figtree text-[clamp(20px,6.8vw,32px)] leading-[1.2] font-normal tracking-[-1.38px] text-[#1D1D1D] break-all sm:break-normal xs:whitespace-nowrap lg:text-[55px] lg:leading-[73px] lg:whitespace-nowrap"
           >
             accounts@designasylum.in
           </a>
           <a
             href="tel:+918547807934"
-            className="block whitespace-nowrap font-figtree text-[clamp(26px,7.8vw,32px)] leading-[1.2] font-normal tracking-[-1.38px] text-[#111] lg:text-[55px] lg:leading-[73px]"
+            className="block whitespace-nowrap font-figtree text-[clamp(20px,6.8vw,32px)] leading-[1.2] font-normal tracking-[-1.38px] text-[#111] lg:text-[55px] lg:leading-[73px]"
           >
             +91 8547807934
           </a>
