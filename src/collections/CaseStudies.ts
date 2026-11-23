@@ -173,71 +173,18 @@ const revalidatePublishedStudy: CollectionAfterChangeHook = async ({ doc, req })
   return doc;
 };
 
-const attachAsFeaturedIfNeeded: CollectionAfterChangeHook = async ({
+const syncCaseStudyToClient: CollectionAfterChangeHook = async ({
   doc,
   req,
   context,
 }) => {
-  if (context?.skipFeaturedAttach) return doc;
+  if (context?.skipFeaturedAttach && context?.skipHeroSync) return doc;
   const clientRef = doc.client;
   const clientId =
     typeof clientRef === "object" && clientRef !== null
       ? (clientRef as { id?: string | number }).id
       : clientRef;
   if (clientId == null) return doc;
-
-  try {
-    const client = await req.payload.findByID({
-      collection: "clients",
-      id: clientId,
-      depth: 0,
-      req,
-    });
-    if (!client || client.projectType !== "direct" || client.featuredStudy) return doc;
-
-    // Direct DB write — avoid nested payload.update() deadlock on uncommitted study.
-    await req.payload.db.updateOne({
-      collection: "clients",
-      id: clientId,
-      data: { featuredStudy: doc.id },
-      req,
-    });
-  } catch (err) {
-    req.payload.logger.error({
-      err,
-      msg: `Could not set featuredStudy on client ${clientId} for case study ${doc.id}`,
-    });
-  }
-
-  return doc;
-};
-
-const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
-  doc,
-  req,
-  context,
-}) => {
-  if (context?.skipHeroSync) return doc;
-  const clientRef = doc.client;
-  const clientId =
-    typeof clientRef === "object" && clientRef !== null
-      ? (clientRef as { id?: string | number }).id
-      : clientRef;
-  if (clientId == null) return doc;
-
-  const heroImageId =
-    doc.hero?.layout === "split"
-      ? (typeof doc.hero?.left?.image === "object" && doc.hero?.left?.image !== null
-          ? (doc.hero.left.image as { id?: string | number }).id
-          : doc.hero?.left?.image) ||
-        (typeof doc.hero?.right?.image === "object" && doc.hero?.right?.image !== null
-          ? (doc.hero.right.image as { id?: string | number }).id
-          : doc.hero?.right?.image)
-      : typeof doc.hero?.image?.image === "object" && doc.hero?.image?.image !== null
-        ? (doc.hero.image.image as { id?: string | number }).id
-        : doc.hero?.image?.image;
-
-  const heroHeading = String(doc.hero?.heading || doc.title || "").trim();
 
   try {
     const client = await req.payload.findByID({
@@ -248,56 +195,84 @@ const syncHeroToClientPlacements: CollectionAfterChangeHook = async ({
     });
     if (!client) return doc;
 
-    const placements = (client.placements || {}) as Record<string, Record<string, unknown>>;
-    let modified = false;
+    const dataToUpdate: Record<string, unknown> = {};
 
-    const updatePlacement = (
-      key: "clientsPage" | "workPage" | "featuredProject" | "portfolioItem",
-      defaults: { image?: unknown; service?: string },
-    ) => {
-      const current = placements[key] || {};
-      const updated = { ...current };
-      let changed = false;
-
-      if (defaults.image != null && !current.image) {
-        updated.image = defaults.image;
-        changed = true;
-      }
-      if (defaults.service && !current.service) {
-        updated.service = defaults.service;
-        changed = true;
-      }
-
-      if (changed) {
-        placements[key] = updated;
-        modified = true;
-      }
-    };
-
-    if (heroImageId != null) {
-      updatePlacement("clientsPage", { image: heroImageId, service: heroHeading });
-      updatePlacement("workPage", { image: heroImageId, service: heroHeading });
-      updatePlacement("featuredProject", { image: heroImageId });
-      updatePlacement("portfolioItem", { image: heroImageId });
-    } else if (heroHeading) {
-      updatePlacement("clientsPage", { service: heroHeading });
-      updatePlacement("workPage", { service: heroHeading });
+    // 1. Attach as featuredStudy for direct clients if empty
+    if (!context?.skipFeaturedAttach && client.projectType === "direct" && !client.featuredStudy) {
+      dataToUpdate.featuredStudy = doc.id;
     }
 
-    if (modified) {
-      // Run decoupled from req transaction so secondary placement sync cannot
-      // poison or roll back the newly saved case study document.
-      await req.payload.update({
+    // 2. Sync hero to placements if needed
+    if (!context?.skipHeroSync) {
+      const heroImageId =
+        doc.hero?.layout === "split"
+          ? (typeof doc.hero?.left?.image === "object" && doc.hero?.left?.image !== null
+              ? (doc.hero.left.image as { id?: string | number }).id
+              : doc.hero?.left?.image) ||
+            (typeof doc.hero?.right?.image === "object" && doc.hero?.right?.image !== null
+              ? (doc.hero.right.image as { id?: string | number }).id
+              : doc.hero?.right?.image)
+          : typeof doc.hero?.image?.image === "object" && doc.hero?.image?.image !== null
+            ? (doc.hero.image.image as { id?: string | number }).id
+            : doc.hero?.image?.image;
+
+      const heroHeading = String(doc.hero?.heading || doc.title || "").trim();
+
+      const placements = (client.placements || {}) as Record<string, Record<string, unknown>>;
+      let modified = false;
+
+      const updatePlacement = (
+        key: "clientsPage" | "workPage" | "featuredProject" | "portfolioItem",
+        defaults: { image?: unknown; service?: string },
+      ) => {
+        const current = placements[key] || {};
+        const updated = { ...current };
+        let changed = false;
+
+        if (defaults.image != null && !current.image) {
+          updated.image = defaults.image;
+          changed = true;
+        }
+        if (defaults.service && !current.service) {
+          updated.service = defaults.service;
+          changed = true;
+        }
+
+        if (changed) {
+          placements[key] = updated;
+          modified = true;
+        }
+      };
+
+      if (heroImageId != null) {
+        updatePlacement("clientsPage", { image: heroImageId, service: heroHeading });
+        updatePlacement("workPage", { image: heroImageId, service: heroHeading });
+        updatePlacement("featuredProject", { image: heroImageId });
+        updatePlacement("portfolioItem", { image: heroImageId });
+      } else if (heroHeading) {
+        updatePlacement("clientsPage", { service: heroHeading });
+        updatePlacement("workPage", { service: heroHeading });
+      }
+
+      if (modified) {
+        dataToUpdate.placements = placements;
+      }
+    }
+
+    if (Object.keys(dataToUpdate).length > 0) {
+      // Single direct DB update in the same transaction — eliminates connection deadlocks.
+      await req.payload.db.updateOne({
         collection: "clients",
         id: clientId,
-        data: { placements } as never,
-        context: { skipSync: true, skipHeroSync: true, skipRevalidation: true },
+        data: dataToUpdate,
+        req,
       });
     }
   } catch (err) {
+    // Under NO circumstances should secondary client placement sync fail the case study save.
     req.payload.logger.error({
       err,
-      msg: `Could not sync case study hero to client placements for client ${clientId}`,
+      msg: `Could not sync case study ${doc.id} to client ${clientId}`,
     });
   }
 
@@ -318,7 +293,7 @@ export const CaseStudies: CollectionConfig = {
   hooks: {
     beforeValidate: [ensureSlug, computeCaseStudyAdminTitle, uniqueSlugPerClient],
     beforeChange: [preserveHiddenMedia],
-    afterChange: [attachAsFeaturedIfNeeded, syncHeroToClientPlacements, revalidatePublishedStudy],
+    afterChange: [syncCaseStudyToClient],
   },
   fields: [
     {
