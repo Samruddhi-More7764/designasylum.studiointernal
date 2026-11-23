@@ -331,6 +331,10 @@ export const CaseStudies: CollectionConfig = {
               admin: {
                 description:
                   "The brand this study belongs to. If the Client does not exist yet, create and save it first — leave Featured study empty. After you save this Case study, Direct clients pick it up automatically.",
+                // Required stays on for the form. The condition keeps the Postgres column
+                // nullable so deleting a client clears this link instead of leaving an id
+                // the admin cannot open.
+                condition: () => true,
               },
             },
             ...caseStudyFields,

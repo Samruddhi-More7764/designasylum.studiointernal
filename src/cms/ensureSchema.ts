@@ -91,12 +91,17 @@ async function addMissingColumns(payload: Payload): Promise<void> {
     // here. If a migration step fails, we want the outer catch to roll back
     // the transaction and skip writing the fingerprint — so the next cold boot
     // retries all migrations rather than marking a broken run as "done".
-    await ensureDataMigrations(client);
+    const clearedRelationships = await ensureDataMigrations(client);
 
     await client.query("COMMIT");
     if (createdTables || addedColumns) {
       payload.logger.info({
         msg: `Added missing CMS schema: ${createdTables} tables, ${addedColumns} columns. Existing rows were kept.`,
+      });
+    }
+    if (clearedRelationships) {
+      payload.logger.info({
+        msg: `Cleared ${clearedRelationships} relationship ids that pointed at deleted clients or case studies.`,
       });
     }
     await writeFingerprint(client, fingerprint);
@@ -111,7 +116,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v11_all_hub_case_study_fks"];
+  const lines: string[] = ["migration_v12_clear_orphan_relationships"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -740,7 +745,121 @@ async function ensureCascadeForeignKeys(client: QueryClient): Promise<void> {
   }
 }
 
-async function ensureDataMigrations(client: QueryClient): Promise<void> {
+/**
+ * Columns that store a relationship id. Dead ids are cleared, then a foreign
+ * key with ON DELETE SET NULL is attached so deleting the target cannot leave
+ * another "document could not be found" link behind.
+ * Earlier migrations added only some of these keys and swallowed the error
+ * when existing bad ids blocked the constraint, then saved the fingerprint
+ * so the cleanup never ran again.
+ */
+const RELATIONSHIP_FOREIGN_KEYS: ReadonlyArray<readonly [string, string, string]> = [
+  ["blog_posts", "client_id", "clients"],
+  ["blog_posts_topics", "client_id", "clients"],
+  ["case_studies", "client_id", "clients"],
+  ["clients_index_cards", "client_id", "clients"],
+  ["featured_projects", "client_id", "clients"],
+  ["homepage_case_studies", "client_id", "clients"],
+  ["industry_pages_projects", "client_id", "clients"],
+  ["location_pages_projects", "client_id", "clients"],
+  ["pain_points", "client_id", "clients"],
+  ["portfolio_items", "client_id", "clients"],
+  ["service_pages_projects", "client_id", "clients"],
+  ["solution_pages_projects", "client_id", "clients"],
+  ["studio_page_projects", "client_id", "clients"],
+  ["work_page_projects", "client_id", "clients"],
+  ["work_service_pages_projects", "client_id", "clients"],
+  ["clients", "featured_study_id", "case_studies"],
+  ["clients", "logo_design_case_study_id", "case_studies"],
+  ["clients", "website_design_case_study_id", "case_studies"],
+  ["clients", "project_brochure_case_study_id", "case_studies"],
+  ["clients", "brand_video_case_study_id", "case_studies"],
+  ["clients", "case_study_case_study_id", "case_studies"],
+  ["clients", "placements_homepage_case_study_case_study_id", "case_studies"],
+  ["homepage_case_studies", "case_study_id", "case_studies"],
+];
+
+function relationshipConstraintName(table: string, column: string): string {
+  const full = `fk_${table}_${column}`;
+  if (full.length <= 63) return full;
+  const hash = createHash("sha256").update(full).digest("hex").slice(0, 8);
+  return `fk_${hash}_${column}`.slice(0, 63);
+}
+
+async function ensureOnDeleteSetNull(
+  client: QueryClient,
+  table: string,
+  column: string,
+  referencedTable: string,
+): Promise<number> {
+  assertIdent(table);
+  assertIdent(column);
+  assertIdent(referencedTable);
+
+  const columnExists = await client.query<{ exists: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1 FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = $1 AND column_name = $2
+     ) AS exists`,
+    [table, column],
+  );
+  if (!columnExists.rows[0]?.exists) return 0;
+
+  const referencedExists = await client.query<{ exists: boolean }>(
+    `SELECT to_regclass($1) IS NOT NULL AS exists`,
+    [`public.${referencedTable}`],
+  );
+  if (!referencedExists.rows[0]?.exists) return 0;
+
+  // Required relationships are NOT NULL in older schemas. SET NULL cannot
+  // clear a dead id until the column accepts null. The form still requires
+  // a value; only rows whose target was already deleted become empty.
+  await client.query(
+    `ALTER TABLE ${quoteIdent(table)} ALTER COLUMN ${quoteIdent(column)} DROP NOT NULL`,
+  );
+
+  const cleared = await client.query(
+    `UPDATE ${quoteIdent(table)} AS rel_row
+     SET ${quoteIdent(column)} = NULL
+     WHERE rel_row.${quoteIdent(column)} IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM ${quoteIdent(referencedTable)} AS rel_ref
+         WHERE rel_ref.id = rel_row.${quoteIdent(column)}
+       )`,
+  );
+
+  const existing = await client.query<{ conname: string }>(
+    `SELECT c.conname
+     FROM pg_constraint c
+     JOIN pg_attribute a
+       ON a.attrelid = c.conrelid
+      AND a.attnum = ANY (c.conkey)
+     WHERE c.contype = 'f'
+       AND c.conrelid = ${quoteLiteral(table)}::regclass
+       AND a.attname = $1`,
+    [column],
+  );
+  for (const row of existing.rows) {
+    assertIdent(row.conname);
+    await client.query(
+      `ALTER TABLE ${quoteIdent(table)} DROP CONSTRAINT ${quoteIdent(row.conname)}`,
+    );
+  }
+
+  const constraint = relationshipConstraintName(table, column);
+  assertIdent(constraint);
+  await client.query(
+    `ALTER TABLE ${quoteIdent(table)}
+     ADD CONSTRAINT ${quoteIdent(constraint)}
+     FOREIGN KEY (${quoteIdent(column)})
+     REFERENCES ${quoteIdent(referencedTable)}(id)
+     ON DELETE SET NULL`,
+  );
+
+  return cleared.rowCount ?? 0;
+}
+
+async function ensureDataMigrations(client: QueryClient): Promise<number> {
   // 1. Roles pointers migration to single textarea columns
   await client.query(`
     ALTER TABLE IF EXISTS open_roles_page_roles
@@ -1145,76 +1264,6 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
     END $$;
   `).catch(() => undefined);
 
-  // 7. FK from case_studies.client_id → clients.id with SET NULL on delete.
-  //    Without this, deleting a client leaves orphaned client_id values in
-  //    case_studies, causing the Payload list to show "document not found".
-  await client.query(`
-    DO $$ BEGIN
-      -- Drop the old FK if it was created without ON DELETE behaviour.
-      ALTER TABLE IF EXISTS "case_studies"
-        DROP CONSTRAINT IF EXISTS "case_studies_client_id_clients_id_fk";
-    EXCEPTION WHEN OTHERS THEN NULL;
-    END $$;
-
-    DO $$ BEGIN
-      ALTER TABLE IF EXISTS "case_studies"
-        ADD CONSTRAINT "case_studies_client_id_clients_id_fk"
-        FOREIGN KEY ("client_id") REFERENCES "clients"("id")
-        ON DELETE SET NULL;
-    EXCEPTION WHEN duplicate_object THEN NULL;
-    WHEN OTHERS THEN NULL;
-    END $$;
-  `).catch(() => undefined);
-
-  // 8. FKs from clients (*_case_study_id, featured_study_id) → case_studies.id with SET NULL on delete.
-  //    Without this, deleting or rolling back a case study leaves any client relationship
-  //    (featured study or Hub sections like logoDesign, websiteDesign, etc.) pointing to a ghost ID,
-  //    surfacing as "document not found" on CMS lists whenever Payload resolves relations.
-  await client.query(`
-    DO $$
-    DECLARE
-      col text;
-      cols text[] := ARRAY[
-        'featured_study_id',
-        'logo_design_case_study_id',
-        'website_design_case_study_id',
-        'project_brochure_case_study_id',
-        'brand_video_case_study_id',
-        'case_study_case_study_id'
-      ];
-      fk_name text;
-    BEGIN
-      FOREACH col IN ARRAY cols LOOP
-        IF EXISTS (
-          SELECT 1 FROM information_schema.columns
-          WHERE table_name = 'clients' AND column_name = col
-        ) THEN
-          fk_name := 'clients_' || col || '_case_studies_id_fk';
-
-          -- Drop existing constraint if any
-          EXECUTE format('ALTER TABLE "clients" DROP CONSTRAINT IF EXISTS %I;', fk_name);
-
-          -- Clean any existing orphans before attaching FK constraint
-          EXECUTE format('
-            UPDATE "clients"
-            SET %I = NULL
-            WHERE %I IS NOT NULL AND %I NOT IN (SELECT id FROM "case_studies");
-          ', col, col, col);
-
-          -- Re-add with ON DELETE SET NULL
-          EXECUTE format('
-            ALTER TABLE "clients"
-            ADD CONSTRAINT %I
-            FOREIGN KEY (%I) REFERENCES "case_studies"("id")
-            ON DELETE SET NULL;
-          ', fk_name, col);
-        END IF;
-      END LOOP;
-    EXCEPTION WHEN duplicate_object THEN NULL;
-    WHEN OTHERS THEN NULL;
-    END $$;
-  `).catch(() => undefined);
-
   // 9. Industry pages primary key deduplication.
   //    PAYLOAD_PUSH or a failed migration can leave the industry_pages table with
   //    duplicate id values or a broken sequence, causing Payload to throw
@@ -1277,5 +1326,15 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
     WHEN OTHERS THEN NULL;
     END $$;
   `).catch(() => undefined);
+
+  // 7. Clear relationship ids whose target row is gone, then keep them cleared.
+  //    The admin turns a dead id into "The document with ID X could not be found"
+  //    and bounces back to the collection list. A foreign key with ON DELETE
+  //    SET NULL stops the next delete from writing that id again.
+  let cleared = 0;
+  for (const [table, column, referencedTable] of RELATIONSHIP_FOREIGN_KEYS) {
+    cleared += await ensureOnDeleteSetNull(client, table, column, referencedTable);
+  }
+  return cleared;
 }
 
