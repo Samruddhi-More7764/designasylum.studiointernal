@@ -111,7 +111,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v10_featured_study_fk_industry_pk"];
+  const lines: string[] = ["migration_v11_all_hub_case_study_fks"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -1166,22 +1166,50 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
     END $$;
   `).catch(() => undefined);
 
-  // 8. FK from clients.featured_study_id → case_studies.id with SET NULL on delete.
-  //    Without this, deleting or rolling back a case study leaves the client's
-  //    featured_study_id pointing to a ghost ID, surfacing as "document not found"
-  //    on the Case Studies list page (Payload resolves every relationship on list load).
+  // 8. FKs from clients (*_case_study_id, featured_study_id) → case_studies.id with SET NULL on delete.
+  //    Without this, deleting or rolling back a case study leaves any client relationship
+  //    (featured study or Hub sections like logoDesign, websiteDesign, etc.) pointing to a ghost ID,
+  //    surfacing as "document not found" on CMS lists whenever Payload resolves relations.
   await client.query(`
-    DO $$ BEGIN
-      ALTER TABLE IF EXISTS "clients"
-        DROP CONSTRAINT IF EXISTS "clients_featured_study_id_case_studies_id_fk";
-    EXCEPTION WHEN OTHERS THEN NULL;
-    END $$;
+    DO $$
+    DECLARE
+      col text;
+      cols text[] := ARRAY[
+        'featured_study_id',
+        'logo_design_case_study_id',
+        'website_design_case_study_id',
+        'project_brochure_case_study_id',
+        'brand_video_case_study_id',
+        'case_study_case_study_id'
+      ];
+      fk_name text;
+    BEGIN
+      FOREACH col IN ARRAY cols LOOP
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'clients' AND column_name = col
+        ) THEN
+          fk_name := 'clients_' || col || '_case_studies_id_fk';
 
-    DO $$ BEGIN
-      ALTER TABLE IF EXISTS "clients"
-        ADD CONSTRAINT "clients_featured_study_id_case_studies_id_fk"
-        FOREIGN KEY ("featured_study_id") REFERENCES "case_studies"("id")
-        ON DELETE SET NULL;
+          -- Drop existing constraint if any
+          EXECUTE format('ALTER TABLE "clients" DROP CONSTRAINT IF EXISTS %I;', fk_name);
+
+          -- Clean any existing orphans before attaching FK constraint
+          EXECUTE format('
+            UPDATE "clients"
+            SET %I = NULL
+            WHERE %I IS NOT NULL AND %I NOT IN (SELECT id FROM "case_studies");
+          ', col, col, col);
+
+          -- Re-add with ON DELETE SET NULL
+          EXECUTE format('
+            ALTER TABLE "clients"
+            ADD CONSTRAINT %I
+            FOREIGN KEY (%I) REFERENCES "case_studies"("id")
+            ON DELETE SET NULL;
+          ', fk_name, col);
+        END IF;
+      END LOOP;
     EXCEPTION WHEN duplicate_object THEN NULL;
     WHEN OTHERS THEN NULL;
     END $$;
