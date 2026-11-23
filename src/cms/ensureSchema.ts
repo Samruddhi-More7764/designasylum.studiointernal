@@ -111,7 +111,7 @@ async function addMissingColumns(payload: Payload): Promise<void> {
 function schemaFingerprint(
   tables: Array<{ name: string; columns: readonly { name: string }[] }>,
 ): string {
-  const lines: string[] = ["migration_v9_client_fk_set_null"];
+  const lines: string[] = ["migration_v10_featured_study_fk_industry_pk"];
   for (const table of [...tables].sort((a, b) => a.name.localeCompare(b.name))) {
     for (const column of table.columns as SqlColumn[]) {
       const values = column.enumValues?.join(",") ?? "";
@@ -1163,6 +1163,56 @@ async function ensureDataMigrations(client: QueryClient): Promise<void> {
         ON DELETE SET NULL;
     EXCEPTION WHEN duplicate_object THEN NULL;
     WHEN OTHERS THEN NULL;
+    END $$;
+  `).catch(() => undefined);
+
+  // 8. FK from clients.featured_study_id → case_studies.id with SET NULL on delete.
+  //    Without this, deleting or rolling back a case study leaves the client's
+  //    featured_study_id pointing to a ghost ID, surfacing as "document not found"
+  //    on the Case Studies list page (Payload resolves every relationship on list load).
+  await client.query(`
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "clients"
+        DROP CONSTRAINT IF EXISTS "clients_featured_study_id_case_studies_id_fk";
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      ALTER TABLE IF EXISTS "clients"
+        ADD CONSTRAINT "clients_featured_study_id_case_studies_id_fk"
+        FOREIGN KEY ("featured_study_id") REFERENCES "case_studies"("id")
+        ON DELETE SET NULL;
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    WHEN OTHERS THEN NULL;
+    END $$;
+  `).catch(() => undefined);
+
+  // 9. Industry pages primary key deduplication.
+  //    PAYLOAD_PUSH or a failed migration can leave the industry_pages table with
+  //    duplicate id values or a broken sequence, causing Payload to throw
+  //    "Value must be unique" on the id column when saving. This block:
+  //      a) ensures the id column has a primary key constraint
+  //      b) resets the sequence to MAX(id)+1 so new rows never collide
+  await client.query(`
+    DO $$ BEGIN
+      -- Ensure a primary key exists (safe no-op if already present)
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = 'industry_pages'::regclass AND contype = 'p'
+      ) THEN
+        ALTER TABLE industry_pages ADD PRIMARY KEY (id);
+      END IF;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END $$;
+
+    DO $$ BEGIN
+      -- Reset the id sequence to avoid future collisions
+      PERFORM setval(
+        pg_get_serial_sequence('industry_pages', 'id'),
+        COALESCE((SELECT MAX(id) FROM industry_pages), 0) + 1,
+        false
+      );
+    EXCEPTION WHEN OTHERS THEN NULL;
     END $$;
   `).catch(() => undefined);
 
