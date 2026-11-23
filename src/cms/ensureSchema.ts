@@ -29,6 +29,17 @@ type SqlColumn = {
  * Existing rows are left in place. Columns are never dropped or rewritten.
  */
 export async function ensureSchema(payload: Payload): Promise<void> {
+  // Own transaction, committed before the larger schema migration. The larger
+  // one locks many tables and has been rolled back on Neon, which threw away
+  // the relationship cleanup and left the "document could not be found" links.
+  try {
+    await repairRelationships(payload);
+  } catch (error) {
+    payload.logger.error({
+      err: error,
+      msg: "Could not clear relationship ids that point at deleted records.",
+    });
+  }
   try {
     await addMissingColumns(payload);
   } catch (error) {
@@ -786,6 +797,24 @@ function relationshipConstraintName(table: string, column: string): string {
   return `fk_${hash}_${column}`.slice(0, 63);
 }
 
+function isMediaColumn(name: string): boolean {
+  if (name.includes("client_logo")) return false;
+  return (
+    name === "image_id" ||
+    name.endsWith("_image_id") ||
+    name === "video_id" ||
+    name.endsWith("_video_id") ||
+    name === "portrait_id" ||
+    name === "icon_id" ||
+    name.endsWith("_icon_id") ||
+    name === "photo_one_id" ||
+    name === "photo_two_id" ||
+    name === "photo_three_id" ||
+    name === "photo_image_id" ||
+    name === "details_logo_id"
+  );
+}
+
 async function ensureOnDeleteSetNull(
   client: QueryClient,
   table: string,
@@ -796,14 +825,13 @@ async function ensureOnDeleteSetNull(
   assertIdent(column);
   assertIdent(referencedTable);
 
-  const columnExists = await client.query<{ exists: boolean }>(
-    `SELECT EXISTS (
-       SELECT 1 FROM information_schema.columns
-       WHERE table_schema = 'public' AND table_name = $1 AND column_name = $2
-     ) AS exists`,
+  const columnInfo = await client.query<{ is_nullable: string }>(
+    `SELECT is_nullable
+     FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = $1 AND column_name = $2`,
     [table, column],
   );
-  if (!columnExists.rows[0]?.exists) return 0;
+  if (!columnInfo.rows[0]) return 0;
 
   const referencedExists = await client.query<{ exists: boolean }>(
     `SELECT to_regclass($1) IS NOT NULL AS exists`,
@@ -811,12 +839,25 @@ async function ensureOnDeleteSetNull(
   );
   if (!referencedExists.rows[0]?.exists) return 0;
 
-  // Required relationships are NOT NULL in older schemas. SET NULL cannot
-  // clear a dead id until the column accepts null. The form still requires
-  // a value; only rows whose target was already deleted become empty.
-  await client.query(
-    `ALTER TABLE ${quoteIdent(table)} ALTER COLUMN ${quoteIdent(column)} DROP NOT NULL`,
+  const existing = await client.query<{ conname: string; def: string }>(
+    `SELECT c.conname, pg_get_constraintdef(c.oid) AS def
+     FROM pg_constraint c
+     JOIN pg_attribute a
+       ON a.attrelid = c.conrelid
+      AND a.attnum = ANY (c.conkey)
+     WHERE c.contype = 'f'
+       AND c.conrelid = ${quoteLiteral(table)}::regclass
+       AND a.attname = $1`,
+    [column],
   );
+  const alreadySetNull = existing.rows.some((row) => /ON DELETE SET NULL/i.test(row.def));
+  if (alreadySetNull && columnInfo.rows[0].is_nullable === "YES") return 0;
+
+  if (columnInfo.rows[0].is_nullable !== "YES") {
+    await client.query(
+      `ALTER TABLE ${quoteIdent(table)} ALTER COLUMN ${quoteIdent(column)} DROP NOT NULL`,
+    );
+  }
 
   const cleared = await client.query(
     `UPDATE ${quoteIdent(table)} AS rel_row
@@ -828,35 +869,78 @@ async function ensureOnDeleteSetNull(
        )`,
   );
 
-  const existing = await client.query<{ conname: string }>(
-    `SELECT c.conname
-     FROM pg_constraint c
-     JOIN pg_attribute a
-       ON a.attrelid = c.conrelid
-      AND a.attnum = ANY (c.conkey)
-     WHERE c.contype = 'f'
-       AND c.conrelid = ${quoteLiteral(table)}::regclass
-       AND a.attname = $1`,
-    [column],
-  );
-  for (const row of existing.rows) {
-    assertIdent(row.conname);
+  if (!alreadySetNull) {
+    for (const row of existing.rows) {
+      assertIdent(row.conname);
+      await client.query(
+        `ALTER TABLE ${quoteIdent(table)} DROP CONSTRAINT ${quoteIdent(row.conname)}`,
+      );
+    }
+    const constraint = relationshipConstraintName(table, column);
+    assertIdent(constraint);
     await client.query(
-      `ALTER TABLE ${quoteIdent(table)} DROP CONSTRAINT ${quoteIdent(row.conname)}`,
+      `ALTER TABLE ${quoteIdent(table)}
+       ADD CONSTRAINT ${quoteIdent(constraint)}
+       FOREIGN KEY (${quoteIdent(column)})
+       REFERENCES ${quoteIdent(referencedTable)}(id)
+       ON DELETE SET NULL`,
     );
   }
 
-  const constraint = relationshipConstraintName(table, column);
-  assertIdent(constraint);
-  await client.query(
-    `ALTER TABLE ${quoteIdent(table)}
-     ADD CONSTRAINT ${quoteIdent(constraint)}
-     FOREIGN KEY (${quoteIdent(column)})
-     REFERENCES ${quoteIdent(referencedTable)}(id)
-     ON DELETE SET NULL`,
-  );
-
   return cleared.rowCount ?? 0;
+}
+
+async function relationshipTargets(
+  client: QueryClient,
+): Promise<Array<readonly [string, string, string]>> {
+  const targets: Array<readonly [string, string, string]> = [...RELATIONSHIP_FOREIGN_KEYS];
+  const mediaColumns = await client.query<{ table_name: string; column_name: string }>(
+    `SELECT table_name, column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND data_type IN ('integer', 'bigint')`,
+  );
+  for (const row of mediaColumns.rows) {
+    if (!isMediaColumn(row.column_name)) continue;
+    targets.push([row.table_name, row.column_name, "media"]);
+  }
+  return targets;
+}
+
+async function repairRelationships(payload: Payload): Promise<void> {
+  const db = payload.db as Payload["db"] & {
+    pool?: { connect: () => Promise<unknown> };
+  };
+  if (!db.pool) return;
+  const client = (await db.pool.connect()) as QueryClient;
+  let cleared = 0;
+  try {
+    // Session lock, not a transaction lock, so each column can commit on its
+    // own. One long transaction was rolling the whole cleanup back on Neon.
+    await client.query(`SELECT pg_advisory_lock(hashtext('cms-repair-relationships'))`);
+    const targets = await relationshipTargets(client);
+    for (const [table, column, referencedTable] of targets) {
+      await client.query("BEGIN");
+      try {
+        cleared += await ensureOnDeleteSetNull(client, table, column, referencedTable);
+        await client.query("COMMIT");
+      } catch (error) {
+        await client.query("ROLLBACK").catch(() => undefined);
+        payload.logger.error({
+          err: error,
+          msg: `Could not repair ${table}.${column}. Other relationship columns were kept.`,
+        });
+      }
+    }
+    if (cleared) {
+      payload.logger.info({
+        msg: `Cleared ${cleared} relationship ids that pointed at deleted clients, case studies, or media.`,
+      });
+    }
+  } finally {
+    await client.query(`SELECT pg_advisory_unlock(hashtext('cms-repair-relationships'))`).catch(() => undefined);
+    client.release();
+  }
 }
 
 async function ensureDataMigrations(client: QueryClient): Promise<number> {
@@ -1327,14 +1411,6 @@ async function ensureDataMigrations(client: QueryClient): Promise<number> {
     END $$;
   `).catch(() => undefined);
 
-  // 7. Clear relationship ids whose target row is gone, then keep them cleared.
-  //    The admin turns a dead id into "The document with ID X could not be found"
-  //    and bounces back to the collection list. A foreign key with ON DELETE
-  //    SET NULL stops the next delete from writing that id again.
-  let cleared = 0;
-  for (const [table, column, referencedTable] of RELATIONSHIP_FOREIGN_KEYS) {
-    cleared += await ensureOnDeleteSetNull(client, table, column, referencedTable);
-  }
-  return cleared;
+  return 0;
 }
 
